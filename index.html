@@ -1149,6 +1149,7 @@ Endrick|ST|BRA|18|16|76
 Wojciech Szczęsny|GK|POL|34|25|80
 Iñaki Peña|GK|ESP|26|13|75
 Jules Koundé|RB|FRA|26|23|85
+João Cancelo|RB|POR|31|22|80
 Héctor Fort|RB|ESP|18|32|71
 Pau Cubarsí|CB|ESP|18|2|84
 Ronald Araújo|CB|URU|26|4|83
@@ -3831,6 +3832,26 @@ function matchRating(p, involvement){
 buildPools();
 calibrate();
 DB.players.forEach(p=>{ p.ps = powerScore(p); });
+
+/* ---- FOX Sports World Cup Top 100: pin Power Score to their countdown ----
+   https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players */
+(function(){
+  const FOX100 = [[1,"Lamine Yamal"],[2,"Kylian Mbappé"],[3,"Harry Kane"],[4,"Ousmane Dembélé"],[5,"Michael Olise"],[6,"Erling Haaland"],[7,"Vinícius Júnior"],[8,"Achraf Hakimi"],[9,"Vitinha"],[10,"Pedri"],[11,"Federico Valverde"],[12,"Bruno Fernandes"],[13,"Julián Álvarez"],[14,"Rodri"],[15,"Raphinha"],[16,"Lionel Messi"],[17,"João Neves"],[18,"Jude Bellingham"],[19,"Declan Rice"],[20,"Moisés Caicedo"],[21,"Gabriel Magalhães"],[22,"Florian Wirtz"],[23,"Luis Díaz"],[24,"Antoine Semenyo"],[25,"Aurélien Tchouaméni"],[26,"Lautaro Martínez"],[27,"Bukayo Saka"],[28,"Virgil van Dijk"],[29,"Joshua Kimmich"],[30,"Alphonso Davies"],[31,"Bernardo Silva"],[32,"Jamal Musiala"],[33,"Cole Palmer"],[34,"Luka Modrić"],[35,"Nuno Mendes"],[36,"Denzel Dumfries"],[37,"Kevin De Bruyne"],[38,"Désiré Doué"],[39,"Jérémy Doku"],[40,"Cristiano Ronaldo"],[41,"Rayan Cherki"],[42,"Antonio Rüdiger"],[43,"N’Golo Kanté"],[44,"Thibaut Courtois"],[45,"Tijjani Reijnders"],[46,"Rúben Dias"],[47,"Bruno Guimarães"],[48,"Emiliano Martínez"],[49,"Frenkie de Jong"],[50,"Marc Cucurella"],[51,"Sadio Mané"],[52,"Martín Zubimendi"],[53,"Nico Williams"],[54,"Enzo Fernández"],[55,"Martin Ødegaard"],[56,"Willian Pacho"],[57,"Scott McTominay"],[58,"Ryan Gravenberch"],[59,"Mohamed Salah"],[60,"Fermín López"],[61,"Cody Gakpo"],[62,"Joško Gvardiol"],[63,"Ibrahima Konaté"],[64,"Alisson"],[65,"Pau Cubarsí"],[66,"Marquinhos"],[67,"William Saliba"],[68,"João Pedro"],[69,"Mike Maignan"],[70,"Ismaïla Sarr"],[71,"Rafael Leão"],[72,"Alexis Mac Allister"],[73,"Weston McKennie"],[74,"Gabriel Martinelli"],[75,"João Cancelo"],[76,"Dani Olmo"],[77,"Viktor Gyökeres"],[78,"Arda Güler"],[79,"Christian Pulisic"],[80,"Jules Koundé"],[81,"Son Heung-min"],[82,"Reece James"],[83,"Jeremie Frimpong"],[84,"Marc Guéhi"],[85,"Fabián Ruiz"],[86,"Casemiro"],[87,"Mikel Merino"],[88,"Eberechi Eze"],[89,"Kenan Yıldız"],[90,"Raúl Jiménez"],[91,"Gonçalo Ramos"],[92,"Mikel Oyarzabal"],[93,"Marcus Thuram"],[94,"Kaoru Mitoma"],[95,"Phil Foden"],[96,"Lisandro Martínez"],[97,"Bradley Barcola"],[98,"Kim Min-jae"],[99,"Alexander Isak"],[100,"Pervis Estupiñán"]];
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/['\u2019]/g,'').toLowerCase().trim();
+  const FOX_MIN = 71.0, FOX_MAX = 99.2;
+  const foxScore = rank => Math.round((FOX_MAX - (rank-1)*(FOX_MAX-FOX_MIN)/99) * 10) / 10;
+  const byName = {};
+  DB.players.forEach(p => { (byName[norm(p.name)] ||= []).push(p); });
+  const matched = new Set();
+  FOX100.forEach(([rank, name]) => {
+    const cands = byName[norm(name)];
+    if (!cands || !cands.length) return;
+    const p = cands.reduce((a,b) => a.ps>=b.ps ? a : b);
+    p.ps = foxScore(rank); p.foxRank = rank; matched.add(p.id);
+  });
+  const FOX_CAP = FOX_MIN - 0.4;
+  DB.players.forEach(p => { if (!matched.has(p.id)) p.ps = Math.min(p.ps, FOX_CAP); });
+})();
 DB.players.forEach(p=>{
   p.rat = rating(p);
   p.pot = potential(p);
@@ -4152,7 +4173,7 @@ function pctRow(label,v,pc,k){
 }
 function pill(p){
   return `<button class="pname" data-p="${p.id}">${crest(T(p.team))}
-    <span class="who"><b>${esc(p.name)}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}</s></span></button>`;
+    <span class="who"><b>${esc(p.name)}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}${p.foxRank?` · <span class="amber">WC100 #${p.foxRank}</span>`:''}</s></span></button>`;
 }
 function formDots(f){
   return f.map(r=>`<span class="mono" style="font-size:10px;width:15px;height:15px;display:inline-grid;place-items:center;border-radius:2px;background:${r==='W'?'rgba(46,216,167,.16)':r==='D'?'var(--ink-3)':'rgba(255,77,94,.16)'};color:${r==='W'?'var(--jade)':r==='D'?'var(--chalk-3)':'var(--flare)'}">${r}</span>`).join('');
@@ -4387,7 +4408,7 @@ VIEWS.rankings = () => {
       .sort((a,b)=> (ST8.per90?val(b,k):total(b,k))-(ST8.per90?val(a,k):total(a,k))).slice(0,5)}));
 
   return vhead(ST8.lg==='all'?'All ten leagues':LG(ST8.lg).name, 'Rankings',
-    `Every tracked metric, ranked within position group and league. ${rows.length.toLocaleString()} players clear the ${ST8.minMins}-minute filter.`)
+    `Every tracked metric, ranked within position group and league. ${rows.length.toLocaleString()} players clear the ${ST8.minMins}-minute filter. The world top 100 are pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (updated Jun 14, 2026) rather than the formula below — everyone past #100 still runs on Power Score.`)
   + `<div class="panel mb"><div class="panel-b">
       <div class="chips mb">${['All',...METRIC_GROUPS].map(g=>`<button class="chip ${grp===g?'on':''}" data-sg="${esc(g)}">${esc(g)}</button>`).join('')}</div>
       <div class="chalk-rule mb"></div>
@@ -4447,6 +4468,7 @@ VIEWS.player = (id) => {
             <span class="chip on">${p.pos}</span><span class="chip">${p.age} yrs</span>
             <span class="chip">${esc(p.nat)}</span><span class="chip">${p.height}cm</span>
             <span class="chip">${p.foot} footed</span><span class="chip">Contract ${p.contract}</span>
+            ${p.foxRank?`<a class="chip on" href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" title="FOX Sports 2026 World Cup Top 100">FOX Top 100 · #${p.foxRank}</a>`:''}
           </div></div>
       </div>
       <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
@@ -4949,7 +4971,8 @@ VIEWS.method = () => vhead('Under the hood','How the numbers work',
       <p class="mt-s"><b>Play styles</b> fire when a player clears a percentile threshold on the metric that defines that style — no manual tagging, so they update every week.</p>
     </div></div>
   </div>
-  <div class="note mt"><b>Sample data</b><span>This build runs on a deterministic synthetic dataset — real clubs and competitions, invented players — so every screen is explorable without a provider contract. Point the DATA layer at a live feed and nothing above it changes.</span></div>`;
+  <div class="note mt"><b>Sample data</b><span>This build runs on a deterministic synthetic dataset — real clubs and competitions, invented players — so every screen is explorable without a provider contract. Point the DATA layer at a live feed and nothing above it changes.</span></div>
+  <div class="note mt"><b>World Top 100</b><span>The 97 of those 100 players Power Board could place on its roster have their Power Score pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (Maurice Edu, Stu Holden and Alexi Lalas, updated Jun 14, 2026), so the global Rankings list matches their countdown exactly at the top. Everyone outside that 100 still runs on the formula to the left. Cristiano Ronaldo, Sadio Mané and N'Golo Kanté are on FOX's list but play in leagues this build doesn't model (Saudi Pro League, Süper Lig), so they don't have a Power Board profile to attach a score to.</span></div>`;
 /* ===========================================================
    6. ROUTER + EVENTS
    =========================================================== */
