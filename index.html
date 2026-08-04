@@ -660,7 +660,7 @@ function makePlayer(team, pos, quality, real){
 
   const p = {
     id:'p'+(_pid++), name: real ? real.name : N.f[ri(0,N.f.length-1)]+' '+N.l[ri(0,N.l.length-1)],
-    nat, pos, grp:g, line:LINE[pos], age, team:team.id, lg:team.lg,
+    nat, pos, grp:g, line:LINE[pos], age, dob: real ? real.dob : null, team:team.id, lg:team.lg,
     num: real ? real.num : ri(1,45), foot: rnd()<.24?'Left':(rnd()<.94?'Right':'Both'),
     height: ri(g==='GK'?185:168, g==='GK'?199:196),
     apps, starts:Math.round(apps*clamp(.35+ability*.7,.1,1)), mins, per, st,
@@ -674,10 +674,14 @@ function makePlayer(team, pos, quality, real){
 function ageCurve(a){ if(a<=20)return 'Rising'; if(a<=23)return 'Developing'; if(a<=27)return 'Peak'; if(a<=31)return 'Prime hold'; if(a<=34)return 'Declining'; return 'Veteran'; }
 
 
-/* ===== REAL SQUADS (end of 2024/25 season; MLS: 2025) ===== */
+/* ===== REAL SQUADS (current as of Aug 2026; ages computed live) ===== */
 const ROSTER = {
-/* ===== PREMIER LEAGUE — 2024/25 squads ===== */
+/* ===== PREMIER LEAGUE — squads current to Aug 2026 transfer window ===== */
 'epl:ARS':`
+Eberechi Eze|AM|ENG|26|10|83
+Noni Madueke|RW|ENG|22|11|79
+Martín Zubimendi|DM|ESP|26|6|84
+Viktor Gyökeres|ST|SWE|26|9|88
 Raya|GK|ESP|29|22|85
 Neto|GK|BRA|35|31|74
 Ben White|RB|ENG|27|4|83
@@ -686,7 +690,6 @@ William Saliba|CB|FRA|23|2|87
 Gabriel Magalhães|CB|BRA|27|6|86
 Riccardo Calafiori|CB|ITA|22|33|80
 Jakub Kiwior|CB|POL|24|15|76
-Oleksandr Zinchenko|LB|UKR|28|35|78
 Myles Lewis-Skelly|LB|ENG|18|49|74
 Thomas Partey|DM|GHA|31|5|83
 Jorginho|DM|ITA|33|20|78
@@ -702,6 +705,8 @@ Kai Havertz|ST|GER|25|29|84
 Gabriel Jesus|ST|BRA|27|9|81
 `,
 'epl:AVL':`
+Jadon Sancho|LW|ENG|24|19|79
+Harvey Elliott|AM|ENG|21|19|77
 Emiliano Martínez|GK|ARG|32|1|85
 Robin Olsen|GK|SWE|35|26|72
 Matty Cash|RB|POL|27|2|78
@@ -721,16 +726,13 @@ Leon Bailey|RW|JAM|27|31|79
 Marco Asensio|LW|ESP|29|10|80
 Ollie Watkins|ST|ENG|29|11|85
 Jhon Durán|ST|COL|21|9|79
-Marcus Rashford|LW|ENG|27|9|81
 `,
 'epl:BOU':`
 Kepa Arrizabalaga|GK|ESP|30|1|79
 Mark Travers|GK|IRL|25|43|71
 Adam Smith|RB|ENG|33|15|74
 Julián Araujo|RB|MEX|23|16|74
-Illia Zabarnyi|CB|UKR|22|27|81
 Marcos Senesi|CB|ARG|27|25|79
-Dean Huijsen|CB|ESP|19|4|78
 James Hill|CB|ENG|22|2|72
 Miloš Kerkez|LB|HUN|21|3|80
 Tyler Adams|DM|USA|25|12|78
@@ -739,7 +741,6 @@ Ryan Christie|CM|SCO|29|10|77
 Alex Scott|CM|ENG|21|7|74
 Philip Billing|CM|DEN|28|29|75
 Justin Kluivert|AM|NED|25|19|79
-Antoine Semenyo|RW|GHA|24|24|79
 Dango Ouattara|RW|BFA|22|11|76
 Marcus Tavernier|LW|ENG|25|16|77
 Luis Sinisterra|LW|COL|25|8|77
@@ -761,10 +762,8 @@ Vitaly Janelt|DM|GER|26|27|75
 Mathias Jensen|CM|DEN|28|8|76
 Yehor Yarmoliuk|CM|UKR|20|18|72
 Mikkel Damsgaard|AM|DEN|24|24|78
-Bryan Mbeumo|RW|CMR|25|19|83
 Kevin Schade|LW|GER|23|7|76
 Keane Lewis-Potter|LW|ENG|23|11|74
-Yoane Wissa|ST|COD|28|11|80
 Fábio Carvalho|AM|POR|22|29|74
 `,
 'epl:BHA':`
@@ -787,10 +786,11 @@ Simon Adingra|LW|CIV|22|24|76
 Yankuba Minteh|RW|GAM|20|17|76
 Solly March|RW|ENG|30|7|76
 Danny Welbeck|ST|ENG|34|18|77
-João Pedro|ST|BRA|23|9|80
 Georginio Rutter|ST|FRA|22|11|76
 `,
 'epl:CHE':`
+Jamie Gittens|LW|ENG|20|43|79
+João Pedro|ST|BRA|23|9|80
 Robert Sánchez|GK|ESP|27|1|77
 Filip Jörgensen|GK|SWE|22|12|74
 Reece James|RB|ENG|25|24|82
@@ -805,11 +805,8 @@ Roméo Lavia|DM|BEL|21|45|77
 Enzo Fernández|CM|ARG|24|8|84
 Cole Palmer|AM|ENG|22|20|87
 Christopher Nkunku|AM|FRA|27|18|82
-Noni Madueke|RW|ENG|22|11|79
 Pedro Neto|RW|POR|24|7|80
-Jadon Sancho|LW|ENG|24|19|79
 Mykhailo Mudryk|LW|UKR|23|10|76
-Nicolas Jackson|ST|SEN|23|15|80
 Marc Guiu|ST|ESP|18|38|71
 `,
 'epl:CRY':`
@@ -817,7 +814,6 @@ Dean Henderson|GK|ENG|27|1|78
 Remi Matthews|GK|ENG|30|13|68
 Daniel Muñoz|RB|COL|28|12|79
 Nathaniel Clyne|RB|ENG|33|17|72
-Marc Guéhi|CB|ENG|24|6|82
 Chris Richards|CB|USA|24|26|77
 Maxence Lacroix|CB|FRA|24|5|78
 Chadi Riad|CB|MAR|21|34|74
@@ -827,13 +823,13 @@ Adam Wharton|DM|ENG|20|20|79
 Jefferson Lerma|DM|COL|30|8|78
 Will Hughes|CM|ENG|29|19|74
 Daichi Kamada|CM|JPN|28|18|78
-Eberechi Eze|AM|ENG|26|10|83
 Ismaïla Sarr|RW|SEN|26|7|79
 Daniel Kanu|RW|ENG|20|39|70
 Jean-Philippe Mateta|ST|FRA|27|14|80
 Odsonne Édouard|ST|FRA|26|22|75
 `,
 'epl:EVE':`
+Thierno Barry|ST|FRA|22|9|78
 Jordan Pickford|GK|ENG|30|1|83
 João Virgínia|GK|POR|25|32|69
 Séamus Coleman|RB|IRL|36|23|72
@@ -918,12 +914,14 @@ Jamie Vardy|ST|ENG|38|9|76
 Patson Daka|ST|ZAM|26|20|74
 `,
 'epl:LIV':`
+Hugo Ekitiké|ST|FRA|22|11|82
+Florian Wirtz|AM|GER|22|10|90
+Jeremie Frimpong|RB|NED|24|30|83
+Alexander Isak|ST|SWE|25|14|86
 Alisson|GK|BRA|32|1|89
 Caoimhín Kelleher|GK|IRL|26|62|77
-Trent Alexander-Arnold|RB|ENG|26|66|86
 Conor Bradley|RB|NIR|21|84|76
 Virgil van Dijk|CB|NED|33|4|89
-Ibrahima Konaté|CB|FRA|25|5|84
 Joe Gomez|CB|ENG|27|2|79
 Jarell Quansah|CB|ENG|21|78|76
 Andrew Robertson|LB|SCO|30|26|83
@@ -933,15 +931,17 @@ Wataru Endo|DM|JPN|31|3|77
 Alexis Mac Allister|CM|ARG|26|10|85
 Dominik Szoboszlai|CM|HUN|24|8|83
 Curtis Jones|CM|ENG|23|17|79
-Harvey Elliott|AM|ENG|21|19|77
 Mohamed Salah|RW|EGY|32|11|91
-Luis Díaz|LW|COL|28|7|85
 Cody Gakpo|LW|NED|25|18|83
-Darwin Núñez|ST|URU|25|9|82
 Diogo Jota|ST|POR|28|20|83
 Federico Chiesa|RW|ITA|27|14|79
 `,
 'epl:MCI':`
+Gianluigi Donnarumma|GK|ITA|26|1|87
+Antoine Semenyo|RW|GHA|24|24|79
+Rayan Cherki|AM|FRA|21|18|82
+Tijjani Reijnders|CM|NED|26|14|84
+Marc Guéhi|CB|ENG|24|6|82
 Ederson|GK|BRA|31|31|86
 Stefan Ortega|GK|GER|32|18|78
 Rico Lewis|RB|ENG|20|82|78
@@ -955,7 +955,6 @@ Mateo Kovačić|DM|CRO|30|8|83
 Ilkay Gündoğan|CM|GER|34|19|82
 Bernardo Silva|CM|POR|30|20|86
 Matheus Nunes|CM|POR|26|27|78
-Kevin De Bruyne|AM|BEL|33|17|88
 Phil Foden|AM|ENG|24|47|88
 Savinho|RW|BRA|20|26|80
 Jérémy Doku|LW|BEL|22|11|82
@@ -967,6 +966,9 @@ Nico González|DM|ESP|23|14|78
 Vitor Reis|CB|BRA|19|26|74
 `,
 'epl:MUN':`
+Benjamin Šeško|ST|SVN|21|30|82
+Bryan Mbeumo|RW|CMR|25|19|83
+Matheus Cunha|AM|BRA|25|12|83
 André Onana|GK|CMR|28|24|80
 Altay Bayındır|GK|TUR|26|1|72
 Diogo Dalot|RB|POR|25|20|80
@@ -990,6 +992,8 @@ Joshua Zirkzee|ST|NED|23|11|77
 Patrick Dorgu|LB|DEN|20|13|75
 `,
 'epl:NEW':`
+Anthony Elanga|RW|SWE|22|21|79
+Yoane Wissa|ST|COD|28|11|80
 Nick Pope|GK|ENG|32|22|80
 Martin Dúbravka|GK|SVK|35|1|75
 Kieran Trippier|RB|ENG|34|2|80
@@ -1008,11 +1012,11 @@ Joe Willock|CM|ENG|25|28|76
 Anthony Gordon|LW|ENG|23|10|83
 Harvey Barnes|LW|ENG|27|15|79
 Jacob Murphy|RW|ENG|29|23|78
-Alexander Isak|ST|SWE|25|14|86
 Callum Wilson|ST|ENG|32|9|77
 William Osula|ST|DEN|21|18|71
 `,
 'epl:NFO':`
+Oleksandr Zinchenko|LB|UKR|28|35|78
 Matz Sels|GK|BEL|32|26|79
 Carlos Miguel|GK|BRA|26|1|71
 Neco Williams|RB|WAL|23|7|76
@@ -1028,7 +1032,6 @@ Ryan Yates|DM|ENG|27|22|74
 Nicolás Domínguez|CM|ARG|26|16|76
 Elliot Anderson|CM|ENG|22|8|77
 Morgan Gibbs-White|AM|ENG|24|10|82
-Anthony Elanga|RW|SWE|22|21|79
 Callum Hudson-Odoi|LW|ENG|24|14|78
 Chris Wood|ST|NZL|33|11|79
 Taiwo Awoniyi|ST|NGA|27|9|75
@@ -1055,6 +1058,8 @@ Cameron Archer|ST|ENG|23|9|74
 Adam Armstrong|ST|ENG|27|9|75
 `,
 'epl:TOT':`
+Mohammed Kudus|RW|GHA|24|14|82
+Xavi Simons|AM|NED|22|10|83
 Guglielmo Vicario|GK|ITA|28|1|82
 Fraser Forster|GK|ENG|36|20|70
 Pedro Porro|RB|ESP|25|23|82
@@ -1073,7 +1078,6 @@ Dejan Kulusevski|AM|SWE|24|21|83
 Lucas Bergvall|CM|SWE|18|15|74
 Brennan Johnson|RW|WAL|23|22|79
 Wilson Odobert|LW|FRA|20|28|74
-Son Heung-min|LW|KOR|32|7|85
 Dominic Solanke|ST|ENG|27|19|81
 Richarlison|ST|BRA|27|9|78
 `,
@@ -1091,7 +1095,6 @@ Guido Rodríguez|DM|ARG|30|24|77
 Tomáš Souček|CM|CZE|29|28|78
 Lucas Paquetá|AM|BRA|27|10|83
 James Ward-Prowse|CM|ENG|30|7|78
-Mohammed Kudus|RW|GHA|24|14|82
 Crysencio Summerville|LW|NED|23|11|78
 Jarrod Bowen|RW|ENG|28|20|82
 Michail Antonio|ST|JAM|34|9|74
@@ -1113,15 +1116,20 @@ Mario Lemina|DM|GAB|31|5|77
 Tommy Doyle|CM|ENG|23|20|72
 Jean-Ricner Bellegarde|CM|FRA|26|27|76
 Pablo Sarabia|AM|ESP|32|21|77
-Matheus Cunha|AM|BRA|25|12|83
 Gonçalo Guedes|RW|POR|28|7|75
 Pedro Lima|RB|BRA|18|29|70
 Jørgen Strand Larsen|ST|NOR|24|9|77
 Hwang Hee-chan|ST|KOR|28|11|77
 `,
 
-/* ===== LA LIGA — 2024/25 squads ===== */
+/* ===== LA LIGA — squads current to Aug 2026 transfer window ===== */
 'lal:RMA':`
+Ibrahima Konaté|CB|FRA|25|5|84
+Denzel Dumfries|RB|NED|28|2|82
+Franco Mastantuono|AM|ARG|17|30|81
+Dean Huijsen|CB|ESP|19|4|80
+Trent Alexander-Arnold|RB|ENG|26|66|86
+Álvaro Carreras|LB|ESP|22|3|78
 Thibaut Courtois|GK|BEL|32|1|89
 Andriy Lunin|GK|UKR|26|13|79
 Dani Carvajal|RB|ESP|33|2|82
@@ -1135,7 +1143,6 @@ Fran García|LB|ESP|25|20|75
 Aurélien Tchouaméni|DM|FRA|25|14|83
 Eduardo Camavinga|DM|FRA|22|6|83
 Federico Valverde|CM|URU|26|8|87
-Luka Modrić|CM|CRO|39|10|81
 Dani Ceballos|CM|ESP|28|19|78
 Jude Bellingham|AM|ENG|21|5|89
 Arda Güler|AM|TUR|20|15|80
@@ -1146,6 +1153,9 @@ Kylian Mbappé|ST|FRA|26|9|91
 Endrick|ST|BRA|18|16|76
 `,
 'lal:BAR':`
+Karim Adeyemi|LW|GER|23|27|81
+Joan García|GK|ESP|24|13|82
+Marcus Rashford|LW|ENG|27|9|81
 Wojciech Szczęsny|GK|POL|34|25|80
 Iñaki Peña|GK|ESP|26|13|75
 Jules Koundé|RB|FRA|26|23|85
@@ -1170,6 +1180,10 @@ Robert Lewandowski|ST|POL|36|9|86
 Pau Víctor|ST|ESP|23|18|72
 `,
 'lal:ATM':`
+Thiago Almada|AM|ARG|24|26|80
+Johnny Cardoso|DM|USA|23|20|80
+Álex Baena|AM|ESP|23|16|83
+Dávid Hancko|CB|SVK|27|33|79
 Jan Oblak|GK|SVN|32|13|86
 Juan Musso|GK|ARG|30|1|76
 Marcos Llorente|RB|ESP|30|14|80
@@ -1221,7 +1235,6 @@ Jon Pacheco|CB|ESP|24|3|76
 Nayef Aguerd|CB|MAR|28|4|78
 Aihen Muñoz|LB|ESP|27|12|75
 Sergio Gómez|LB|ESP|24|17|76
-Martín Zubimendi|DM|ESP|26|6|84
 Beñat Turrientes|DM|ESP|23|18|76
 Brais Méndez|CM|ESP|28|23|79
 Pablo Marín|CM|ESP|21|28|73
@@ -1242,7 +1255,6 @@ Natan|CB|BRA|24|4|76
 Diego Llorente|CB|ESP|31|3|75
 Romain Perraud|LB|FRA|27|15|74
 Ricardo Rodríguez|LB|SUI|32|12|73
-Johnny Cardoso|DM|USA|23|20|78
 Sergi Altimira|DM|ESP|23|6|76
 Pablo Fornals|CM|ESP|29|18|78
 Isco|AM|ESP|32|22|85
@@ -1273,6 +1285,7 @@ Isaac Romero|ST|ESP|24|9|75
 Akor Adams|ST|NGA|25|12|74
 `,
 'lal:VIL':`
+Georges Mikautadze|ST|GEO|24|69|79
 Diego Conde|GK|ESP|26|13|76
 Luiz Júnior|GK|BRA|24|1|72
 Kiko Femenía|RB|ESP|34|21|73
@@ -1284,11 +1297,9 @@ Alfonso Pedraza|LB|ESP|29|12|74
 Dani Parejo|CM|ESP|35|10|80
 Santi Comesaña|DM|ESP|28|14|77
 Pape Gueye|DM|SEN|26|6|76
-Álex Baena|AM|ESP|23|16|83
 Yeremy Pino|RW|ESP|22|20|79
 Ilias Akhomach|RW|MAR|21|22|74
 Ayoze Pérez|ST|ESP|31|19|81
-Thierno Barry|ST|FRA|22|9|78
 Gerard Moreno|ST|ESP|32|7|78
 `,
 'lal:CEL':`
@@ -1452,7 +1463,6 @@ Mamadou Sylla|ST|SEN|31|19|71
 Marcos André|ST|BRA|28|7|70
 `,
 'lal:ESP':`
-Joan García|GK|ESP|24|13|82
 Ángel Fortuño|GK|ESP|23|1|66
 Omar El Hilali|RB|MAR|21|20|74
 Marash Kumbulla|CB|ALB|25|24|74
@@ -1506,7 +1516,7 @@ Miguel de la Fuente|ST|ESP|26|9|71
 Diego García|ST|ESP|24|17|70
 `,
 
-/* ===== SERIE A — 2024/25 squads ===== */
+/* ===== SERIE A — squads current to Aug 2026 transfer window ===== */
 'ser:INT':`
 Yann Sommer|GK|SUI|36|1|84
 Josep Martínez|GK|ESP|26|13|74
@@ -1515,7 +1525,6 @@ Francesco Acerbi|CB|ITA|37|15|79
 Alessandro Bastoni|CB|ITA|26|95|86
 Stefan de Vrij|CB|NED|33|6|79
 Yann Bisseck|CB|GER|24|31|77
-Denzel Dumfries|RB|NED|28|2|82
 Matteo Darmian|RB|ITA|35|36|76
 Federico Dimarco|LB|ITA|27|32|84
 Carlos Augusto|LB|BRA|26|30|77
@@ -1552,6 +1561,7 @@ Dušan Vlahović|ST|SRB|25|9|82
 Randal Kolo Muani|ST|FRA|26|20|80
 `,
 'ser:MIL':`
+Luka Modrić|CM|CRO|39|10|81
 Mike Maignan|GK|FRA|29|16|85
 Marco Sportiello|GK|ITA|32|57|72
 Kyle Walker|RB|ENG|34|32|80
@@ -1563,7 +1573,6 @@ Strahinja Pavlović|CB|SRB|24|31|78
 Theo Hernández|LB|FRA|27|19|83
 Alex Jiménez|LB|ESP|20|20|73
 Youssouf Fofana|DM|FRA|26|29|79
-Tijjani Reijnders|CM|NED|26|14|84
 Ruben Loftus-Cheek|CM|ENG|29|8|77
 Yunus Musah|CM|USA|22|80|75
 Christian Pulisic|RW|USA|26|11|84
@@ -1575,6 +1584,7 @@ Tammy Abraham|ST|ENG|27|90|76
 Luka Jović|ST|SRB|27|9|74
 `,
 'ser:NAP':`
+Kevin De Bruyne|AM|BEL|33|17|88
 Alex Meret|GK|ITA|28|1|80
 Elia Caprile|GK|ITA|23|25|73
 Giovanni Di Lorenzo|RB|ITA|31|22|81
@@ -1613,7 +1623,6 @@ Ademola Lookman|LW|NGA|27|11|85
 Charles De Ketelaere|AM|BEL|24|17|81
 Lazar Samardžić|AM|SRB|23|24|76
 Nicolò Zaniolo|RW|ITA|25|10|74
-Mateo Retegui|ST|ITA|26|32|82
 Daniel Maldini|AM|ITA|23|70|74
 Juan Cuadrado|RW|COL|36|7|72
 `,
@@ -1913,8 +1922,10 @@ Christian Gytkjær|ST|DEN|35|11|68
 John Yeboah|RW|GHA|24|21|70
 `,
 
-/* ===== BUNDESLIGA — 2024/25 squads ===== */
+/* ===== BUNDESLIGA — squads current to Aug 2026 transfer window ===== */
 'bun:FCB':`
+Nicolas Jackson|ST|SEN|23|15|80
+Luis Díaz|LW|COL|28|7|85
 Manuel Neuer|GK|GER|39|1|84
 Sven Ulreich|GK|GER|36|26|71
 Joshua Kimmich|RB|GER|30|6|85
@@ -1940,7 +1951,6 @@ Harry Kane|ST|ENG|31|9|90
 'bun:B04':`
 Lukáš Hrádecký|GK|FIN|35|1|79
 Matěj Kovář|GK|CZE|24|17|74
-Jeremie Frimpong|RB|NED|24|30|83
 Edmond Tapsoba|CB|BFA|26|12|81
 Jonathan Tah|CB|GER|29|4|84
 Piero Hincapié|CB|ECU|23|3|81
@@ -1951,7 +1961,6 @@ Granit Xhaka|DM|SUI|32|34|84
 Robert Andrich|DM|GER|30|8|78
 Exequiel Palacios|CM|ARG|26|25|80
 Aleix García|CM|ESP|27|24|78
-Florian Wirtz|AM|GER|22|10|90
 Jonas Hofmann|AM|GER|32|7|75
 Amine Adli|LW|MAR|24|31|76
 Martin Terrier|LW|FRA|28|11|75
@@ -1976,8 +1985,6 @@ Felix Nmecha|CM|GER|24|8|76
 Salih Özcan|DM|TUR|27|6|73
 Julian Brandt|AM|GER|29|10|80
 Giovanni Reyna|AM|USA|22|7|72
-Karim Adeyemi|LW|GER|23|27|79
-Jamie Gittens|LW|ENG|20|43|79
 Julien Duranville|RW|BEL|18|16|72
 Serhou Guirassy|ST|GUI|29|9|85
 Maximilian Beier|ST|GER|22|14|77
@@ -1996,10 +2003,8 @@ Nicolas Seiwald|DM|AUT|24|13|76
 Kevin Kampl|CM|SVN|34|44|73
 Arthur Vermeeren|DM|BEL|20|6|76
 Christoph Baumgartner|AM|AUT|25|14|77
-Xavi Simons|AM|NED|22|10|83
 Antonio Nusa|LW|NOR|20|7|77
 Loïs Openda|ST|BEL|25|17|82
-Benjamin Šeško|ST|SVN|21|30|82
 André Silva|ST|POR|29|33|72
 `,
 'bun:SGE':`
@@ -2018,7 +2023,6 @@ Can Uzun|AM|TUR|19|10|75
 Farès Chaïbi|AM|ALG|22|21|74
 Jean-Mattéo Bahoya|LW|FRA|19|29|73
 Ansgar Knauff|RW|GER|23|14|75
-Hugo Ekitiké|ST|FRA|22|11|82
 Elye Wahi|ST|FRA|22|9|75
 Igor Matanović|ST|CRO|22|19|72
 `,
@@ -2270,9 +2274,9 @@ Andrej Ilić|ST|SRB|25|9|72
 Jordan Siebatcheu|ST|USA|29|14|71
 `,
 
-/* ===== LIGUE 1 — 2024/25 squads ===== */
+/* ===== LIGUE 1 — squads current to Aug 2026 transfer window ===== */
 'lig:PSG':`
-Gianluigi Donnarumma|GK|ITA|26|1|87
+Illia Zabarnyi|CB|UKR|22|27|81
 Matvey Safonov|GK|RUS|26|39|76
 Achraf Hakimi|RB|MAR|26|2|87
 Warren Zaïre-Emery|CM|FRA|19|33|80
@@ -2369,11 +2373,8 @@ Abner|LB|BRA|24|12|73
 Nemanja Matić|DM|SRB|36|31|73
 Corentin Tolisso|CM|FRA|30|88|77
 Tanner Tessmann|DM|USA|23|42|73
-Thiago Almada|AM|ARG|24|26|80
-Rayan Cherki|AM|FRA|21|18|82
 Malick Fofana|LW|BEL|20|11|79
 Ernest Nuamah|RW|GHA|21|24|74
-Georges Mikautadze|ST|GEO|24|69|79
 Alexandre Lacazette|ST|FRA|33|10|78
 `,
 'lig:OGC':`
@@ -2608,7 +2609,7 @@ Lucas Stassin|ST|BEL|20|26|74
 Augustine Boakye|AM|GHA|24|10|71
 `,
 
-/* ===== REST OF WORLD — flagship clubs, 2024/25 (MLS: 2025 season) ===== */
+/* ===== REST OF WORLD — flagship clubs, current to Aug 2026 (MLS: 2025 season) ===== */
 'pri:POR':`
 Diogo Costa|GK|POR|25|99|83
 Cláudio Ramos|GK|POR|33|14|70
@@ -2635,7 +2636,6 @@ Alexander Bah|RB|DEN|27|2|76
 Tomás Araújo|CB|POR|22|4|75
 Nicolás Otamendi|CB|ARG|37|30|77
 António Silva|CB|POR|21|66|78
-Álvaro Carreras|LB|ESP|22|3|78
 Samuel Dahl|LB|SWE|21|26|72
 Florentino Luís|DM|POR|25|61|76
 Orkun Kökçü|CM|TUR|24|10|80
@@ -2665,7 +2665,6 @@ Francisco Trincão|RW|POR|25|17|78
 Geovany Quenda|RW|POR|17|77|77
 Marcus Edwards|RW|ENG|26|10|76
 Pedro Gonçalves|AM|POR|26|8|80
-Viktor Gyökeres|ST|SWE|26|9|88
 Conrad Harder|ST|DEN|19|11|74
 `,
 'pri:BRA':`
@@ -2733,7 +2732,6 @@ Justin Bijlow|GK|NED|27|21|74
 Givairo Read|RB|NED|18|2|73
 Bart Nieuwkoop|RB|NED|29|4|73
 Thomas Beelen|CB|NED|23|3|73
-Dávid Hancko|CB|SVK|27|33|79
 Gernot Trauner|CB|AUT|33|5|73
 Gijs Smal|LB|NED|27|17|72
 Quilindschy Hartman|LB|NED|23|29|74
@@ -3096,7 +3094,6 @@ Matías Kranevitter|DM|ARG|32|5|72
 Rodrigo Aliendro|CM|ARG|34|29|72
 Ignacio Fernández|AM|ARG|35|26|74
 Manuel Lanzini|AM|ARG|32|10|75
-Franco Mastantuono|AM|ARG|17|30|79
 Maximiliano Meza|RW|ARG|32|11|72
 Facundo Colidio|ST|ARG|25|9|77
 Miguel Borja|ST|COL|32|19|75
@@ -3236,6 +3233,7 @@ Luis Suárez|ST|URU|38|9|82
 Fafà Picault|LW|HAI|34|14|70
 `,
 'mls:LAF':`
+Son Heung-min|LW|KOR|32|7|85
 Hugo Lloris|GK|FRA|38|1|78
 David Ochoa|GK|USA|24|77|68
 Sergi Palencia|RB|ESP|29|4|72
@@ -3575,10 +3573,26 @@ Tai Baribo|ST|ISR|27|29|74
 
 
 };
+const DOB_OVERRIDE = {"Lamine Yamal":"2007-07-13","Kylian Mbappé":"1998-12-20","Harry Kane":"1993-07-28","Ousmane Dembélé":"1997-05-15","Michael Olise":"2001-12-12","Erling Haaland":"2000-07-21","Vinícius Júnior":"2000-07-12","Achraf Hakimi":"1998-11-04","Vitinha":"2000-02-13","Pedri":"2002-11-25","Federico Valverde":"1998-07-22","Bruno Fernandes":"1994-09-08","Julián Álvarez":"2000-01-31","Rodri":"1996-06-22","Raphinha":"1996-12-14","Lionel Messi":"1987-06-24","João Neves":"2004-09-27","Jude Bellingham":"2003-06-29","Declan Rice":"1999-01-14","Moisés Caicedo":"2001-11-02","Gabriel Magalhães":"1997-12-19","Florian Wirtz":"2003-05-03","Luis Díaz":"1997-01-13","Antoine Semenyo":"2000-01-07","Aurélien Tchouaméni":"2000-01-27","Lautaro Martínez":"1997-08-22","Bukayo Saka":"2001-09-05","Virgil van Dijk":"1991-07-08","Joshua Kimmich":"1995-02-08","Alphonso Davies":"2000-11-02","Bernardo Silva":"1994-08-10","Jamal Musiala":"2003-02-26","Cole Palmer":"2002-05-06","Luka Modrić":"1985-09-09","Nuno Mendes":"2002-06-19","Denzel Dumfries":"1996-04-18","Kevin De Bruyne":"1991-06-28","Désiré Doué":"2005-06-03","Jérémy Doku":"2002-05-27","Rayan Cherki":"2003-08-17","Antonio Rüdiger":"1993-03-03","Thibaut Courtois":"1992-05-11","Tijjani Reijnders":"1998-07-29","Rúben Dias":"1997-05-14","Bruno Guimarães":"1997-11-16","Emiliano Martínez":"1992-09-02","Frenkie de Jong":"1997-05-12","Marc Cucurella":"1998-07-22","Martín Zubimendi":"1999-02-02","Nico Williams":"2002-07-12","Enzo Fernández":"2001-01-17","Martin Ødegaard":"1998-12-17","Willian Pacho":"2001-10-16","Scott McTominay":"1996-12-08","Ryan Gravenberch":"2002-05-16","Mohamed Salah":"1992-06-15","Fermín López":"2003-05-11","Cody Gakpo":"1999-05-07","Joško Gvardiol":"2002-01-23","Ibrahima Konaté":"1999-05-25","Alisson":"1992-10-02","Pau Cubarsí":"2007-01-22","Marquinhos":"1994-05-14","William Saliba":"2001-03-24","João Pedro":"2001-09-23","Mike Maignan":"1995-07-03","Ismaïla Sarr":"1998-02-25","Rafael Leão":"1999-06-10","Alexis Mac Allister":"1998-12-24","Weston McKennie":"1998-08-28","Gabriel Martinelli":"2001-06-18","João Cancelo":"1994-05-27","Dani Olmo":"1998-05-07","Viktor Gyökeres":"1998-06-04","Arda Güler":"2005-02-25","Christian Pulisic":"1998-09-18","Jules Koundé":"1998-11-12","Son Heung-min":"1992-07-08","Reece James":"2000-12-08","Jeremie Frimpong":"2000-12-10","Marc Guéhi":"2000-07-13","Fabián Ruiz":"1996-04-03","Casemiro":"1992-02-23","Mikel Merino":"1996-06-22","Eberechi Eze":"1998-06-29","Kenan Yıldız":"2005-05-04","Raúl Jiménez":"1991-05-05","Gonçalo Ramos":"2001-06-20","Mikel Oyarzabal":"1997-04-21","Marcus Thuram":"1997-08-06","Kaoru Mitoma":"1997-05-20","Phil Foden":"2000-05-28","Lisandro Martínez":"1998-01-18","Bradley Barcola":"2002-09-02","Kim Min-jae":"1996-11-15","Alexander Isak":"1999-09-21","Pervis Estupiñán":"1998-01-21","Trent Alexander-Arnold":"1998-10-07","Franco Mastantuono":"2007-08-14","Dean Huijsen":"2005-04-14","Álvaro Carreras":"2003-06-23"};
+/* Recorded ages are a snapshot as of 2025-06-30. Players with a known real
+   birth date tick over on that exact day; everyone else is approximated to
+   Jan 1 of their birth year, derived from the snapshot age, so they still
+   age up automatically — just on New Year's Day rather than their real
+   birthday. Either way, this runs fresh in the browser on every page load,
+   so ages are always correct for today, not just for whenever this was built. */
+function approxDob(snapAge){ return Date.UTC(2025 - snapAge, 0, 1); }
+function liveAge(dobMs){
+  const d = new Date(dobMs), n = new Date();
+  let a = n.getUTCFullYear() - d.getUTCFullYear();
+  const m = n.getUTCMonth() - d.getUTCMonth();
+  if (m < 0 || (m === 0 && n.getUTCDate() < d.getUTCDate())) a--;
+  return a;
+}
 function parseRoster(txt){
   return txt.trim().split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
     const a = l.split('|');
-    return { name:a[0], pos:a[1], nat:a[2], age:+a[3], num:+a[4], rat:+a[5] };
+    const dobMs = DOB_OVERRIDE[a[0]] ? Date.parse(DOB_OVERRIDE[a[0]]) : approxDob(+a[3]);
+    return { name:a[0], pos:a[1], nat:a[2], age:liveAge(dobMs), dob:dobMs, num:+a[4], rat:+a[5] };
   });
 }
 LEAGUES.forEach(L=>{
@@ -4972,7 +4986,8 @@ VIEWS.method = () => vhead('Under the hood','How the numbers work',
     </div></div>
   </div>
   <div class="note mt"><b>Sample data</b><span>This build runs on a deterministic synthetic dataset — real clubs and competitions, invented players — so every screen is explorable without a provider contract. Point the DATA layer at a live feed and nothing above it changes.</span></div>
-  <div class="note mt"><b>World Top 100</b><span>The 97 of those 100 players Power Board could place on its roster have their Power Score pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (Maurice Edu, Stu Holden and Alexi Lalas, updated Jun 14, 2026), so the global Rankings list matches their countdown exactly at the top. Everyone outside that 100 still runs on the formula to the left. Cristiano Ronaldo, Sadio Mané and N'Golo Kanté are on FOX's list but play in leagues this build doesn't model (Saudi Pro League, Süper Lig), so they don't have a Power Board profile to attach a score to.</span></div>`;
+  <div class="note mt"><b>World Top 100</b><span>The 97 of those 100 players Power Board could place on its roster have their Power Score pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (Maurice Edu, Stu Holden and Alexi Lalas, updated Jun 14, 2026), so the global Rankings list matches their countdown exactly at the top. Everyone outside that 100 still runs on the formula to the left. Cristiano Ronaldo, Sadio Mané and N'Golo Kanté are on FOX's list but play in leagues this build doesn't model (Saudi Pro League, Süper Lig), so they don't have a Power Board profile to attach a score to.</span></div>
+  <div class="note mt"><b>Squads &amp; ages</b><span>Real rosters were refreshed against reported summer 2025, January 2026 and summer 2026 transfer business, so players sit at the club they actually play for today rather than a frozen 2024/25 snapshot. Ages aren't stored as fixed numbers: each player has a birth date, and age is calculated fresh from your device's clock every time this page loads — so it keeps advancing on its own, no rebuild needed. The ~100 highest-profile players use their real birthday; everyone else is approximated to Jan 1 of their birth year, since sourcing exact birthdates for a sample of 2,600 players isn't something this build can responsibly guarantee. Transfers, by contrast, can't self-update the same way — there's no live data feed wired in, so if a new move gets confirmed, the roster needs a manual refresh.</span></div>`;
 /* ===========================================================
    6. ROUTER + EVENTS
    =========================================================== */
