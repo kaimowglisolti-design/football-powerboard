@@ -3823,7 +3823,514 @@ const AGEV = {16:.55,17:.7,18:.86,19:1,20:1.12,21:1.2,22:1.24,23:1.26,24:1.25,25
 const DEAL_FEE = {"Morgan Rogers":138,"Elliot Anderson":135,"Sandro Tonali":108,"Mateus Fernandes":99,"Anthony Gordon":80,"Gonçalo Ramos":70,"Jérémy Jacquet":63.6,"Maxence Lacroix":60.7,"Jan Paul van Hecke":60,"Andrey Santos":56.3,"Nathaniel Brown":55,"Ismael Saibari":55,"Geovany Quenda":50,"Youri Tielemans":41,"Piero Hincapié":40,"Emanuel Emegha":25.3,"Karim Adeyemi":22,"Denzel Dumfries":20,"Danny Welbeck":5.85};
 const CAREER_PATH = {"Mateus Fernandes":[[0,"epl:TOT"],[1,"epl:SOU"],[3,"pri:SCP"]],"Sandro Tonali":[[0,"epl:TOT"],[1,"epl:NEW"],[4,"ser:MIL"]],"Andrew Robertson":[[0,"epl:TOT"],[1,"epl:LIV"]],"Marcos Senesi":[[0,"epl:TOT"],[1,"epl:BOU"]],"Martin Dúbravka":[[0,"epl:TOT"],[1,"epl:NEW"]],"Jan Paul van Hecke":[[0,"epl:TOT"],[1,"epl:BHA"]],"Morgan Rogers":[[0,"epl:CHE"],[1,"epl:AVL"]],"Maxence Lacroix":[[0,"epl:CHE"],[1,"epl:CRY"],[3,"bun:WOB"]],"Danny Welbeck":[[0,"epl:CHE"],[1,"epl:BHA"],[6,"epl:ARS"]],"Geovany Quenda":[[0,"epl:CHE"],[1,"pri:SCP"]],"Emanuel Emegha":[[0,"epl:CHE"],[1,"lig:RCS"]],"Elliot Anderson":[[0,"epl:MCI"],[1,"epl:NFO"],[3,"epl:NEW"]],"Andrey Santos":[[0,"epl:MUN"],[1,"lig:RCS"]],"Youri Tielemans":[[0,"epl:MUN"],[1,"epl:AVL"],[4,"epl:LEI"]],"Piero Hincapié":[[0,"epl:ARS"],[1,"bun:B04"]],"Jérémy Jacquet":[[0,"epl:LIV"],[1,"lig:SRF"]],"Anthony Gordon":[[0,"lal:BAR"],[1,"epl:NEW"],[5,"epl:EVE"]],"Karim Adeyemi":[[0,"lal:BAR"],[1,"bun:BVB"]],"Ibrahima Konaté":[[0,"lal:RMA"],[1,"epl:LIV"],[6,"bun:RBL"]],"Denzel Dumfries":[[0,"lal:RMA"],[1,"ser:INT"],[6,"ere:PSV"]],"Bernardo Silva":[[0,"lal:RMA"],[1,"epl:MCI"],[10,"lig:ASM"]],"Marc Cucurella":[[0,"lal:RMA"],[1,"epl:CHE"],[5,"epl:BHA"]],"Gonçalo Ramos":[[0,"ser:MIL"],[1,"lig:PSG"],[4,"pri:BEN"]],"Nathaniel Brown":[[0,"bun:FCB"],[1,"bun:SGE"]],"Ismael Saibari":[[0,"bun:FCB"],[1,"ere:PSV"]],"Yan Diomande":[[0,"bun:RBL"],[2,"lal:LEG"]]};
 const TM_VALUES = {"Kylian Mbappé":200,"Erling Haaland":185,"Lamine Yamal":180,"Jude Bellingham":180,"Pedri":150,"Florian Wirtz":150,"Vinícius Júnior":150,"Bukayo Saka":150,"Phil Foden":130,"Jamal Musiala":130,"Rodri":120,"Gavi":120,"Eduardo Camavinga":100,"Nico Williams":100,"Rúben Dias":90,"Warren Zaïre-Emery":90,"Xavi Simons":90,"Lautaro Martínez":90,"Evan Ferguson":85,"António Silva":80,"Kobbie Mainoo":80,"Savinho":75,"Gonçalo Ramos":75,"Alejandro Garnacho":75,"Kim Min-jae":70,"Fermín López":70,"Alejandro Grimaldo":60,"Dani Carvajal":40,"Yan Diomande":90,"Lionel Messi":17};
-function marketValue(p){
+/* ---- TOP 500 BOARD ----
+   Membership + verified Transfermarkt values, € millions.
+   null = not yet verified; marketValue() falls through to the
+   estimate and tmReal stays false, so nothing is ever faked.
+   Sorted by roster rating at extraction. */
+const TOP500 = {
+  "Erling Haaland": 185,  // #1 Manchester City · rat 91
+  "Kylian Mbappé": 200,  // #2 Real Madrid · rat 91
+  "Mohamed Salah": null,  // #3 Liverpool · rat 91
+  "Rodri": 120,  // #4 Manchester City · rat 91
+  "Florian Wirtz": 150,  // #5 Liverpool · rat 90
+  "Harry Kane": null,  // #6 Bayern München · rat 90
+  "Lionel Messi": 17,  // #7 Inter Miami · rat 90
+  "Vinícius Júnior": 150,  // #8 Real Madrid · rat 90
+  "Alisson": null,  // #9 Liverpool · rat 89
+  "Jamal Musiala": 130,  // #10 Bayern München · rat 89
+  "Jude Bellingham": 180,  // #11 Real Madrid · rat 89
+  "Lamine Yamal": 180,  // #12 Barcelona · rat 89
+  "Ousmane Dembélé": null,  // #13 Paris Saint-Germain · rat 89
+  "Raphinha": null,  // #14 Barcelona · rat 89
+  "Thibaut Courtois": null,  // #15 Real Madrid · rat 89
+  "Virgil van Dijk": null,  // #16 Liverpool · rat 89
+  "Bukayo Saka": 150,  // #17 Arsenal · rat 88
+  "Kevin De Bruyne": null,  // #18 Napoli · rat 88
+  "Lautaro Martínez": 90,  // #19 Internacional · rat 88
+  "Pedri": 150,  // #20 Barcelona · rat 88
+  "Phil Foden": 130,  // #21 Manchester City · rat 88
+  "Viktor Gyökeres": null,  // #22 Arsenal · rat 88
+  "Achraf Hakimi": null,  // #23 Paris Saint-Germain · rat 87
+  "Bruno Fernandes": null,  // #24 Manchester United · rat 87
+  "Cole Palmer": null,  // #25 Chelsea · rat 87
+  "Declan Rice": null,  // #26 Arsenal · rat 87
+  "Federico Valverde": null,  // #27 Real Madrid · rat 87
+  "Gianluigi Donnarumma": null,  // #28 Manchester City · rat 87
+  "Martin Ødegaard": null,  // #29 Arsenal · rat 87
+  "Rúben Dias": 90,  // #30 Manchester City · rat 87
+  "Vitinha": null,  // #31 Paris Saint-Germain · rat 87
+  "William Saliba": null,  // #32 Arsenal · rat 87
+  "Alessandro Bastoni": null,  // #33 Internacional · rat 86
+  "Alexander Isak": null,  // #34 Liverpool · rat 86
+  "Bernardo Silva": null,  // #35 Real Madrid · rat 86
+  "Ederson": null,  // #36 Manchester City · rat 86
+  "Gabriel Magalhães": null,  // #37 Arsenal · rat 86
+  "Jan Oblak": null,  // #38 Atlético Madrid · rat 86
+  "Julián Alvarez": null,  // #39 Atlético Madrid · rat 86
+  "Khvicha Kvaratskhelia": null,  // #40 Paris Saint-Germain · rat 86
+  "Michael Olise": null,  // #41 Bayern München · rat 86
+  "Nico Williams": 100,  // #42 Athletic Club · rat 86
+  "Nicolò Barella": null,  // #43 Internacional · rat 86
+  "Robert Lewandowski": null,  // #44 Barcelona · rat 86
+  "Trent Alexander-Arnold": null,  // #45 Real Madrid · rat 86
+  "Ademola Lookman": null,  // #46 Atalanta · rat 85
+  "Alejandro Grimaldo": 60,  // #47 Bayer Leverkusen · rat 85
+  "Alexis Mac Allister": null,  // #48 Liverpool · rat 85
+  "Antonio Rüdiger": null,  // #49 Real Madrid · rat 85
+  "Bruno Guimarães": null,  // #50 Newcastle United · rat 85
+  "Cristian Romero": null,  // #51 Tottenham · rat 85
+  "Emiliano Martínez": null,  // #52 Aston Villa · rat 85
+  "Gregor Kobel": null,  // #53 Borussia Dortmund · rat 85
+  "Hakan Çalhanoğlu": null,  // #54 Internacional · rat 85
+  "Isco": null,  // #55 Betis · rat 85
+  "Joshua Kimmich": null,  // #56 Bayern München · rat 85
+  "Joško Gvardiol": null,  // #57 Manchester City · rat 85
+  "Jules Koundé": null,  // #58 Barcelona · rat 85
+  "Luis Díaz": null,  // #59 Bayern München · rat 85
+  "Marcus Thuram": null,  // #60 Internacional · rat 85
+  "Mike Maignan": null,  // #61 Milan · rat 85
+  "Moisés Caicedo": null,  // #62 Chelsea · rat 85
+  "Nuno Mendes": null,  // #63 Paris Saint-Germain · rat 85
+  "Ollie Watkins": null,  // #64 Aston Villa · rat 85
+  "Rafael Leão": null,  // #65 Milan · rat 85
+  "Raya": null,  // #66 Arsenal · rat 85
+  "Rodrygo": null,  // #67 Real Madrid · rat 85
+  "Serhou Guirassy": null,  // #68 Borussia Dortmund · rat 85
+  "Son Heung-min": null,  // #69 LAFC · rat 85
+  "Alphonso Davies": null,  // #70 Bayern München · rat 84
+  "Ángel Di María": null,  // #71 Benfica · rat 84
+  "Antoine Griezmann": null,  // #72 Atlético Madrid · rat 84
+  "Christian Pulisic": null,  // #73 Milan · rat 84
+  "Éder Militão": null,  // #74 Real Madrid · rat 84
+  "Enzo Fernández": null,  // #75 Chelsea · rat 84
+  "Federico Dimarco": null,  // #76 Internacional · rat 84
+  "Gleison Bremer": null,  // #77 Juventude · rat 84
+  "Granit Xhaka": null,  // #78 Bayer Leverkusen · rat 84
+  "Ibrahima Konaté": null,  // #79 Real Madrid · rat 84
+  "João Neves": null,  // #80 Paris Saint-Germain · rat 84
+  "Jonathan David": null,  // #81 Lille · rat 84
+  "Jonathan Tah": null,  // #82 Bayer Leverkusen · rat 84
+  "Kai Havertz": null,  // #83 Arsenal · rat 84
+  "Manuel Akanji": null,  // #84 Manchester City · rat 84
+  "Manuel Neuer": null,  // #85 Bayern München · rat 84
+  "Marquinhos": null,  // #86 Paris Saint-Germain · rat 84
+  "Martín Zubimendi": null,  // #87 Arsenal · rat 84
+  "Mikel Oyarzabal": null,  // #88 Real Sociedad · rat 84
+  "Pau Cubarsí": null,  // #89 Barcelona · rat 84
+  "Scott McTominay": null,  // #90 Napoli · rat 84
+  "Tijjani Reijnders": null,  // #91 Manchester City · rat 84
+  "Unai Simón": null,  // #92 Athletic Club · rat 84
+  "Yan Diomande": 90,  // #93 RB Leipzig · rat 84
+  "Yann Sommer": null,  // #94 Internacional · rat 84
+  "Álex Baena": null,  // #95 Atlético Madrid · rat 83
+  "Andrew Robertson": null,  // #96 Tottenham · rat 83
+  "Anthony Gordon": null,  // #97 Barcelona · rat 83
+  "Aurélien Tchouaméni": null,  // #98 Real Madrid · rat 83
+  "Ben White": null,  // #99 Arsenal · rat 83
+  "Bradley Barcola": null,  // #100 Paris Saint-Germain · rat 83
+  "Bryan Mbeumo": null,  // #101 Manchester United · rat 83
+  "Cody Gakpo": null,  // #102 Liverpool · rat 83
+  "Dani Olmo": null,  // #103 Barcelona · rat 83
+  "Dejan Kulusevski": null,  // #104 Tottenham · rat 83
+  "Désiré Doué": null,  // #105 Paris Saint-Germain · rat 83
+  "Diogo Costa": null,  // #106 Porto · rat 83
+  "Diogo Jota": null,  // #107 Liverpool · rat 83
+  "Dominik Szoboszlai": null,  // #108 Liverpool · rat 83
+  "Eberechi Eze": null,  // #109 Arsenal · rat 83
+  "Eduardo Camavinga": 100,  // #110 Real Madrid · rat 83
+  "Frenkie de Jong": null,  // #111 Barcelona · rat 83
+  "Gabriel Martinelli": null,  // #112 Arsenal · rat 83
+  "Giorgi Mamardashvili": null,  // #113 Valencia · rat 83
+  "Giorgian de Arrascaeta": null,  // #114 Flamengo · rat 83
+  "Jeremie Frimpong": null,  // #115 Liverpool · rat 83
+  "John Stones": null,  // #116 Manchester City · rat 83
+  "Jordan Pickford": null,  // #117 Everton · rat 83
+  "Lisandro Martínez": null,  // #118 Manchester United · rat 83
+  "Lucas Paquetá": null,  // #119 West Ham · rat 83
+  "Mateo Kovačić": null,  // #120 Manchester City · rat 83
+  "Matheus Cunha": null,  // #121 Manchester United · rat 83
+  "Matthijs de Ligt": null,  // #122 Manchester United · rat 83
+  "Micky van de Ven": null,  // #123 Tottenham · rat 83
+  "Moise Kean": null,  // #124 Fiorentina · rat 83
+  "Ronald Araújo": null,  // #125 Barcelona · rat 83
+  "Sandro Tonali": null,  // #126 Tottenham · rat 83
+  "Theo Hernández": null,  // #127 Milan · rat 83
+  "Thomas Partey": null,  // #128 Arsenal · rat 83
+  "Xavi Simons": 90,  // #129 Tottenham · rat 83
+  "Alejandro Balde": null,  // #130 Barcelona · rat 82
+  "Alessandro Buongiorno": null,  // #131 Napoli · rat 82
+  "Benjamin Šeško": null,  // #132 Manchester United · rat 82
+  "Christopher Nkunku": null,  // #133 Chelsea · rat 82
+  "Dani Carvajal": 40,  // #134 Real Madrid · rat 82
+  "David de Gea": null,  // #135 Fiorentina · rat 82
+  "Dayot Upamecano": null,  // #136 Bayern München · rat 82
+  "Denis Bouanga": null,  // #137 LAFC · rat 82
+  "Denzel Dumfries": null,  // #138 Real Madrid · rat 82
+  "Dušan Vlahović": null,  // #139 Juventude · rat 82
+  "Estêvão": null,  // #140 Palmeiras · rat 82
+  "Fabián Ruiz": null,  // #141 Paris Saint-Germain · rat 82
+  "Guglielmo Vicario": null,  // #142 Tottenham · rat 82
+  "Hugo Ekitiké": null,  // #143 Liverpool · rat 82
+  "Iago Aspas": null,  // #144 Celta Vigo · rat 82
+  "Ilkay Gündoğan": null,  // #145 Manchester City · rat 82
+  "Iñaki Williams": null,  // #146 Athletic Club · rat 82
+  "Iñigo Martínez": null,  // #147 Barcelona · rat 82
+  "Jack Grealish": null,  // #148 Manchester City · rat 82
+  "James Maddison": null,  // #149 Tottenham · rat 82
+  "Jarrad Branthwaite": null,  // #150 Everton · rat 82
+  "Jarrod Bowen": null,  // #151 West Ham · rat 82
+  "Jérémy Doku": null,  // #152 Manchester City · rat 82
+  "Joan García": null,  // #153 Barcelona · rat 82
+  "Joelinton": null,  // #154 Newcastle United · rat 82
+  "Jurriën Timber": null,  // #155 Arsenal · rat 82
+  "Kaoru Mitoma": null,  // #156 Brighton · rat 82
+  "Kenan Yıldız": null,  // #157 Juventude · rat 82
+  "Leandro Trossard": null,  // #158 Arsenal · rat 82
+  "Loïs Openda": null,  // #159 RB Leipzig · rat 82
+  "Lucas Chevalier": null,  // #160 Lille · rat 82
+  "Luis Suárez": null,  // #161 Inter Miami · rat 82
+  "Marc Guéhi": null,  // #162 Manchester City · rat 82
+  "Mason Greenwood": null,  // #163 Marseille · rat 82
+  "Mikel Merino": null,  // #164 Arsenal · rat 82
+  "Mile Svilar": null,  // #165 Roma · rat 82
+  "Mohammed Kudus": null,  // #166 Tottenham · rat 82
+  "Morgan Gibbs-White": null,  // #167 Nottingham Forest · rat 82
+  "Murillo": null,  // #168 Nottingham Forest · rat 82
+  "Nico Schlotterbeck": null,  // #169 Borussia Dortmund · rat 82
+  "Oihan Sancet": null,  // #170 Athletic Club · rat 82
+  "Omar Marmoush": null,  // #171 Manchester City · rat 82
+  "Pau Torres": null,  // #172 Aston Villa · rat 82
+  "Paulo Dybala": null,  // #173 Roma · rat 82
+  "Pedro": null,  // #174 Flamengo · rat 82
+  "Pedro Porro": null,  // #175 Tottenham · rat 82
+  "Rayan Cherki": null,  // #176 Manchester City · rat 82
+  "Reece James": null,  // #177 Chelsea · rat 82
+  "Rodrigo De Paul": null,  // #178 Atlético Madrid · rat 82
+  "Ryan Gravenberch": null,  // #179 Liverpool · rat 82
+  "Stanislav Lobotka": null,  // #180 Napoli · rat 82
+  "Takefusa Kubo": null,  // #181 Real Sociedad · rat 82
+  "Willian Pacho": null,  // #182 Paris Saint-Germain · rat 82
+  "Youri Tielemans": null,  // #183 Manchester United · rat 82
+  "Adrien Rabiot": null,  // #184 Marseille · rat 81
+  "Álex Remiro": null,  // #185 Real Sociedad · rat 81
+  "Antony": null,  // #186 Betis · rat 81
+  "Ayoze Pérez": null,  // #187 Villarreal · rat 81
+  "Benjamin Pavard": null,  // #188 Internacional · rat 81
+  "Boubacar Kamara": null,  // #189 Aston Villa · rat 81
+  "Charles De Ketelaere": null,  // #190 Atalanta · rat 81
+  "Dani Vivian": null,  // #191 Athletic Club · rat 81
+  "Destiny Udogie": null,  // #192 Tottenham · rat 81
+  "Dominic Solanke": null,  // #193 Tottenham · rat 81
+  "Éderson": null,  // #194 Atalanta · rat 81
+  "Edmond Tapsoba": null,  // #195 Bayer Leverkusen · rat 81
+  "Franco Mastantuono": null,  // #196 Real Madrid · rat 81
+  "Gabriel Jesus": null,  // #197 Arsenal · rat 81
+  "Gerónimo Rulli": null,  // #198 Marseille · rat 81
+  "Giovanni Di Lorenzo": null,  // #199 Napoli · rat 81
+  "Illia Zabarnyi": null,  // #200 Paris Saint-Germain · rat 81
+  "José María Giménez": null,  // #201 Atlético Madrid · rat 81
+  "Karim Adeyemi": null,  // #202 Barcelona · rat 81
+  "Kim Min-jae": 70,  // #203 Bayern München · rat 81
+  "Leroy Sané": null,  // #204 Bayern München · rat 81
+  "Levi Colwill": null,  // #205 Chelsea · rat 81
+  "Lewis Dunk": null,  // #206 Brighton · rat 81
+  "Luka Modrić": null,  // #207 Milan · rat 81
+  "Marcus Rashford": null,  // #208 Barcelona · rat 81
+  "Michele Di Gregorio": null,  // #209 Juventude · rat 81
+  "Nathan Aké": null,  // #210 Manchester City · rat 81
+  "Patrik Schick": null,  // #211 Bayer Leverkusen · rat 81
+  "Piero Hincapié": null,  // #212 Arsenal · rat 81
+  "Robin Le Normand": null,  // #213 Atlético Madrid · rat 81
+  "Romelu Lukaku": null,  // #214 Napoli · rat 81
+  "Sergio Busquets": null,  // #215 Inter Miami · rat 81
+  "Sven Botman": null,  // #216 Newcastle United · rat 81
+  "Vangelis Pavlidis": null,  // #217 Benfica · rat 81
+  "Alejandro Garnacho": 75,  // #218 Manchester United · rat 80
+  "Aleksandar Pavlović": null,  // #219 Bayern München · rat 80
+  "Alex Meret": null,  // #220 Napoli · rat 80
+  "Alexander Sørloth": null,  // #221 Atlético Madrid · rat 80
+  "André Onana": null,  // #222 Manchester United · rat 80
+  "Andrea Cambiaso": null,  // #223 Juventude · rat 80
+  "Angelo Stiller": null,  // #224 Stuttgart · rat 80
+  "Ante Budimir": null,  // #225 Osasuna · rat 80
+  "Antonee Robinson": null,  // #226 Fulham · rat 80
+  "Arda Güler": null,  // #227 Real Madrid · rat 80
+  "Bernd Leno": null,  // #228 Fulham · rat 80
+  "Brahim Díaz": null,  // #229 Real Madrid · rat 80
+  "Casemiro": null,  // #230 Manchester United · rat 80
+  "Dani Parejo": null,  // #231 Villarreal · rat 80
+  "Dean Huijsen": null,  // #232 Real Madrid · rat 80
+  "Denis Zakaria": null,  // #233 Monaco · rat 80
+  "Diogo Dalot": null,  // #234 Manchester United · rat 80
+  "Dodi Lukébakio": null,  // #235 Sevilla · rat 80
+  "Exequiel Palacios": null,  // #236 Bayer Leverkusen · rat 80
+  "Ezri Konsa": null,  // #237 Aston Villa · rat 80
+  "Fabian Schär": null,  // #238 Newcastle United · rat 80
+  "Ferran Torres": null,  // #239 Barcelona · rat 80
+  "Fikayo Tomori": null,  // #240 Milan · rat 80
+  "Frank Anguissa": null,  // #241 Napoli · rat 80
+  "Gavi": 120,  // #242 Barcelona · rat 80
+  "Gerson": null,  // #243 Flamengo · rat 80
+  "Giovani Lo Celso": null,  // #244 Betis · rat 80
+  "Igor Paixão": null,  // #245 Feyenoord · rat 80
+  "Jean-Philippe Mateta": null,  // #246 Crystal Palace · rat 80
+  "Jerdy Schouten": null,  // #247 PSV · rat 80
+  "Jhon Arias": null,  // #248 Fluminense · rat 80
+  "Joachim Andersen": null,  // #249 Fulham · rat 80
+  "João Cancelo": null,  // #250 Barcelona · rat 80
+  "João Gomes": null,  // #251 Wolves · rat 80
+  "João Pedro": null,  // #252 Chelsea · rat 80
+  "Johnny Cardoso": null,  // #253 Atlético Madrid · rat 80
+  "Julian Brandt": null,  // #254 Borussia Dortmund · rat 80
+  "Khéphren Thuram": null,  // #255 Juventude · rat 80
+  "Kieran Trippier": null,  // #256 Newcastle United · rat 80
+  "Kingsley Coman": null,  // #257 Bayern München · rat 80
+  "Kyle Walker": null,  // #258 Milan · rat 80
+  "Loïc Badé": null,  // #259 Sevilla · rat 80
+  "Maghnes Akliouche": null,  // #260 Monaco · rat 80
+  "Marc Cucurella": null,  // #261 Real Madrid · rat 80
+  "Marco Asensio": null,  // #262 Aston Villa · rat 80
+  "Marco Carnesecchi": null,  // #263 Atalanta · rat 80
+  "Marcos Llorente": null,  // #264 Atlético Madrid · rat 80
+  "Matheus Pereira": null,  // #265 Cruzeiro · rat 80
+  "Mattia Zaccagni": null,  // #266 Lazio · rat 80
+  "Miguel Gutiérrez": null,  // #267 Girona · rat 80
+  "Miloš Kerkez": null,  // #268 Bournemouth · rat 80
+  "Morgan Rogers": null,  // #269 Chelsea · rat 80
+  "Nick Pope": null,  // #270 Newcastle United · rat 80
+  "Nico Paz": null,  // #271 Como · rat 80
+  "Nicolas Jackson": null,  // #272 Bayern München · rat 80
+  "Nikola Milenković": null,  // #273 Nottingham Forest · rat 80
+  "Noussair Mazraoui": null,  // #274 Manchester United · rat 80
+  "Orkun Kökçü": null,  // #275 Benfica · rat 80
+  "Pedro Gonçalves": null,  // #276 Sporting CP · rat 80
+  "Pedro Neto": null,  // #277 Chelsea · rat 80
+  "Pervis Estupiñán": null,  // #278 Brighton · rat 80
+  "Pierre-Emile Højbjerg": null,  // #279 Marseille · rat 80
+  "Randal Kolo Muani": null,  // #280 Juventude · rat 80
+  "Riccardo Calafiori": null,  // #281 Arsenal · rat 80
+  "Riccardo Orsolini": null,  // #282 Bologna · rat 80
+  "Samu Aghehowa": null,  // #283 Porto · rat 80
+  "Santiago Giménez": null,  // #284 Milan · rat 80
+  "Savinho": 75,  // #285 Manchester City · rat 80
+  "Thiago Almada": null,  // #286 Atlético Madrid · rat 80
+  "Victor Boniface": null,  // #287 Bayer Leverkusen · rat 80
+  "Warren Zaïre-Emery": 90,  // #288 Paris Saint-Germain · rat 80
+  "Wesley Fofana": null,  // #289 Chelsea · rat 80
+  "Wojciech Szczęsny": null,  // #290 Barcelona · rat 80
+  "Yoane Wissa": null,  // #291 Newcastle United · rat 80
+  "Adam Wharton": null,  // #292 Crystal Palace · rat 79
+  "Alan Patrick": null,  // #293 Internacional · rat 79
+  "Alan Varela": null,  // #294 Porto · rat 79
+  "Albert Gudmundsson": null,  // #295 Fiorentina · rat 79
+  "Alberto Moleiro": null,  // #296 Las Palmas · rat 79
+  "Aleksandr Golovin": null,  // #297 Monaco · rat 79
+  "Alex Iwobi": null,  // #298 Fulham · rat 79
+  "Amadou Onana": null,  // #299 Aston Villa · rat 79
+  "Amine Gouiri": null,  // #300 Marseille · rat 79
+  "Amir Rrahmani": null,  // #301 Napoli · rat 79
+  "Anatoliy Trubin": null,  // #302 Benfica · rat 79
+  "Andrey Santos": null,  // #303 Manchester United · rat 79
+  "Andriy Lunin": null,  // #304 Real Madrid · rat 79
+  "Anthony Elanga": null,  // #305 Newcastle United · rat 79
+  "Antoine Semenyo": null,  // #306 Manchester City · rat 79
+  "Artem Dovbyk": null,  // #307 Roma · rat 79
+  "Brais Méndez": null,  // #308 Real Sociedad · rat 79
+  "Brennan Johnson": null,  // #309 Tottenham · rat 79
+  "Carles Gil": null,  // #310 New England · rat 79
+  "Castello Lukeba": null,  // #311 RB Leipzig · rat 79
+  "Chris Wood": null,  // #312 Nottingham Forest · rat 79
+  "Christian Nørgaard": null,  // #313 Brest · rat 79
+  "Conor Gallagher": null,  // #314 Atlético Madrid · rat 79
+  "Cristhian Mosquera": null,  // #315 Valencia · rat 79
+  "Cucho Hernández": null,  // #316 Betis · rat 79
+  "Curtis Jones": null,  // #317 Liverpool · rat 79
+  "Daniel Muñoz": null,  // #318 Crystal Palace · rat 79
+  "David Alaba": null,  // #319 Real Madrid · rat 79
+  "Dávid Hancko": null,  // #320 Atlético Madrid · rat 79
+  "David Neres": null,  // #321 Napoli · rat 79
+  "Deniz Undav": null,  // #322 Stuttgart · rat 79
+  "Diego Carlos": null,  // #323 Aston Villa · rat 79
+  "Dwight McNeil": null,  // #324 Everton · rat 79
+  "Edson Álvarez": null,  // #325 West Ham · rat 79
+  "Evan Ndicka": null,  // #326 Roma · rat 79
+  "Evander": null,  // #327 FC Cincinnati · rat 79
+  "Evanilson": null,  // #328 Bournemouth · rat 79
+  "Ez Abde": null,  // #329 Betis · rat 79
+  "Federico Chiesa": null,  // #330 Liverpool · rat 79
+  "Ferland Mendy": null,  // #331 Real Madrid · rat 79
+  "Fermín López": 70,  // #332 Barcelona · rat 79
+  "Francesco Acerbi": null,  // #333 Internacional · rat 79
+  "Georges Mikautadze": null,  // #334 Villarreal · rat 79
+  "Gonçalo Inácio": null,  // #335 Sporting CP · rat 79
+  "Gonçalo Ramos": 75,  // #336 Milan · rat 79
+  "Hany Mukhtar": null,  // #337 Nashville SC · rat 79
+  "Harvey Barnes": null,  // #338 Newcastle United · rat 79
+  "Hugo Larsson": null,  // #339 Eintracht Frankfurt · rat 79
+  "Hulk": null,  // #340 Atlético Mineiro · rat 79
+  "Igor Zubeldia": null,  // #341 Real Sociedad · rat 79
+  "Ismaïla Sarr": null,  // #342 Crystal Palace · rat 79
+  "Ivan Provedel": null,  // #343 Lazio · rat 79
+  "Jadon Sancho": null,  // #344 Aston Villa · rat 79
+  "James Tarkowski": null,  // #345 Everton · rat 79
+  "Jamie Gittens": null,  // #346 Chelsea · rat 79
+  "Jan Paul van Hecke": null,  // #347 Tottenham · rat 79
+  "Jean-Clair Todibo": null,  // #348 West Ham · rat 79
+  "Jhon Durán": null,  // #349 Aston Villa · rat 79
+  "Joe Gomez": null,  // #350 Liverpool · rat 79
+  "Joey Veerman": null,  // #351 PSV · rat 79
+  "John McGinn": null,  // #352 Aston Villa · rat 79
+  "Jonathan Burkardt": null,  // #353 Mainz 05 · rat 79
+  "Jordi Alba": null,  // #354 Inter Miami · rat 79
+  "Jorrel Hato": null,  // #355 Ajax · rat 79
+  "José Gayà": null,  // #356 Valencia · rat 79
+  "Justin Kluivert": null,  // #357 Bournemouth · rat 79
+  "Kepa Arrizabalaga": null,  // #358 Bournemouth · rat 79
+  "Kobbie Mainoo": 80,  // #359 Manchester United · rat 79
+  "Konrad Laimer": null,  // #360 Bayern München · rat 79
+  "Leon Bailey": null,  // #361 Aston Villa · rat 79
+  "Leon Goretzka": null,  // #362 Bayern München · rat 79
+  "Leonardo Balerdi": null,  // #363 Marseille · rat 79
+  "Lukáš Hrádecký": null,  // #364 Bayer Leverkusen · rat 79
+  "Luke Shaw": null,  // #365 Manchester United · rat 79
+  "Malick Fofana": null,  // #366 Lyon · rat 79
+  "Malo Gusto": null,  // #367 Chelsea · rat 79
+  "Manu Koné": null,  // #368 Roma · rat 79
+  "Manuel Locatelli": null,  // #369 Juventude · rat 79
+  "Manuel Ugarte": null,  // #370 Manchester United · rat 79
+  "Marc Casadó": null,  // #371 Barcelona · rat 79
+  "Marcos Senesi": null,  // #372 Tottenham · rat 79
+  "Matteo Politano": null,  // #373 Napoli · rat 79
+  "Matz Sels": null,  // #374 Nottingham Forest · rat 79
+  "Max Kilman": null,  // #375 West Ham · rat 79
+  "Memphis Depay": null,  // #376 Corinthians · rat 79
+  "Morten Hjulmand": null,  // #377 Sporting CP · rat 79
+  "Nathan Collins": null,  // #378 Brest · rat 79
+  "Niclas Füllkrug": null,  // #379 West Ham · rat 79
+  "Nicolás De la Cruz": null,  // #380 Flamengo · rat 79
+  "Noa Lang": null,  // #381 PSV · rat 79
+  "Noni Madueke": null,  // #382 Arsenal · rat 79
+  "Ola Aina": null,  // #383 Nottingham Forest · rat 79
+  "Oscar": null,  // #384 São Paulo · rat 79
+  "Óscar Mingueza": null,  // #385 Celta Vigo · rat 79
+  "Pablo Barrios": null,  // #386 Atlético Madrid · rat 79
+  "Pepê": null,  // #387 Porto · rat 79
+  "Pierre Kalulu": null,  // #388 Juventude · rat 79
+  "Raphael Veiga": null,  // #389 Palmeiras · rat 79
+  "Rasmus Højlund": null,  // #390 Manchester United · rat 79
+  "Rayan Aït-Nouri": null,  // #391 Wolves · rat 79
+  "Ricardo Horta": null,  // #392 Braga · rat 79
+  "Richard Ríos": null,  // #393 Palmeiras · rat 79
+  "Riqui Puig": null,  // #394 LA Galaxy · rat 79
+  "Rodrigo Bentancur": null,  // #395 Tottenham · rat 79
+  "Rodrigo Garro": null,  // #396 Corinthians · rat 79
+  "Samuele Ricci": null,  // #397 Torino · rat 79
+  "Stefan de Vrij": null,  // #398 Internacional · rat 79
+  "Teun Koopmeiners": null,  // #399 Juventude · rat 79
+  "Thomas Müller": null,  // #400 Bayern München · rat 79
+  "Tino Livramento": null,  // #401 Newcastle United · rat 79
+  "Vanderson": null,  // #402 Monaco · rat 79
+  "Vanja Milinković-Savić": null,  // #403 Torino · rat 79
+  "Viktor Tsygankov": null,  // #404 Girona · rat 79
+  "Yeremy Pino": null,  // #405 Villarreal · rat 79
+  "Youssouf Fofana": null,  // #406 Milan · rat 79
+  "Aaron Ramsdale": null,  // #407 Southampton · rat 78
+  "Aaron Wan-Bissaka": null,  // #408 West Ham · rat 78
+  "Abdoulaye Doucouré": null,  // #409 Everton · rat 78
+  "Adrián Martínez": null,  // #410 Racing · rat 78
+  "Agustín Rossi": null,  // #411 Flamengo · rat 78
+  "Aleix García": null,  // #412 Bayer Leverkusen · rat 78
+  "Alessio Romagnoli": null,  // #413 Lazio · rat 78
+  "Alexander Nübel": null,  // #414 Stuttgart · rat 78
+  "Alexandre Lacazette": null,  // #415 Lyon · rat 78
+  "Alexsandro": null,  // #416 Lille · rat 78
+  "Alphonse Areola": null,  // #417 West Ham · rat 78
+  "Álvaro Carreras": null,  // #418 Real Madrid · rat 78
+  "Amad Diallo": null,  // #419 Manchester United · rat 78
+  "Ander Barrenetxea": null,  // #420 Real Sociedad · rat 78
+  "Andreas Christensen": null,  // #421 Barcelona · rat 78
+  "Andreas Pereira": null,  // #422 Fulham · rat 78
+  "Andrei Ratiu": null,  // #423 Rayo Vallecano · rat 78
+  "Andrej Kramarić": null,  // #424 Hoffenheim · rat 78
+  "Ángel Correa": null,  // #425 Atlético Madrid · rat 78
+  "António Silva": 80,  // #426 Benfica · rat 78
+  "Arnaud Kalimuendo": null,  // #427 Rennes · rat 78
+  "Bafodé Diakité": null,  // #428 Lille · rat 78
+  "Bart Verbruggen": null,  // #429 Brighton · rat 78
+  "Borja Mayoral": null,  // #430 Getafe · rat 78
+  "Brice Samba": null,  // #431 Rennes · rat 78
+  "Callum Hudson-Odoi": null,  // #432 Nottingham Forest · rat 78
+  "Calvin Bassey": null,  // #433 Fulham · rat 78
+  "Carlos Baleba": null,  // #434 Brighton · rat 78
+  "Crysencio Summerville": null,  // #435 West Ham · rat 78
+  "Daichi Kamada": null,  // #436 Crystal Palace · rat 78
+  "Dan Ndoye": null,  // #437 Bologna · rat 78
+  "Dani Ceballos": null,  // #438 Real Madrid · rat 78
+  "David Raum": null,  // #439 RB Leipzig · rat 78
+  "Davide Frattesi": null,  // #440 Internacional · rat 78
+  "Dean Henderson": null,  // #441 Crystal Palace · rat 78
+  "Dodô": null,  // #442 Fiorentina · rat 78
+  "Dominic Calvert-Lewin": null,  // #443 Everton · rat 78
+  "Đorđe Petrović": null,  // #444 Strasbourg · rat 78
+  "Edon Zhegrova": null,  // #445 Lille · rat 78
+  "Emile Smith Rowe": null,  // #446 Fulham · rat 78
+  "Enzo Millot": null,  // #447 Stuttgart · rat 78
+  "Ethan Pinnock": null,  // #448 Brest · rat 78
+  "Evann Guessand": null,  // #449 Nice · rat 78
+  "Federico Gatti": null,  // #450 Juventude · rat 78
+  "Ferdi Kadıoğlu": null,  // #451 Brighton · rat 78
+  "Francisco Conceição": null,  // #452 Juventude · rat 78
+  "Francisco Trincão": null,  // #453 Sporting CP · rat 78
+  "Franco Armani": null,  // #454 River Plate · rat 78
+  "Gerard Moreno": null,  // #455 Villarreal · rat 78
+  "Gianluca Mancini": null,  // #456 Roma · rat 78
+  "Gustavo Gómez": null,  // #457 Palmeiras · rat 78
+  "Harry Maguire": null,  // #458 Manchester United · rat 78
+  "Henrikh Mkhitaryan": null,  // #459 Internacional · rat 78
+  "Hugo Lloris": null,  // #460 LAFC · rat 78
+  "Ibrahim Sangaré": null,  // #461 Nottingham Forest · rat 78
+  "Isak Hien": null,  // #462 Atalanta · rat 78
+  "Isi Palazón": null,  // #463 Rayo Vallecano · rat 78
+  "Jacob Murphy": null,  // #464 Newcastle United · rat 78
+  "Jaka Bijol": null,  // #465 Udinese · rat 78
+  "James Ward-Prowse": null,  // #466 West Ham · rat 78
+  "Javi Guerra": null,  // #467 Valencia · rat 78
+  "Jefferson Lerma": null,  // #468 Crystal Palace · rat 78
+  "João Félix": null,  // #469 Milan · rat 78
+  "João Palhinha": null,  // #470 Bayern München · rat 78
+  "Johan Bakayoko": null,  // #471 RB Leipzig · rat 78
+  "Jonathan Calleri": null,  // #472 São Paulo · rat 78
+  "Jorginho": null,  // #473 Arsenal · rat 78
+  "José Sá": null,  // #474 Wolves · rat 78
+  "Juan Foyth": null,  // #475 Villarreal · rat 78
+  "Kaio Jorge": null,  // #476 Cruzeiro · rat 78
+  "Kevin Trapp": null,  // #477 Eintracht Frankfurt · rat 78
+  "Koke": null,  // #478 Atlético Madrid · rat 78
+  "Lee Kang-in": null,  // #479 Paris Saint-Germain · rat 78
+  "Leny Yoro": null,  // #480 Manchester United · rat 78
+  "Lewis Hall": null,  // #481 Newcastle United · rat 78
+  "Lorenzo Pellegrini": null,  // #482 Roma · rat 78
+  "Lucas Digne": null,  // #483 Aston Villa · rat 78
+  "Lucas Hernández": null,  // #484 Paris Saint-Germain · rat 78
+  "Lucas Moura": null,  // #485 São Paulo · rat 78
+  "Lucas Perri": null,  // #486 Lyon · rat 78
+  "Luciano Acosta": null,  // #487 FC Dallas · rat 78
+  "Luis Henrique": null,  // #488 Marseille · rat 78
+  "Łukasz Skorupski": null,  // #489 Bologna · rat 78
+  "Luuk de Jong": null,  // #490 PSV · rat 78
+  "Malik Tillman": null,  // #491 PSV · rat 78
+  "Marco Reus": null,  // #492 LA Galaxy · rat 78
+  "Marcos Acuña": null,  // #493 River Plate · rat 78
+  "Mario Gila": null,  // #494 Lazio · rat 78
+  "Mario Pašalić": null,  // #495 Atalanta · rat 78
+  "Mark Flekken": null,  // #496 Brest · rat 78
+  "Mason Mount": null,  // #497 Manchester United · rat 78
+  "Matéo Guendouzi": null,  // #498 Lazio · rat 78
+  "Matheus Nunes": null,  // #499 Manchester City · rat 78
+  "Mathías Olivera": null,  // #500 Napoli · rat 78
+};
+   function marketValue(p){
   const coef = DB.leagues.find(l=>l.id===p.lg).coef;
   const a = AGEV[p.age] ?? .3;
   const potBoost = 1 + (p.pot - p.rat)*0.055;
