@@ -3595,6 +3595,14 @@ function parseRoster(txt){
     return { name:a[0], pos:a[1], nat:a[2], age:liveAge(dobMs), dob:dobMs, num:+a[4], rat:+a[5] };
   });
 }
+
+/* ===== WORLD CLUB RANKING — FootballDatabase.com, CC BY-SA 4.0 =====
+   https://footballdatabase.com/ranking/world/1  (snapshot 2 Aug 2026)
+   PSG is manually pinned to #1 at the site owner's request; every other
+   club keeps FootballDatabase's own order. FDB_SOURCE_RANK preserves
+   what the source actually said so the override stays auditable. */
+const FDB = [["bun:FCB",1,2085],["epl:ARS",2,2055],["lig:PSG",3,2018],["lal:BAR",4,1970],["lal:RMA",5,1934],["epl:MCI",6,1923],["ser:INT",7,1916],["epl:MUN",8,1895],["epl:AVL",9,1891],["bun:BVB",10,1859],["pri:SCP",11,1849],["epl:BOU",12,1833],["ser:ROM",13,1832],["ser:COM",14,1819],["pri:BEN",15,1818],["epl:LIV",16,1817],["ere:PSV",17,1813],["bra:PAL",18,1809],["bra:FLA",19,1805],["bun:B04",20,1804],["lal:ATM",21,1800],["ser:JUV",22,1791],["pri:POR",23,1790],["ser:NAP",24,1788],["bun:VFB",25,1784],["epl:NFO",26,1781],["epl:NEW",27,1777],["epl:BHA",28,1766],["bun:RBL",29,1763],["epl:BRE",31,1761],["ser:ATA",32,1751],["lal:VIL",33,1748],["lig:RCL",35,1745],["ser:MIL",36,1744],["lal:BET",38,1742],["epl:FUL",40,1738],["epl:CHE",41,1730],["epl:CRY",43,1724],["lig:LIL",46,1711],["bun:TSG",47,1710],["epl:EVE",49,1708],["lal:VAL",50,1706],["lal:RAY",51,1704],["epl:TOT",53,1702],["lig:OL",55,1697],["ser:LAZ",56,1696],["lig:SRF",57,1691],["lig:ASM",58,1685],["bra:BOT",60,1685],["epl:WHU",62,1684],["ser:BOL",63,1684],["lal:CEL",64,1683],["bun:SCF",65,1682],["pri:BRA",67,1680],["ser:FIO",69,1679],["bun:M05",73,1672],["bra:FLU",79,1666],["lig:OM",81,1662],["bra:CRU",82,1661],["ser:UDI",84,1659],["lig:RCS",85,1658],["ere:FEY",86,1657],["arg:BOC",88,1657],["lal:GET",90,1651],["arg:ARG",93,1642],["lal:RSO",95,1639],["arg:ROS",96,1638],["arg:RAC",97,1637],["bra:CAP",99,1635]];
+const FDB_PSG_OVERRIDE = true;
 LEAGUES.forEach(L=>{
   const cl = CLUBS[L.id];
   cl.forEach((c,i)=>{
@@ -3889,11 +3897,56 @@ function rankAll(){
     t.squad.sort((a,b)=> DB.byId[b].ps - DB.byId[a].ps);
     const sq = t.squad.map(id=>DB.byId[id]);
     t.ps = +(sq.slice(0,14).reduce((s,p)=>s+p.ps,0)/14).toFixed(1);
+    t.squadPs = t.ps;
     t.mv = +sq.reduce((s,p)=>s+p.mv,0).toFixed(0);
     t.best = {}; ['GK','DEF','MID','ATT'].forEach(l=>{ t.best[l] = sq.filter(p=>p.line===l).sort((a,b)=>b.ps-a.ps)[0]; });
   });
 }
 rankAll();
+(function applyWorldRanking(){
+  const byKey = {};
+  DB.teams.forEach(t => { byKey[t.lg + ':' + t.abbr] = t; });
+  const entries = FDB.filter(([k]) => byKey[k]);
+  if (!entries.length) return;
+  const pts = entries.map(e => e[2]);
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  entries.forEach(([k, srcRank, p]) => {
+    const t = byKey[k];
+    t.fdbSourceRank = srcRank;
+    t.fdbPts = p;
+    t.ps = +(74 + (p - lo) / (hi - lo || 1) * 20).toFixed(1);   // 74..94
+  });
+  if (FDB_PSG_OVERRIDE && byKey['lig:PSG']){
+    const psg = byKey['lig:PSG'];
+    psg.ps = 95.5;                    // pinned clear of Bayern's 94
+    psg.fdbOverridden = true;
+  }
+  // everyone outside the top 100 sits below the ranked band, ordered by squad
+  const rest = DB.teams.filter(t => !t.fdbPts);
+  if (rest.length){
+    const rp = rest.map(t => t.squadPs || t.ps);
+    const rlo = Math.min(...rp), rhi = Math.max(...rp);
+    rest.forEach(t => {
+      const v = t.squadPs || t.ps;
+      t.ps = +(55 + (v - rlo) / (rhi - rlo || 1) * 18).toFixed(1); // 55..73
+    });
+  }
+  // final world order across every club Power Board knows about
+  [...DB.teams].sort((a, b) => b.ps - a.ps).forEach((t, i) => { t.wrank = i + 1; });
+  DB.worldRanked = entries.length;
+  // league records follow the new strength so the tables stay coherent
+  DB.teams.forEach(t => {
+    const q = clamp((t.ps - 55) / 40, 0, 1);
+    const gp = t.rec.gp;
+    const w = clamp(Math.round(gp * (.16 + q * .52) + gauss(0, 1.1)), 0, gp);
+    const d = clamp(Math.round((gp - w) * rf(.15, .45)), 0, gp - w);
+    t.rec = { gp, w, d, l: gp - w - d, pts: w * 3 + d,
+              gf: Math.round(gp * (.75 + q * 1.35)), ga: Math.round(gp * (1.9 - q * 1.15)) };
+    t.rec.gd = t.rec.gf - t.rec.ga;
+    t.xg = +(t.rec.gf / gp * rf(.86, 1.16)).toFixed(2);
+    t.xga = +(t.rec.ga / gp * rf(.86, 1.16)).toFixed(2);
+  });
+})();
 
 /* ===========================================================
    3. FIXTURES, LIVE STATE, PLAY-BY-PLAY
@@ -3931,6 +3984,60 @@ const EVENT_TEMPLATES = {
 };
 const WEIGHTS_EV = [['goal',.05],['bigchance',.07],['shot',.20],['keypass',.16],['tackle',.13],['save',.07],['card',.05],['sub',.05],['press',.10],['corner',.07],['carry',.05]];
 
+
+/* ===== REAL FIXTURES (snapshot pulled 4 Aug 2026) =====
+   Real matchups, real kickoff times, real final scores where played. */
+const REAL_FIXTURES = [{"lg":"mls","h":"MIA","a":"CLB","ko":"2026-08-02T00:10:00Z","hs":2,"as":2},{"lg":"mls","h":"CHI","a":"CLT","ko":"2026-08-02T00:30:00Z","hs":2,"as":1},{"lg":"mls","h":"COL","a":"ATX","ko":"2026-08-02T01:30:00Z","hs":1,"as":0},{"lg":"mls","h":"LAG","a":"DAL","ko":"2026-08-02T02:30:00Z","hs":0,"as":0},{"lg":"mls","h":"NE","a":"HOU","ko":"2026-08-08T20:30:00Z"},{"lg":"mls","h":"ATL","a":"RBNY","ko":"2026-08-15T23:30:00Z"},{"lg":"mls","h":"CLT","a":"CLB","ko":"2026-08-15T23:30:00Z"},{"lg":"mls","h":"ORL","a":"CIN","ko":"2026-08-15T23:30:00Z"},{"lg":"mls","h":"HOU","a":"LAG","ko":"2026-08-16T00:30:00Z"},{"lg":"mls","h":"NSH","a":"MIA","ko":"2026-08-16T00:30:00Z"},{"lg":"lal","h":"ALA","a":"GET","ko":"2026-08-15T17:30:00Z"},{"lg":"lal","h":"SEV","a":"RAY","ko":"2026-08-15T19:30:00Z"},{"lg":"lal","h":"CEL","a":"OSA","ko":"2026-08-16T19:30:00Z"},{"lg":"lal","h":"RAY","a":"ALA","ko":"2026-08-20T19:00:00Z"},{"lg":"lal","h":"BET","a":"RSO","ko":"2026-08-21T19:00:00Z"},{"lg":"lal","h":"ATH","a":"SEV","ko":"2026-08-22T15:00:00Z"},{"lg":"epl","h":"EVE","a":"CRY","ko":"2026-08-22T14:00:00Z"},{"lg":"epl","h":"BRE","a":"TOT","ko":"2026-08-22T16:30:00Z"},{"lg":"epl","h":"BHA","a":"AVL","ko":"2026-08-23T13:00:00Z"},{"lg":"epl","h":"MCI","a":"BOU","ko":"2026-08-23T13:00:00Z"},{"lg":"epl","h":"NEW","a":"LIV","ko":"2026-08-23T15:30:00Z"},{"lg":"epl","h":"FUL","a":"CHE","ko":"2026-08-24T19:00:00Z"},{"lg":"ser","h":"INT","a":"MON","ko":"2026-08-22T16:30:00Z"},{"lg":"ser","h":"UDI","a":"COM","ko":"2026-08-22T16:30:00Z"},{"lg":"ser","h":"GEN","a":"NAP","ko":"2026-08-22T18:45:00Z"},{"lg":"ser","h":"PAR","a":"CAG","ko":"2026-08-22T18:45:00Z"},{"lg":"ser","h":"VEN","a":"LEC","ko":"2026-08-23T16:30:00Z"},{"lg":"ser","h":"TOR","a":"MIL","ko":"2026-08-23T18:45:00Z"},{"lg":"ser","h":"BOL","a":"LAZ","ko":"2026-08-24T16:30:00Z"},{"lg":"ser","h":"ROM","a":"FIO","ko":"2026-08-24T18:45:00Z"},{"lg":"lig","h":"OM","a":"RCS","ko":"2026-08-21T18:45:00Z"},{"lg":"lig","h":"RCL","a":"AJA","ko":"2026-08-22T15:15:00Z"},{"lg":"lig","h":"TFC","a":"OL","ko":"2026-08-22T18:45:00Z"},{"lg":"lig","h":"SCO","a":"LIL","ko":"2026-08-23T13:00:00Z"},{"lg":"lig","h":"HAC","a":"ASM","ko":"2026-08-23T15:15:00Z"},{"lg":"lig","h":"PSG","a":"SRF","ko":"2026-08-23T18:45:00Z"},{"lg":"lig","h":"LIL","a":"PSG","ko":"2026-08-28T18:45:00Z"},{"lg":"bun","h":"FCB","a":"VFB","ko":"2026-08-28T18:30:00Z"},{"lg":"bun","h":"RBL","a":"BMG","ko":"2026-08-29T13:30:00Z"},{"lg":"bun","h":"FCU","a":"SGE","ko":"2026-08-29T13:30:00Z"},{"lg":"bun","h":"SCF","a":"SVW","ko":"2026-08-30T13:30:00Z"}];
+
+/* ===== OPTIONAL LIVE FEED =====
+   This file is static, so it cannot discover a goal on its own. If you
+   want genuinely live in-play scores, drop your own provider's details
+   in here. When enabled, Power Board calls the endpoint on load and
+   overwrites the baked-in scores; when it isn't, it falls back to the
+   real fixture list below. Keep in mind anything you put here is
+   visible to anyone who views source, so use a key that is restricted
+   to your own domain.
+   Expected response shape: [{home:"MCI", away:"BOU", hs:2, as:1,
+                             minute:67, status:"LIVE"}, ...]           */
+const LIVE_FEED = { enabled:false, endpoint:'', apiKey:'' };
+async function refreshLiveScores(){
+  if (!LIVE_FEED.enabled || !LIVE_FEED.endpoint) return false;
+  try {
+    const res = await fetch(LIVE_FEED.endpoint, {
+      headers: LIVE_FEED.apiKey ? { 'X-Auth-Token': LIVE_FEED.apiKey } : {}
+    });
+    if (!res.ok) throw new Error('feed HTTP ' + res.status);
+    const rows = await res.json();
+    let hits = 0;
+    for (const r of (Array.isArray(rows) ? rows : [])){
+      const m = DB.matches.find(x => T(x.h).abbr === r.home && T(x.a).abbr === r.away);
+      if (!m) continue;
+      m.hs = +r.hs || 0; m.as = +r.as || 0; m.pending = false;
+      if (r.status) m.state = r.status;
+      if (r.minute != null) m.min = +r.minute;
+      hits++;
+    }
+    if (hits) { DB.liveFeedOK = true; render(); }
+    return true;
+  } catch (e){
+    console.warn('Live feed unavailable, using baked-in fixtures:', e.message);
+    DB.liveFeedError = true;
+    return false;
+  }
+}
+
+/* Kickoff-aware match state, recomputed from the viewer's own clock on
+   every load — so a fixture flips from upcoming to in-play to finished
+   by itself, with no rebuild. A match that has kicked off but has no
+   score in the data is marked pending rather than given a made-up one. */
+function matchStateNow(koMs, hasResult){
+  const now = Date.now();
+  if (now < koMs) return { state:'PRE', min:0, pending:false };
+  const mins = Math.floor((now - koMs) / 60000);
+  if (hasResult) return { state:'FT', min:90, pending:false };
+  if (mins < 105) return { state:'LIVE', min: Math.min(90, mins), pending:true };
+  return { state:'FT', min:90, pending:true };
+}
 function buildMatch(compId, h, a, state, dayOffset){
   const wp = winProb(h,a);
   const m = {
@@ -3961,6 +4068,7 @@ function buildMatch(compId, h, a, state, dayOffset){
   // build the scoreline out of the goal events so the two agree
   const goals = m.events.filter(e=>e.type==='goal');
   m.hs = goals.filter(e=>e.home).length; m.as = goals.filter(e=>!e.home).length;
+  m._goalEvents = goals;
   [...hSq.slice(0,11),...aSq.slice(0,11)].forEach(p=>{
     const inv = m.events.filter(e=>e.pid===p.id).length;
     m.ratings[p.id] = { r: matchRating(p, inv*0.24 + gauss(0,.3)),
@@ -3981,19 +4089,23 @@ function buildMatch(compId, h, a, state, dayOffset){
   return m;
 }
 (function buildFixtures(){
-  LEAGUES.forEach(L=>{
-    const ts = DB.teams.filter(t=>t.lg===L.id);
-    const sh = [...ts].sort(()=>rnd()-.5);
-    for(let i=0;i+1<sh.length;i+=2){
-      const st = rnd()<.24?'LIVE':(rnd()<.52?'FT':'PRE');
-      DB.matches.push(buildMatch(L.id, sh[i], sh[i+1], st, st==='PRE'?ri(0,3):0));
-    }
+  const find = (lg, ab) => DB.teams.find(t => t.lg === lg && t.abbr === ab);
+  REAL_FIXTURES.forEach(fx => {
+    const h = find(fx.lg, fx.h), a = find(fx.lg, fx.a);
+    if (!h || !a) return;                     // skip rather than invent
+    const ko = Date.parse(fx.ko);
+    const hasResult = fx.hs != null && fx.as != null;
+    const st = matchStateNow(ko, hasResult);
+    const m = buildMatch(fx.lg, h, a, st.state, 0);
+    m.ko = ko;
+    m.real = true;
+    m.pending = st.pending;
+    m.min = st.min;
+    if (hasResult){ m.hs = fx.hs; m.as = fx.as; }
+    else if (st.state !== 'PRE'){ m.hs = 0; m.as = 0; }
+    DB.matches.push(m);
   });
-  const ue = DB.teams.filter(t=>UCL_POOL.includes(t.lg)).sort((a,b)=>b.ps-a.ps).slice(0,24).sort(()=>rnd()-.5);
-  for(let i=0;i+1<16;i+=2) DB.matches.push(buildMatch('ucl', ue[i], ue[i+1], rnd()<.3?'LIVE':(rnd()<.6?'FT':'PRE'), ri(0,2)));
-  const lb = DB.teams.filter(t=>LIB_POOL.includes(t.lg)).sort((a,b)=>b.ps-a.ps).slice(0,16).sort(()=>rnd()-.5);
-  for(let i=0;i+1<8;i+=2) DB.matches.push(buildMatch('lib', lb[i], lb[i+1], rnd()<.25?'LIVE':(rnd()<.6?'FT':'PRE'), ri(0,2)));
-  DB.matches.sort((a,b)=> b.heat-a.heat);
+  DB.matches.sort((x, y) => (x.ko || 0) - (y.ko || 0));
 })();
 
 /* Game log: last 12 appearances per player, cached lazily. */
@@ -4210,14 +4322,24 @@ function vhead(eyebrow,title,sub){
 function matchRow(m){
   const h=T(m.h), a=T(m.a), c=COMP(m.comp);
   const hw=m.hs>m.as, aw=m.as>m.hs, done=m.state==='FT';
-  const clock = m.state==='LIVE' ? `<span class="live">${m.min}'</span>`
-              : m.state==='FT' ? 'FT'
-              : `${['Today','Tomorrow','+2d','+3d'][m.kickoff]||'Soon'}<br>${String(ri(12,20)).padStart(2,'0')}:${pick(['00','15','30','45'])}`;
+  const koTxt = m.ko ? (()=>{
+      const d = new Date(m.ko), n = new Date();
+      const sameDay = d.toDateString() === n.toDateString();
+      const tom = new Date(n.getTime()+864e5).toDateString() === d.toDateString();
+      const day = sameDay ? 'Today' : tom ? 'Tomorrow'
+                : d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+      const hm = d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      return `${day}<br>${hm}`;
+    })() : 'Soon';
+  const clock = m.state==='LIVE' ? (m.pending ? `<span class="live">LIVE</span>` : `<span class="live">${m.min}'</span>`)
+              : m.state==='FT' ? (m.pending ? '<span class="dim">FT</span>' : 'FT')
+              : koTxt;
+  const showScore = m.state!=='PRE' && !m.pending;
   return `<div class="match" data-m="${m.id}">
     <div class="clock">${clock}</div>
     <div class="sides">
-      <div class="side ${done&&aw?'lose':''}">${crest(h)}<span class="nm">${esc(h.name)}</span>${m.state!=='PRE'?`<span class="sc">${m.hs}</span>`:''}</div>
-      <div class="side ${done&&hw?'lose':''}">${crest(a)}<span class="nm">${esc(a.name)}</span>${m.state!=='PRE'?`<span class="sc">${m.as}</span>`:''}</div>
+      <div class="side ${done&&aw&&showScore?'lose':''}">${crest(h)}<span class="nm">${esc(h.name)}</span>${showScore?`<span class="sc">${m.hs}</span>`:m.state!=='PRE'?'<span class="sc dim">–</span>':''}</div>
+      <div class="side ${done&&hw&&showScore?'lose':''}">${crest(a)}<span class="nm">${esc(a.name)}</span>${showScore?`<span class="sc">${m.as}</span>`:m.state!=='PRE'?'<span class="sc dim">–</span>':''}</div>
     </div>
     <div class="heat" style="width:120px">
       ${wpBar(m.wp)}
@@ -4236,7 +4358,7 @@ VIEWS.today = () => {
 
   return vhead('Matchday · '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
     'Today',
-    `${live.length} live across 12 competitions. Win probability updates every event; ratings update every touch.`)
+    `${live.length ? live.length + ' in play right now. ' : 'Nothing in play right now. '}${DB.matches.length} real fixtures loaded from the match feed — real clubs, real kickoff times, and real scores for matches already played.`)
   + `<div class="grid gside">
     <div>
       ${live.length?`<div class="panel mb"><div class="panel-h"><h3>Live now</h3><span class="live">${live.length} in play</span></div>${live.map(matchRow).join('')}</div>`:''}
@@ -4668,14 +4790,15 @@ VIEWS.compare = () => {
 VIEWS.teams = () => {
   const ts = DB.teams.filter(t=>ST8.lg==='all'||t.lg===ST8.lg).sort((a,b)=>b.rec.pts-a.rec.pts);
   return vhead(ST8.lg==='all'?'All ten leagues':LG(ST8.lg).name,'Teams',
-    'Table, squad strength and the standout performer in every line.')
+    'Table, squad strength and the standout performer in every line. The <b>World</b> column is the club world ranking from <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--sodium)">FootballDatabase</a> (CC BY-SA 4.0, snapshot 2 Aug 2026), with Paris Saint-Germain pinned to #1 by hand.')
   + `<div class="panel"><div class="tbl-wrap"><table><thead><tr>
-      <th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+      <th>#</th><th>Club</th><th title="FootballDatabase world club ranking">World</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
       <th>xG</th><th>xGA</th><th>Squad PS</th><th>Squad value</th><th>Form</th>
       <th>Best GK</th><th>Best DEF</th><th>Best MID</th><th>Best ATT</th></tr></thead><tbody>
     ${ts.map((t,i)=>`<tr data-t="${t.id}">
       <td class="rank ${i<4?'top':''}">${i+1}</td>
       <td><div style="display:flex;gap:9px;align-items:center">${crest(t)}<b>${esc(t.name)}</b></div></td>
+      <td class="num" style="font-weight:600;color:${t.fdbPts?'var(--sodium)':'var(--chalk-3)'}" title="${t.fdbOverridden?'Pinned to #1 by hand':t.fdbPts?'FootballDatabase world rank '+t.fdbSourceRank:'Outside the FootballDatabase top 100'}">${t.fdbOverridden?'#1*':t.fdbPts?'#'+t.fdbSourceRank:'—'}</td>
       <td class="num dim">${t.rec.gp}</td><td class="num">${t.rec.w}</td><td class="num">${t.rec.d}</td><td class="num">${t.rec.l}</td>
       <td class="num">${t.rec.gf}</td><td class="num">${t.rec.ga}</td><td class="num ${t.rec.gd>0?'jd':t.rec.gd<0?'fl':''}">${t.rec.gd>0?'+':''}${t.rec.gd}</td>
       <td class="num amber" style="font-weight:700">${t.rec.pts}</td>
@@ -4987,6 +5110,8 @@ VIEWS.method = () => vhead('Under the hood','How the numbers work',
   </div>
   <div class="note mt"><b>Sample data</b><span>This build runs on a deterministic synthetic dataset — real clubs and competitions, invented players — so every screen is explorable without a provider contract. Point the DATA layer at a live feed and nothing above it changes.</span></div>
   <div class="note mt"><b>World Top 100</b><span>The 97 of those 100 players Power Board could place on its roster have their Power Score pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (Maurice Edu, Stu Holden and Alexi Lalas, updated Jun 14, 2026), so the global Rankings list matches their countdown exactly at the top. Everyone outside that 100 still runs on the formula to the left. Cristiano Ronaldo, Sadio Mané and N'Golo Kanté are on FOX's list but play in leagues this build doesn't model (Saudi Pro League, Süper Lig), so they don't have a Power Board profile to attach a score to.</span></div>
+  <div class="note mt"><b>Club world ranking</b><span>Club strength, the league tables and every win probability are driven by the club world ranking published by <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--sodium)">FootballDatabase.com</a> (CC BY-SA 4.0), snapshot taken after matches played on 2 August 2026. <b>Paris Saint-Germain is pinned to #1 by hand</b> — FootballDatabase actually has them 3rd, behind Bayern München and Arsenal, and every other club keeps the source's own order. Clubs outside the published top 100 are ranked below it on squad strength, which is consistent: not appearing in the top 100 means fewer ranking points than every club that does.</span></div>
+  <div class="note mt"><b>How live are the matches?</b><span>Fixtures are real — real matchups, real kickoff times and real final scores for matches already played, pulled from a match feed on 4 August 2026. No invented games. Each fixture works out whether it is upcoming, in play or finished from your own device clock, so it changes state on its own. What a static page <i>cannot</i> do is discover a goal as it happens: for genuinely live in-play scores, set <span class="mono amber">LIVE_FEED</span> at the top of the file to your own provider's endpoint and key, and Power Board will fetch from it on load and fall back to these fixtures if it fails. Matches that have kicked off without a score in the data show a dash, never a made-up scoreline. Match commentary and player match ratings are still generated by the model. Fixtures involving clubs promoted after 2024/25 (Leeds, Sunderland, Levante, Paderborn and similar) are skipped, because this build has no squad data for them.</span></div>
   <div class="note mt"><b>Squads &amp; ages</b><span>Real rosters were refreshed against reported summer 2025, January 2026 and summer 2026 transfer business, so players sit at the club they actually play for today rather than a frozen 2024/25 snapshot. Ages aren't stored as fixed numbers: each player has a birth date, and age is calculated fresh from your device's clock every time this page loads — so it keeps advancing on its own, no rebuild needed. The ~100 highest-profile players use their real birthday; everyone else is approximated to Jan 1 of their birth year, since sourcing exact birthdates for a sample of 2,600 players isn't something this build can responsibly guarantee. Transfers, by contrast, can't self-update the same way — there's no live data feed wired in, so if a new move gets confirmed, the roster needs a manual refresh.</span></div>`;
 /* ===========================================================
    6. ROUTER + EVENTS
