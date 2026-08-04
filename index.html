@@ -4360,7 +4360,7 @@ function radar(sets, size=230){
   });
   AXES.forEach((a,i)=>{
     const [x,y]=pt(i,124);
-    g+=`<text x="${x}" y="${y}" fill="var(--chalk-3)" font-size="9" font-family="JetBrains Mono" letter-spacing=".08em" text-anchor="middle" dominant-baseline="middle">${a[0].toUpperCase()}</text>`;
+  g+=`<text x="${x}" y="${y}" fill="var(--chalk-3)" font-size="9" font-family="IBM Plex Mono" letter-spacing=".08em" text-anchor="middle" dominant-baseline="middle">${a[0].toUpperCase()}</text>`;
   });
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible">${g}</svg>`;
 }
