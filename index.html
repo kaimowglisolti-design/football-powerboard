@@ -1,3 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Power Board — football ratings, live</title>
+<meta name="description" content="Power Score ratings, live win probability, scouting and a lineup builder across ten leagues.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#090C12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23090C12'/%3E%3Cpath d='M7 21a9 9 0 0 1 18 0' fill='none' stroke='%23FFB020' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================
+   FLOODLIT — design system for the Power Board
+   Night match, chalk lines, sodium-vapour light.
+   =========================================================== */
+:root{
+  --ink:      #090C12;
+  --ink-2:    #10151F;
+  --ink-3:    #1A2130;
+  --ink-4:    #232C3D;
+
+  --chalk:    #E9EEF6;
+  --chalk-2:  #A9B5C8;
+  --chalk-3:  #6C7889;
+
+  --sodium:   #FFB020;
+  --jade:     #2ED8A7;
+  --flare:    #FF4D5E;
+  --violet:   #8B7BFF;
+
+  --line:      rgba(233,238,246,.13);
+  --line-soft: rgba(233,238,246,.065);
+
+  --dsp:  'Chivo', system-ui, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail-w: 232px;
+  --pad: 22px;
+  --r: 10px;
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+[hidden]{ display:none !important }
+
+html{ -webkit-text-size-adjust:100% }
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--chalk);
+  font:400 13.5px/1.55 var(--body);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+/* the floodlight bank: two sodium blooms washing down from above */
+body::before{
+  content:''; position:fixed; inset:0 0 auto 0; height:70vh; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(58vw 42vh at 18% -14%, rgba(255,176,32,.075), transparent 62%),
+    radial-gradient(58vw 42vh at 82% -14%, rgba(255,176,32,.055), transparent 62%);
+}
+h1,h2,h3,h4,h5{ margin:0; font-family:var(--dsp); font-weight:700; letter-spacing:-.015em }
+p{ margin:0 }
+a{ color:inherit; text-decoration:none }
+button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer }
+input,select{ font:inherit; color:inherit }
+input[type=range],input[type=checkbox]{ accent-color:var(--sodium) }
+table{ border-collapse:collapse; width:100% }
+svg{ display:block }
+:focus-visible{ outline:2px solid var(--sodium); outline-offset:2px; border-radius:3px }
+
+/* ---------- shell ---------- */
+.app{ position:relative; z-index:1; display:grid; grid-template-columns:var(--rail-w) minmax(0,1fr) }
+
+.rail-wrap{
+  position:sticky; top:0; height:100vh; overflow-y:auto; overscroll-behavior:contain;
+  border-right:1px solid var(--line-soft); background:rgba(9,12,18,.72);
+  backdrop-filter:blur(12px); padding-bottom:24px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px; padding:20px 18px 16px;
+  position:sticky; top:0; background:linear-gradient(var(--ink) 72%, transparent); z-index:2;
+}
+.brand .mark{ flex:none }
+.brand b{ font-family:var(--dsp); font-weight:900; font-size:15px; letter-spacing:-.02em; line-height:1.1; display:block }
+.brand s{ text-decoration:none; display:block; font:500 8.5px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--chalk-3); margin-top:3px }
+
+.rail-group{ padding:0 10px; margin-bottom:16px }
+.rail-group .eyebrow{ padding:0 10px 6px }
+.rail-group a{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:6.5px 10px; border-radius:7px; font-size:12.9px; font-weight:500;
+  color:var(--chalk-2); transition:background .13s, color .13s;
+}
+.rail-group a:hover{ background:var(--ink-3); color:var(--chalk) }
+.rail-group a.on{ background:rgba(255,176,32,.1); color:var(--sodium); font-weight:600 }
+.rail-group a k{ font:500 9px/1 var(--mono); color:var(--chalk-3); border:1px solid var(--line); border-radius:3px; padding:2.5px 4.5px }
+.rail-group a.on k{ border-color:rgba(255,176,32,.3); color:var(--sodium) }
+
+main{ min-width:0; padding-bottom:96px }
+
+/* ---------- topbar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:12px;
+  padding:12px var(--pad); border-bottom:1px solid var(--line-soft);
+  background:rgba(9,12,18,.82); backdrop-filter:blur(12px);
+}
+#lg{
+  appearance:none; background:var(--ink-2); border:1px solid var(--line); border-radius:8px;
+  padding:8px 30px 8px 12px; font-size:12.5px; font-weight:500; cursor:pointer; max-width:200px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236C7889' stroke-width='2'><path d='M3 4.5 6 8l3-3.5'/></svg>");
+  background-repeat:no-repeat; background-position:right 10px center;
+}
+#lg option{ background:var(--ink-2); color:var(--chalk) }
+
+/* ---------- search ---------- */
+.searchwrap{ position:relative; flex:1; min-width:0; max-width:420px }
+.searchwrap input{
+  width:100%; background:var(--ink-2); border:1px solid var(--line); border-radius:8px;
+  padding:8px 12px 8px 32px; font-size:12.5px; outline:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%236C7889' stroke-width='1.8'><circle cx='5.8' cy='5.8' r='4.4'/><path d='M9.2 9.2 12 12'/></svg>");
+  background-repeat:no-repeat; background-position:11px center;
+}
+.searchwrap input:focus{ border-color:rgba(255,176,32,.45) }
+.searchwrap input::placeholder{ color:var(--chalk-3) }
+.results{
+  position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60; max-height:340px; overflow:auto;
+  background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:5px;
+  box-shadow:0 18px 44px rgba(0,0,0,.6);
+}
+.results button{ display:flex; align-items:center; gap:9px; width:100%; text-align:left; padding:7px 8px; border-radius:7px }
+.results button:hover{ background:var(--ink-3) }
+.results .rp{ font-size:12.5px; font-weight:600 }
+.results .rs{ font-size:10.5px; color:var(--chalk-3) }
+
+/* ---------- view head ---------- */
+#view{ padding:var(--pad) }
+.vhead{ margin-bottom:20px }
+.vhead h1{ font-size:clamp(28px,4.4vw,40px); font-weight:900; letter-spacing:-.035em; margin:5px 0 0 }
+.vhead p{ margin-top:9px; color:var(--chalk-2); font-size:13.5px; line-height:1.6; max-width:62ch }
+
+/* ---------- panels ---------- */
+.panel{ background:var(--ink-2); border:1px solid var(--line-soft); border-radius:var(--r); overflow:hidden }
+.panel-h{
+  display:flex; align-items:center; gap:9px; padding:11px 14px;
+  border-bottom:1px solid var(--line-soft); background:rgba(233,238,246,.016);
+}
+.panel-h h3{ font-size:13px; font-weight:700; letter-spacing:-.01em; flex:1; min-width:0 }
+.panel-h .eyebrow{ flex:none }
+.panel-b{ padding:13px 14px }
+
+/* ---------- grids & utilities ---------- */
+.grid{ display:grid; gap:14px }
+.g2{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+.g3{ grid-template-columns:repeat(3,minmax(0,1fr)) }
+.g4{ grid-template-columns:repeat(4,minmax(0,1fr)) }
+.gside{ grid-template-columns:minmax(0,1.72fr) minmax(0,1fr); align-items:start }
+.gside-l{ grid-template-columns:minmax(0,1fr) minmax(0,1.72fr); align-items:start }
+.spread{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+.mb{ margin-bottom:14px }
+.mt{ margin-top:14px }
+.mt-s{ margin-top:8px }
+.dim{ color:var(--chalk-3) }
+.sub{ color:var(--chalk-2) }
+.mono{ font-family:var(--mono) }
+.dsp{ font-family:var(--dsp); font-weight:900; letter-spacing:-.03em }
+.num{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:500 }
+.amber{ color:var(--sodium) }
+.vio{ color:var(--violet) }
+.jd{ color:var(--jade) }
+.fl{ color:var(--flare) }
+.eyebrow{
+  font:500 9px/1.3 var(--mono); letter-spacing:.15em; text-transform:uppercase; color:var(--chalk-3);
+}
+.chalk-rule{
+  height:1px; border:0;
+  background:repeating-linear-gradient(90deg, var(--line) 0 7px, transparent 7px 12px);
+  opacity:.8;
+}
+
+/* ---------- crest, pill, tag, chip ---------- */
+.crest{
+  flex:none; display:inline-grid; place-items:center; width:24px; height:24px; border-radius:6px;
+  border:1px solid transparent; font:700 9.5px/1 var(--mono); letter-spacing:.02em;
+}
+.crest.lg{ width:34px; height:34px; border-radius:8px; font-size:12px }
+.crest.xl{ width:46px; height:46px; border-radius:11px; font-size:15px }
+.pname{ display:flex; align-items:center; gap:8px; min-width:0; text-align:left; border-radius:7px; padding:2px }
+.pname:hover .who b{ color:var(--sodium) }
+.pname .who{ min-width:0 }
+.pname .who b{ display:block; font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .13s }
+.pname .who s{ display:block; text-decoration:none; font-size:10.5px; color:var(--chalk-3); white-space:nowrap }
+
+.tag{
+  display:inline-flex; align-items:center; gap:4px; padding:3px 7px; border-radius:5px;
+  background:var(--ink-3); color:var(--chalk-2);
+  font:500 10px/1.35 var(--mono); letter-spacing:.05em; white-space:nowrap;
+}
+.tag.amber{ background:rgba(255,176,32,.13); color:var(--sodium) }
+.tag.jade { background:rgba(46,216,167,.13); color:var(--jade) }
+.tag.flare{ background:rgba(255,77,94,.13); color:var(--flare) }
+button.tag:hover{ background:var(--ink-4) }
+
+.chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center }
+.chip{
+  padding:5.5px 11px; border-radius:999px; border:1px solid var(--line);
+  background:var(--ink-2); font-size:11.5px; font-weight:500; color:var(--chalk-2);
+  transition:border-color .13s, color .13s, background .13s;
+}
+.chip:hover{ border-color:var(--chalk-3); color:var(--chalk) }
+.chip.on{ background:rgba(255,176,32,.12); border-color:rgba(255,176,32,.4); color:var(--sodium); font-weight:600 }
+
+.tabs{ display:flex; flex-wrap:wrap; gap:4px; margin-bottom:14px; border-bottom:1px solid var(--line-soft); padding-bottom:0 }
+.tabs button{
+  padding:8px 13px; font-size:12.5px; font-weight:500; color:var(--chalk-3);
+  border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .13s, border-color .13s;
+}
+.tabs button:hover{ color:var(--chalk) }
+.tabs button.on{ color:var(--sodium); border-bottom-color:var(--sodium); font-weight:600 }
+
+.delta{ font:500 10.5px/1 var(--mono); font-variant-numeric:tabular-nums }
+.delta.up{ color:var(--jade) }
+.delta.dn{ color:var(--flare) }
+.delta.flat{ color:var(--chalk-3) }
+
+.live{
+  display:inline-flex; align-items:center; gap:5px;
+  font:600 10px/1 var(--mono); letter-spacing:.08em; color:var(--flare);
+}
+.live::before{
+  content:''; width:5px; height:5px; border-radius:50%; background:var(--flare);
+  animation:pulse 1.7s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* ---------- the signature: the filament ---------- */
+.filament{ position:relative; display:inline-grid; place-items:center; flex:none }
+.filament svg{ overflow:visible }
+.filament .fseg{ stroke-linecap:round }
+.filament .fseg.lit{ filter:drop-shadow(0 0 5px currentColor) }
+.filament .val{ position:absolute; left:0; right:0; text-align:center; line-height:1 }
+.filament .val b{
+  display:block; font-family:var(--mono); font-weight:700; color:var(--sodium);
+  letter-spacing:-.035em; font-variant-numeric:tabular-nums;
+}
+.filament .val s{
+  display:block; text-decoration:none; margin-top:5px;
+  font:500 8px/1 var(--mono); letter-spacing:.17em; color:var(--chalk-3);
+}
+
+/* ---------- kpi ---------- */
+.kpi{ background:var(--ink-3); border:1px solid var(--line-soft); border-radius:8px; padding:10px 11px }
+.kpi b{ display:block; margin-top:5px; font-family:var(--mono); font-weight:700; font-size:21px; letter-spacing:-.03em; font-variant-numeric:tabular-nums }
+.kpi u{ display:block; text-decoration:none; margin-top:4px; font-size:10.5px; line-height:1.4; color:var(--chalk-3) }
+
+/* ---------- win-probability bar ---------- */
+.wp{ display:flex; height:5px; border-radius:3px; overflow:hidden; background:var(--ink-3); width:100% }
+.wp i{ display:block; height:100% }
+.wp .h{ background:var(--sodium) }
+.wp .d{ background:var(--chalk-3); opacity:.55 }
+.wp .a{ background:var(--violet) }
+.wp-lab{
+  display:flex; justify-content:space-between; gap:6px; margin-top:5px;
+  font:500 9.5px/1 var(--mono); color:var(--chalk-2); font-variant-numeric:tabular-nums;
+}
+
+/* ---------- percentile row ---------- */
+.pct-row{ display:grid; grid-template-columns:minmax(0,1fr) 58px minmax(70px,2.1fr) 30px; align-items:center; gap:9px }
+.pct-row .lab{ font-size:12px; color:var(--chalk-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pct-row .v{ font:500 11.5px/1 var(--mono); text-align:right; font-variant-numeric:tabular-nums }
+.pct-row .bar{ height:5px; border-radius:3px; background:var(--ink-3); overflow:hidden }
+.pct-row .bar i{ display:block; height:100%; border-radius:3px }
+.pct-row .p{ font:500 10.5px/1 var(--mono); color:var(--chalk-3); text-align:right; font-variant-numeric:tabular-nums }
+
+/* ---------- match row ---------- */
+.match{
+  display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:12px; align-items:center;
+  padding:10px 14px; border-bottom:1px solid var(--line-soft); cursor:pointer;
+  transition:background .12s;
+}
+.match:last-child{ border-bottom:0 }
+.match:hover{ background:rgba(233,238,246,.028) }
+.match .clock{ font:500 10px/1.45 var(--mono); color:var(--chalk-3); text-align:center; font-variant-numeric:tabular-nums }
+.match .sides{ display:grid; gap:5px; min-width:0 }
+.match .side{ display:grid; grid-template-columns:24px minmax(0,1fr) auto; align-items:center; gap:8px }
+.match .side .nm{ font-size:12.8px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.match .side .sc{ font:700 14px/1 var(--mono); font-variant-numeric:tabular-nums }
+.match .side.lose{ opacity:.45 }
+.match .heat{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:104px }
+
+/* ---------- tables ---------- */
+.tbl-wrap{ overflow-x:auto }
+.tbl-wrap table{ font-size:12.3px; min-width:100% }
+.tbl-wrap th{
+  position:sticky; top:0; z-index:2; text-align:right; padding:9px 10px; white-space:nowrap;
+  background:var(--ink-2); border-bottom:1px solid var(--line);
+  font:500 9px/1.2 var(--mono); letter-spacing:.13em; text-transform:uppercase; color:var(--chalk-3);
+}
+.tbl-wrap th:first-child,.tbl-wrap th:nth-child(2){ text-align:left }
+.tbl-wrap th.sortable{ cursor:pointer; user-select:none }
+.tbl-wrap th.sortable:hover{ color:var(--chalk) }
+.tbl-wrap th.sortable.act{ color:var(--sodium) }
+.tbl-wrap td{ padding:7px 10px; border-bottom:1px solid var(--line-soft); text-align:right; white-space:nowrap }
+.tbl-wrap td:first-child,.tbl-wrap td:nth-child(2){ text-align:left }
+.tbl-wrap tbody tr{ cursor:pointer; transition:background .12s }
+.tbl-wrap tbody tr:hover{ background:rgba(233,238,246,.03) }
+.tbl-wrap td.rank{ font:500 10.5px/1 var(--mono); color:var(--chalk-3); font-variant-numeric:tabular-nums }
+
+/* ---------- play by play ---------- */
+.pbp{ max-height:660px; overflow-y:auto }
+.pbp-i{ display:grid; grid-template-columns:38px minmax(0,1fr); gap:11px; padding:11px 0; border-bottom:1px solid var(--line-soft) }
+.pbp-i:last-child{ border-bottom:0 }
+.pbp-i .min{ font:600 11px/1.4 var(--mono); color:var(--chalk-3); text-align:right; font-variant-numeric:tabular-nums }
+.pbp-i .body h5{ display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700 }
+.pbp-i .body p{ margin:4px 0 0; font-size:12.2px; line-height:1.55; color:var(--chalk-2) }
+.pbp-i .meta{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px }
+.pbp-i.key{ border-left:2px solid var(--sodium); padding-left:11px; margin-left:-13px }
+.pbp-i.key .min{ color:var(--sodium) }
+
+/* ---------- pitch ---------- */
+.pitch{
+  position:relative; aspect-ratio:68/105; width:100%; border-radius:8px; overflow:hidden;
+  background:
+    linear-gradient(180deg, rgba(46,216,167,.045), rgba(46,216,167,.012)),
+    var(--ink-3);
+}
+.pitch .lines{ position:absolute; inset:0; width:100%; height:100% }
+.slot{
+  position:absolute; transform:translate(-50%,-50%); display:grid; place-items:center; gap:3px;
+  width:64px; cursor:pointer;
+}
+.slot .dot{
+  display:grid; place-items:center; width:30px; height:30px; border-radius:50%;
+  background:var(--ink-2); border:1.5px dashed var(--line);
+  font:500 10.5px/1 var(--mono); color:var(--chalk-3); transition:all .14s;
+}
+.slot .nm{ font-size:9.5px; font-weight:600; text-align:center; line-height:1.2; white-space:nowrap; max-width:64px; overflow:hidden; text-overflow:ellipsis }
+.slot .ps{ font:700 9px/1 var(--mono); color:var(--sodium) }
+.slot:hover .dot{ border-color:var(--chalk-3); color:var(--chalk) }
+.slot.filled .dot{ background:rgba(255,176,32,.14); border:1.5px solid rgba(255,176,32,.45); color:var(--sodium); font-weight:700 }
+.slot.sel .dot{ border-color:var(--sodium); box-shadow:0 0 0 4px rgba(255,176,32,.16) }
+
+/* ---------- note / empty / card ---------- */
+.note{
+  display:flex; gap:9px; align-items:baseline; padding:11px 13px; border-radius:8px;
+  background:rgba(255,176,32,.06); border:1px solid rgba(255,176,32,.16); font-size:12.3px; line-height:1.55;
+}
+.note b{ flex:none; font:500 9px/1.6 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--sodium) }
+.note span{ color:var(--chalk-2) }
+
+.empty{ padding:34px 20px; text-align:center; color:var(--chalk-3); font-size:12.3px; line-height:1.6 }
+.empty b{ display:block; margin-bottom:5px; font-family:var(--dsp); font-size:14.5px; color:var(--chalk-2) }
+
+.card-btn{
+  display:block; width:100%; text-align:left; padding:9px 11px; border-radius:8px;
+  background:var(--ink-3); border:1px solid var(--line-soft); cursor:pointer; transition:border-color .13s, background .13s;
+}
+.card-btn:hover{ border-color:rgba(255,176,32,.35); background:var(--ink-4) }
+
+/* ---------- mobile nav ---------- */
+.mobnav{
+  display:none; position:fixed; left:0; right:0; bottom:0; z-index:50;
+  border-top:1px solid var(--line); background:rgba(9,12,18,.94); backdrop-filter:blur(14px);
+  padding:7px 6px calc(7px + env(safe-area-inset-bottom));
+}
+.mobnav a{
+  flex:1; display:grid; justify-items:center; gap:3px; padding:5px 2px; border-radius:8px;
+  font:500 9.5px/1 var(--body); color:var(--chalk-3);
+}
+.mobnav a.on{ color:var(--sodium) }
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .gside,.gside-l{ grid-template-columns:minmax(0,1fr) }
+  .g4{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
+@media (max-width:900px){
+  :root{ --pad:15px }
+  .app{ grid-template-columns:minmax(0,1fr) }
+  .rail-wrap{ display:none }
+  .mobnav{ display:flex }
+  main{ padding-bottom:calc(74px + env(safe-area-inset-bottom)) }
+  .g2,.g3{ grid-template-columns:minmax(0,1fr) }
+  .topbar{ gap:8px }
+  #lg{ max-width:132px }
+  .vhead h1{ font-size:29px }
+  .pct-row{ grid-template-columns:minmax(0,1fr) 50px minmax(50px,1.4fr) 26px; gap:7px }
+  .match{ grid-template-columns:44px minmax(0,1fr); row-gap:8px }
+  .match .heat{ grid-column:1/-1; width:auto !important; min-width:0; align-items:stretch }
+}
+@media (max-width:520px){
+  .g4{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .vhead p{ font-size:12.5px }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="rail-wrap">
+    <a class="brand" href="#today" data-go="today">
+      <svg class="mark" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M4 18.5a9 9 0 0 1 18 0" stroke="#FFB020" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="13" cy="21.5" r="1.8" fill="#FFB020"/>
+      </svg>
+      <span><b>Power Board</b><s>Ten leagues, live</s></span>
+    </a>
+    <nav id="rail"></nav>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <select id="lg" aria-label="Filter by league"></select>
+      <div class="searchwrap">
+        <input id="q" type="search" autocomplete="off" placeholder="Search players, clubs, managers   /">
+        <div id="qres" class="results" hidden></div>
+      </div>
+    </header>
+    <div id="view"></div>
+  </main>
+
+</div>
+
+<nav class="mobnav" id="mobnav" aria-label="Sections"></nav>
+
+<script>
 /* ===========================================================
    1. DATA LAYER  (replace with your provider feed)
    =========================================================== */
@@ -190,20 +624,20 @@ let _pid = 0, _tid = 0;
 function tier(i,n){ // club quality 0..1 — a rough Elo prior by table position
   return clamp(1 - Math.pow(i/(n-1), .72), .05, 1);
 }
-function makePlayer(team, pos, quality){
-  const nat = pick(POOLS[team.lg]);
+function makePlayer(team, pos, quality, real){
+  const nat = real ? real.nat : pick(POOLS[team.lg]);
   const N = NAMES[nat] || NAMES.ENG;
   const g = GROUP[pos];
-  const age = clamp(Math.round(gauss(25.5,4.2)),16,39);
+  const age = real ? real.age : clamp(Math.round(gauss(25.5,4.2)),16,39);
   const peak = 1 - Math.pow(Math.abs(age-27)/11, 1.7)*0.30;
-  const q = clamp(quality*0.62 + rnd()*0.38, .02, 1);           // player ability 0..1
-  const ability = clamp(q*peak + gauss(0,.05), .02, 1);
+  const q = real ? clamp((real.rat-46)/46, .05, .995) : clamp(quality*0.62 + rnd()*0.38, .02, 1);           // player ability 0..1
+  const ability = real ? q : clamp(q*peak + gauss(0,.05), .02, 1);
   const z = (ability - .5) * 3.1;                                // ability as a z-score
 
   const st = {};
   for (const [k,[m,s]] of Object.entries(BASE[g])){
     const met = M[k]; const dir = met && met.neg ? -1 : 1;
-    let v = m + s*(z*0.72*dir + gauss(0,.55));
+    let v = m + s*(z*0.72*dir + gauss(0, real ? .18 : .55));
     if (met && met.pc) v = clamp(v, 8, 97);
     st[k] = Math.max(0, v);
   }
@@ -220,14 +654,14 @@ function makePlayer(team, pos, quality){
   st.convrate = st.shots>.1 ? clamp(st.goals/st.shots*100,0,45) : 0;
   st.tklwon = Math.min(st.tklwon, st.tackles*.72);
 
-  const apps = clamp(Math.round(gauss(24,8) * (0.55+ability*0.6)),1,38);
+  const apps = clamp(Math.round(gauss(real?26:24, real?4.5:8) * (0.55+ability*0.6)),1,38);
   const mins = clamp(Math.round(apps * rf(45,92)),25,3420);
   const per = mins/90;
 
   const p = {
-    id:'p'+(_pid++), name:N.f[ri(0,N.f.length-1)]+' '+N.l[ri(0,N.l.length-1)],
+    id:'p'+(_pid++), name: real ? real.name : N.f[ri(0,N.f.length-1)]+' '+N.l[ri(0,N.l.length-1)],
     nat, pos, grp:g, line:LINE[pos], age, team:team.id, lg:team.lg,
-    num:ri(1,45), foot: rnd()<.24?'Left':(rnd()<.94?'Right':'Both'),
+    num: real ? real.num : ri(1,45), foot: rnd()<.24?'Left':(rnd()<.94?'Right':'Both'),
     height: ri(g==='GK'?185:168, g==='GK'?199:196),
     apps, starts:Math.round(apps*clamp(.35+ability*.7,.1,1)), mins, per, st,
     ability,
@@ -239,6 +673,2913 @@ function makePlayer(team, pos, quality){
 }
 function ageCurve(a){ if(a<=20)return 'Rising'; if(a<=23)return 'Developing'; if(a<=27)return 'Peak'; if(a<=31)return 'Prime hold'; if(a<=34)return 'Declining'; return 'Veteran'; }
 
+
+/* ===== REAL SQUADS (end of 2024/25 season; MLS: 2025) ===== */
+const ROSTER = {
+/* ===== PREMIER LEAGUE — 2024/25 squads ===== */
+'epl:ARS':`
+Raya|GK|ESP|29|22|85
+Neto|GK|BRA|35|31|74
+Ben White|RB|ENG|27|4|83
+Jurriën Timber|RB|NED|23|12|82
+William Saliba|CB|FRA|23|2|87
+Gabriel Magalhães|CB|BRA|27|6|86
+Riccardo Calafiori|CB|ITA|22|33|80
+Jakub Kiwior|CB|POL|24|15|76
+Oleksandr Zinchenko|LB|UKR|28|35|78
+Myles Lewis-Skelly|LB|ENG|18|49|74
+Thomas Partey|DM|GHA|31|5|83
+Jorginho|DM|ITA|33|20|78
+Declan Rice|CM|ENG|26|41|87
+Mikel Merino|CM|ESP|28|23|82
+Martin Ødegaard|AM|NOR|26|8|87
+Ethan Nwaneri|AM|ENG|17|53|73
+Bukayo Saka|RW|ENG|23|7|88
+Raheem Sterling|RW|ENG|30|30|78
+Gabriel Martinelli|LW|BRA|23|11|83
+Leandro Trossard|LW|BEL|30|19|82
+Kai Havertz|ST|GER|25|29|84
+Gabriel Jesus|ST|BRA|27|9|81
+`,
+'epl:AVL':`
+Emiliano Martínez|GK|ARG|32|1|85
+Robin Olsen|GK|SWE|35|26|72
+Matty Cash|RB|POL|27|2|78
+Ezri Konsa|RB|ENG|27|4|80
+Diego Carlos|CB|BRA|31|5|79
+Pau Torres|CB|ESP|28|14|82
+Tyrone Mings|CB|ENG|31|5|78
+Lucas Digne|LB|FRA|31|12|78
+Ian Maatsen|LB|NED|22|22|77
+Boubacar Kamara|DM|FRA|25|44|81
+Amadou Onana|DM|BEL|23|24|79
+Youri Tielemans|CM|BEL|27|8|82
+John McGinn|CM|SCO|30|7|79
+Jacob Ramsey|CM|ENG|23|41|76
+Morgan Rogers|AM|ENG|22|27|80
+Leon Bailey|RW|JAM|27|31|79
+Marco Asensio|LW|ESP|29|10|80
+Ollie Watkins|ST|ENG|29|11|85
+Jhon Durán|ST|COL|21|9|79
+Marcus Rashford|LW|ENG|27|9|81
+`,
+'epl:BOU':`
+Kepa Arrizabalaga|GK|ESP|30|1|79
+Mark Travers|GK|IRL|25|43|71
+Adam Smith|RB|ENG|33|15|74
+Julián Araujo|RB|MEX|23|16|74
+Illia Zabarnyi|CB|UKR|22|27|81
+Marcos Senesi|CB|ARG|27|25|79
+Dean Huijsen|CB|ESP|19|4|78
+James Hill|CB|ENG|22|2|72
+Miloš Kerkez|LB|HUN|21|3|80
+Tyler Adams|DM|USA|25|12|78
+Lewis Cook|DM|ENG|27|4|76
+Ryan Christie|CM|SCO|29|10|77
+Alex Scott|CM|ENG|21|7|74
+Philip Billing|CM|DEN|28|29|75
+Justin Kluivert|AM|NED|25|19|79
+Antoine Semenyo|RW|GHA|24|24|79
+Dango Ouattara|RW|BFA|22|11|76
+Marcus Tavernier|LW|ENG|25|16|77
+Luis Sinisterra|LW|COL|25|8|77
+Evanilson|ST|BRA|25|9|79
+Enes Ünal|ST|TUR|27|26|74
+`,
+'epl:BRE':`
+Mark Flekken|GK|NED|31|1|78
+Hákon Valdimarsson|GK|ISL|23|22|70
+Mads Roerslev|RB|DEN|25|12|74
+Aaron Hickey|RB|SCO|22|2|75
+Ethan Pinnock|CB|JAM|31|5|78
+Nathan Collins|CB|IRL|23|22|79
+Sepp van den Berg|CB|NED|23|15|76
+Kristoffer Ajer|CB|NOR|26|3|76
+Rico Henry|LB|ENG|27|3|75
+Christian Nørgaard|DM|DEN|30|6|79
+Vitaly Janelt|DM|GER|26|27|75
+Mathias Jensen|CM|DEN|28|8|76
+Yehor Yarmoliuk|CM|UKR|20|18|72
+Mikkel Damsgaard|AM|DEN|24|24|78
+Bryan Mbeumo|RW|CMR|25|19|83
+Kevin Schade|LW|GER|23|7|76
+Keane Lewis-Potter|LW|ENG|23|11|74
+Yoane Wissa|ST|COD|28|11|80
+Fábio Carvalho|AM|POR|22|29|74
+`,
+'epl:BHA':`
+Bart Verbruggen|GK|NED|22|1|78
+Jason Steele|GK|ENG|34|23|71
+Tariq Lamptey|RB|GHA|24|2|75
+Joël Veltman|RB|NED|32|6|76
+Lewis Dunk|CB|ENG|33|5|81
+Jan Paul van Hecke|CB|NED|24|29|79
+Adam Webster|CB|ENG|29|4|74
+Igor Julio|CB|BRA|26|3|77
+Pervis Estupiñán|LB|ECU|26|30|80
+Ferdi Kadıoğlu|LB|TUR|25|33|78
+Carlos Baleba|DM|CMR|20|17|78
+Mats Wieffer|DM|NED|24|8|77
+Yasin Ayari|CM|SWE|21|20|73
+Matt O'Riley|CM|DEN|24|10|78
+Kaoru Mitoma|LW|JPN|27|22|82
+Simon Adingra|LW|CIV|22|24|76
+Yankuba Minteh|RW|GAM|20|17|76
+Solly March|RW|ENG|30|7|76
+Danny Welbeck|ST|ENG|34|18|77
+João Pedro|ST|BRA|23|9|80
+Georginio Rutter|ST|FRA|22|11|76
+`,
+'epl:CHE':`
+Robert Sánchez|GK|ESP|27|1|77
+Filip Jörgensen|GK|SWE|22|12|74
+Reece James|RB|ENG|25|24|82
+Malo Gusto|RB|FRA|21|27|79
+Levi Colwill|CB|ENG|21|6|81
+Wesley Fofana|CB|FRA|24|29|80
+Benoît Badiashile|CB|FRA|23|5|77
+Tosin Adarabioyo|CB|ENG|27|4|77
+Marc Cucurella|LB|ESP|26|3|80
+Moisés Caicedo|DM|ECU|23|25|85
+Roméo Lavia|DM|BEL|21|45|77
+Enzo Fernández|CM|ARG|24|8|84
+Cole Palmer|AM|ENG|22|20|87
+Christopher Nkunku|AM|FRA|27|18|82
+Noni Madueke|RW|ENG|22|11|79
+Pedro Neto|RW|POR|24|7|80
+Jadon Sancho|LW|ENG|24|19|79
+Mykhailo Mudryk|LW|UKR|23|10|76
+Nicolas Jackson|ST|SEN|23|15|80
+Marc Guiu|ST|ESP|18|38|71
+`,
+'epl:CRY':`
+Dean Henderson|GK|ENG|27|1|78
+Remi Matthews|GK|ENG|30|13|68
+Daniel Muñoz|RB|COL|28|12|79
+Nathaniel Clyne|RB|ENG|33|17|72
+Marc Guéhi|CB|ENG|24|6|82
+Chris Richards|CB|USA|24|26|77
+Maxence Lacroix|CB|FRA|24|5|78
+Chadi Riad|CB|MAR|21|34|74
+Tyrick Mitchell|LB|ENG|25|3|77
+Ben Chilwell|LB|ENG|28|21|76
+Adam Wharton|DM|ENG|20|20|79
+Jefferson Lerma|DM|COL|30|8|78
+Will Hughes|CM|ENG|29|19|74
+Daichi Kamada|CM|JPN|28|18|78
+Eberechi Eze|AM|ENG|26|10|83
+Ismaïla Sarr|RW|SEN|26|7|79
+Daniel Kanu|RW|ENG|20|39|70
+Jean-Philippe Mateta|ST|FRA|27|14|80
+Odsonne Édouard|ST|FRA|26|22|75
+`,
+'epl:EVE':`
+Jordan Pickford|GK|ENG|30|1|83
+João Virgínia|GK|POR|25|32|69
+Séamus Coleman|RB|IRL|36|23|72
+Ashley Young|RB|ENG|39|18|71
+Jarrad Branthwaite|CB|ENG|22|32|82
+James Tarkowski|CB|ENG|32|6|79
+Michael Keane|CB|ENG|31|5|75
+Vitalii Mykolenko|LB|UKR|25|19|77
+Jake O'Brien|CB|IRL|23|15|74
+Idrissa Gueye|DM|SEN|35|27|76
+James Garner|DM|ENG|23|37|75
+Abdoulaye Doucouré|CM|MLI|31|16|78
+Orel Mangala|CM|BEL|26|8|75
+Tim Iroegbunam|CM|ENG|21|17|71
+Dwight McNeil|AM|ENG|25|7|79
+Jack Harrison|RW|ENG|28|11|76
+Iliman Ndiaye|LW|SEN|24|10|77
+Dominic Calvert-Lewin|ST|ENG|27|9|78
+Beto|ST|GNB|26|14|74
+`,
+'epl:FUL':`
+Bernd Leno|GK|GER|32|17|80
+Steven Benda|GK|GER|26|1|68
+Kenny Tete|RB|NED|29|2|77
+Timothy Castagne|RB|BEL|29|21|78
+Calvin Bassey|CB|NGA|24|3|78
+Joachim Andersen|CB|DEN|28|5|80
+Issa Diop|CB|FRA|27|31|75
+Antonee Robinson|LB|USA|27|33|80
+Ryan Sessegnon|LB|ENG|24|30|72
+Sander Berge|DM|NOR|26|16|78
+Sasa Lukic|DM|SRB|28|4|76
+Tom Cairney|CM|SCO|33|10|75
+Emile Smith Rowe|AM|ENG|24|32|78
+Andreas Pereira|AM|BRA|28|18|78
+Harry Wilson|RW|WAL|27|8|76
+Adama Traoré|RW|ESP|28|11|76
+Alex Iwobi|LW|NGA|28|17|79
+Raúl Jiménez|ST|MEX|33|7|76
+Rodrigo Muniz|ST|BRA|23|9|76
+`,
+'epl:IPS':`
+Arijanet Muric|GK|KOS|26|49|74
+Christian Walton|GK|ENG|29|1|70
+Harry Clarke|RB|ENG|23|2|71
+Ben Johnson|RB|ENG|24|4|73
+Dara O'Shea|CB|IRL|25|3|75
+Jacob Greaves|CB|ENG|24|15|73
+Axel Tuanzebe|CB|ENG|27|33|71
+Cameron Burgess|CB|AUS|29|5|70
+Leif Davis|LB|ENG|24|33|74
+Kalvin Phillips|DM|ENG|29|4|76
+Sam Morsy|DM|EGY|33|5|73
+Jens Cajuste|CM|SWE|25|8|74
+Massimo Luongo|CM|AUS|32|25|69
+Jack Clarke|LW|ENG|24|11|75
+Omari Hutchinson|AM|ENG|21|20|75
+Wes Burns|RW|WAL|30|7|71
+Nathan Broadhead|AM|WAL|26|33|72
+Liam Delap|ST|ENG|21|19|77
+George Hirst|ST|ENG|25|9|71
+`,
+'epl:LEI':`
+Mads Hermansen|GK|DEN|24|1|76
+Danny Ward|GK|WAL|31|12|69
+James Justin|RB|ENG|26|2|75
+Ricardo Pereira|RB|POR|31|21|76
+Wout Faes|CB|BEL|26|3|75
+Jannik Vestergaard|CB|DEN|32|23|74
+Conor Coady|CB|ENG|31|5|73
+Caleb Okoli|CB|ITA|23|4|73
+Victor Kristiansen|LB|DEN|22|33|73
+Wilfred Ndidi|DM|NGA|28|6|78
+Boubakary Soumaré|DM|FRA|25|8|74
+Harry Winks|CM|ENG|28|8|75
+Oliver Skipp|CM|ENG|24|18|74
+Bilal El Khannouss|AM|MAR|20|10|76
+Facundo Buonanotte|AM|ARG|20|20|74
+Abdul Fatawu|RW|GHA|20|11|75
+Stephy Mavididi|LW|ENG|26|10|76
+Jamie Vardy|ST|ENG|38|9|76
+Patson Daka|ST|ZAM|26|20|74
+`,
+'epl:LIV':`
+Alisson|GK|BRA|32|1|89
+Caoimhín Kelleher|GK|IRL|26|62|77
+Trent Alexander-Arnold|RB|ENG|26|66|86
+Conor Bradley|RB|NIR|21|84|76
+Virgil van Dijk|CB|NED|33|4|89
+Ibrahima Konaté|CB|FRA|25|5|84
+Joe Gomez|CB|ENG|27|2|79
+Jarell Quansah|CB|ENG|21|78|76
+Andrew Robertson|LB|SCO|30|26|83
+Kostas Tsimikas|LB|GRE|28|21|77
+Ryan Gravenberch|DM|NED|22|38|82
+Wataru Endo|DM|JPN|31|3|77
+Alexis Mac Allister|CM|ARG|26|10|85
+Dominik Szoboszlai|CM|HUN|24|8|83
+Curtis Jones|CM|ENG|23|17|79
+Harvey Elliott|AM|ENG|21|19|77
+Mohamed Salah|RW|EGY|32|11|91
+Luis Díaz|LW|COL|28|7|85
+Cody Gakpo|LW|NED|25|18|83
+Darwin Núñez|ST|URU|25|9|82
+Diogo Jota|ST|POR|28|20|83
+Federico Chiesa|RW|ITA|27|14|79
+`,
+'epl:MCI':`
+Ederson|GK|BRA|31|31|86
+Stefan Ortega|GK|GER|32|18|78
+Rico Lewis|RB|ENG|20|82|78
+Rúben Dias|CB|POR|27|3|87
+Manuel Akanji|CB|SUI|29|25|84
+John Stones|CB|ENG|30|5|83
+Nathan Aké|CB|NED|29|6|81
+Joško Gvardiol|LB|CRO|23|24|85
+Rodri|DM|ESP|28|16|91
+Mateo Kovačić|DM|CRO|30|8|83
+Ilkay Gündoğan|CM|GER|34|19|82
+Bernardo Silva|CM|POR|30|20|86
+Matheus Nunes|CM|POR|26|27|78
+Kevin De Bruyne|AM|BEL|33|17|88
+Phil Foden|AM|ENG|24|47|88
+Savinho|RW|BRA|20|26|80
+Jérémy Doku|LW|BEL|22|11|82
+Jack Grealish|LW|ENG|29|10|82
+Erling Haaland|ST|NOR|24|9|91
+Omar Marmoush|ST|EGY|25|7|82
+Abdukodir Khusanov|CB|UZB|20|45|77
+Nico González|DM|ESP|23|14|78
+Vitor Reis|CB|BRA|19|26|74
+`,
+'epl:MUN':`
+André Onana|GK|CMR|28|24|80
+Altay Bayındır|GK|TUR|26|1|72
+Diogo Dalot|RB|POR|25|20|80
+Noussair Mazraoui|RB|MAR|27|3|80
+Lisandro Martínez|CB|ARG|27|6|83
+Matthijs de Ligt|CB|NED|25|4|83
+Harry Maguire|CB|ENG|31|5|78
+Leny Yoro|CB|FRA|19|15|78
+Luke Shaw|LB|ENG|29|23|79
+Tyrell Malacia|LB|NED|25|12|74
+Casemiro|DM|BRA|32|18|80
+Manuel Ugarte|DM|URU|23|25|79
+Bruno Fernandes|CM|POR|30|8|87
+Kobbie Mainoo|CM|ENG|19|37|79
+Christian Eriksen|CM|DEN|32|14|77
+Mason Mount|AM|ENG|26|7|78
+Amad Diallo|RW|CIV|22|16|78
+Alejandro Garnacho|LW|ARG|20|17|80
+Rasmus Højlund|ST|DEN|21|11|79
+Joshua Zirkzee|ST|NED|23|11|77
+Patrick Dorgu|LB|DEN|20|13|75
+`,
+'epl:NEW':`
+Nick Pope|GK|ENG|32|22|80
+Martin Dúbravka|GK|SVK|35|1|75
+Kieran Trippier|RB|ENG|34|2|80
+Tino Livramento|RB|ENG|22|21|79
+Sven Botman|CB|NED|24|4|81
+Fabian Schär|CB|SUI|33|5|80
+Dan Burn|CB|ENG|32|33|77
+Emil Krafth|CB|SWE|30|17|72
+Lewis Hall|LB|ENG|20|20|78
+Matt Targett|LB|ENG|29|13|72
+Bruno Guimarães|DM|BRA|27|39|85
+Joelinton|DM|BRA|28|7|82
+Sandro Tonali|CM|ITA|24|8|83
+Sean Longstaff|CM|ENG|27|36|75
+Joe Willock|CM|ENG|25|28|76
+Anthony Gordon|LW|ENG|23|10|83
+Harvey Barnes|LW|ENG|27|15|79
+Jacob Murphy|RW|ENG|29|23|78
+Alexander Isak|ST|SWE|25|14|86
+Callum Wilson|ST|ENG|32|9|77
+William Osula|ST|DEN|21|18|71
+`,
+'epl:NFO':`
+Matz Sels|GK|BEL|32|26|79
+Carlos Miguel|GK|BRA|26|1|71
+Neco Williams|RB|WAL|23|7|76
+Ola Aina|RB|NGA|28|43|79
+Murillo|CB|BRA|22|40|82
+Nikola Milenković|CB|SRB|27|31|80
+Morato|CB|BRA|23|4|74
+Andrew Omobamidele|CB|IRL|22|5|72
+Alex Moreno|LB|ESP|31|3|75
+Harry Toffolo|LB|ENG|29|15|71
+Ibrahim Sangaré|DM|CIV|27|6|78
+Ryan Yates|DM|ENG|27|22|74
+Nicolás Domínguez|CM|ARG|26|16|76
+Elliot Anderson|CM|ENG|22|8|77
+Morgan Gibbs-White|AM|ENG|24|10|82
+Anthony Elanga|RW|SWE|22|21|79
+Callum Hudson-Odoi|LW|ENG|24|14|78
+Chris Wood|ST|NZL|33|11|79
+Taiwo Awoniyi|ST|NGA|27|9|75
+`,
+'epl:SOU':`
+Aaron Ramsdale|GK|ENG|26|1|78
+Alex McCarthy|GK|ENG|35|13|69
+Kyle Walker-Peters|RB|ENG|27|2|76
+Yukinari Sugawara|RB|JPN|24|17|74
+Jan Bednarek|CB|POL|28|35|75
+Taylor Harwood-Bellis|CB|ENG|22|4|75
+Armel Bella-Kotchap|CB|GER|22|3|72
+Jack Stephens|CB|ENG|30|5|72
+Ryan Manning|LB|IRL|28|3|72
+Flynn Downes|DM|ENG|25|4|74
+Will Smallbone|DM|IRL|24|16|71
+Joe Aribo|CM|NGA|28|7|75
+Mateus Fernandes|CM|POR|20|8|74
+Adam Lallana|AM|ENG|36|20|71
+Tyler Dibling|AM|ENG|18|33|73
+Kamaldeen Sulemana|LW|GHA|22|20|75
+Ryan Fraser|RW|SCO|30|22|71
+Cameron Archer|ST|ENG|23|9|74
+Adam Armstrong|ST|ENG|27|9|75
+`,
+'epl:TOT':`
+Guglielmo Vicario|GK|ITA|28|1|82
+Fraser Forster|GK|ENG|36|20|70
+Pedro Porro|RB|ESP|25|23|82
+Djed Spence|RB|ENG|24|24|74
+Cristian Romero|CB|ARG|26|17|85
+Micky van de Ven|CB|NED|23|37|83
+Radu Drăgușin|CB|ROU|22|6|76
+Ben Davies|CB|WAL|31|33|76
+Destiny Udogie|LB|ITA|22|13|81
+Sergio Reguilón|LB|ESP|28|3|73
+Yves Bissouma|DM|MLI|28|8|78
+Rodrigo Bentancur|DM|URU|27|30|79
+Pape Matar Sarr|CM|SEN|22|29|78
+James Maddison|AM|ENG|28|10|82
+Dejan Kulusevski|AM|SWE|24|21|83
+Lucas Bergvall|CM|SWE|18|15|74
+Brennan Johnson|RW|WAL|23|22|79
+Wilson Odobert|LW|FRA|20|28|74
+Son Heung-min|LW|KOR|32|7|85
+Dominic Solanke|ST|ENG|27|19|81
+Richarlison|ST|BRA|27|9|78
+`,
+'epl:WHU':`
+Alphonse Areola|GK|FRA|31|23|78
+Łukasz Fabiański|GK|POL|39|1|71
+Vladimír Coufal|RB|CZE|32|5|75
+Aaron Wan-Bissaka|RB|ENG|27|29|78
+Max Kilman|CB|ENG|27|26|79
+Konstantinos Mavropanos|CB|GRE|27|15|76
+Jean-Clair Todibo|CB|FRA|24|4|79
+Emerson Palmieri|LB|ITA|30|33|77
+Edson Álvarez|DM|MEX|27|19|79
+Guido Rodríguez|DM|ARG|30|24|77
+Tomáš Souček|CM|CZE|29|28|78
+Lucas Paquetá|AM|BRA|27|10|83
+James Ward-Prowse|CM|ENG|30|7|78
+Mohammed Kudus|RW|GHA|24|14|82
+Crysencio Summerville|LW|NED|23|11|78
+Jarrod Bowen|RW|ENG|28|20|82
+Michail Antonio|ST|JAM|34|9|74
+Niclas Füllkrug|ST|GER|31|11|79
+`,
+'epl:WOL':`
+José Sá|GK|POR|31|1|78
+Sam Johnstone|GK|ENG|31|21|74
+Nélson Semedo|RB|POR|31|22|76
+Matt Doherty|RB|IRL|33|2|72
+Craig Dawson|CB|ENG|34|15|75
+Yerson Mosquera|CB|COL|23|23|73
+Santiago Bueno|CB|URU|26|21|74
+Toti Gomes|CB|POR|25|24|75
+Rayan Aït-Nouri|LB|ALG|23|3|79
+Hugo Bueno|LB|ESP|22|32|71
+João Gomes|DM|BRA|23|8|80
+Mario Lemina|DM|GAB|31|5|77
+Tommy Doyle|CM|ENG|23|20|72
+Jean-Ricner Bellegarde|CM|FRA|26|27|76
+Pablo Sarabia|AM|ESP|32|21|77
+Matheus Cunha|AM|BRA|25|12|83
+Gonçalo Guedes|RW|POR|28|7|75
+Pedro Lima|RB|BRA|18|29|70
+Jørgen Strand Larsen|ST|NOR|24|9|77
+Hwang Hee-chan|ST|KOR|28|11|77
+`,
+
+/* ===== LA LIGA — 2024/25 squads ===== */
+'lal:RMA':`
+Thibaut Courtois|GK|BEL|32|1|89
+Andriy Lunin|GK|UKR|26|13|79
+Dani Carvajal|RB|ESP|33|2|82
+Lucas Vázquez|RB|ESP|33|17|75
+Éder Militão|CB|BRA|27|3|84
+Antonio Rüdiger|CB|GER|32|22|85
+Raúl Asencio|CB|ESP|22|35|77
+David Alaba|CB|AUT|32|4|79
+Ferland Mendy|LB|FRA|29|23|79
+Fran García|LB|ESP|25|20|75
+Aurélien Tchouaméni|DM|FRA|25|14|83
+Eduardo Camavinga|DM|FRA|22|6|83
+Federico Valverde|CM|URU|26|8|87
+Luka Modrić|CM|CRO|39|10|81
+Dani Ceballos|CM|ESP|28|19|78
+Jude Bellingham|AM|ENG|21|5|89
+Arda Güler|AM|TUR|20|15|80
+Rodrygo|RW|BRA|24|11|85
+Brahim Díaz|RW|ESP|25|21|80
+Vinícius Júnior|LW|BRA|24|7|90
+Kylian Mbappé|ST|FRA|26|9|91
+Endrick|ST|BRA|18|16|76
+`,
+'lal:BAR':`
+Wojciech Szczęsny|GK|POL|34|25|80
+Iñaki Peña|GK|ESP|26|13|75
+Jules Koundé|RB|FRA|26|23|85
+Héctor Fort|RB|ESP|18|32|71
+Pau Cubarsí|CB|ESP|18|2|84
+Ronald Araújo|CB|URU|26|4|83
+Iñigo Martínez|CB|ESP|33|5|82
+Andreas Christensen|CB|DEN|29|15|78
+Alejandro Balde|LB|ESP|21|3|82
+Gerard Martín|LB|ESP|23|35|73
+Marc Casadó|DM|ESP|21|17|79
+Frenkie de Jong|DM|NED|27|21|83
+Pedri|CM|ESP|22|8|88
+Gavi|CM|ESP|20|6|80
+Fermín López|CM|ESP|21|16|79
+Dani Olmo|AM|ESP|26|20|83
+Lamine Yamal|RW|ESP|17|19|89
+Raphinha|LW|BRA|28|11|89
+Ferran Torres|LW|ESP|25|7|80
+Robert Lewandowski|ST|POL|36|9|86
+Pau Víctor|ST|ESP|23|18|72
+`,
+'lal:ATM':`
+Jan Oblak|GK|SVN|32|13|86
+Juan Musso|GK|ARG|30|1|76
+Marcos Llorente|RB|ESP|30|14|80
+Nahuel Molina|RB|ARG|27|16|78
+José María Giménez|CB|URU|30|2|81
+Robin Le Normand|CB|ESP|28|24|81
+Clément Lenglet|CB|FRA|29|15|76
+Axel Witsel|CB|BEL|36|20|75
+Javi Galán|LB|ESP|30|21|75
+Reinildo Mandava|LB|MOZ|31|23|74
+Rodrigo De Paul|DM|ARG|30|5|82
+Pablo Barrios|DM|ESP|21|8|79
+Koke|CM|ESP|33|6|78
+Conor Gallagher|CM|ENG|25|4|79
+Samuel Lino|LW|BRA|25|12|78
+Antoine Griezmann|AM|FRA|34|7|84
+Giuliano Simeone|RW|ARG|22|22|77
+Ángel Correa|RW|ARG|30|10|78
+Julián Alvarez|ST|ARG|25|19|86
+Alexander Sørloth|ST|NOR|29|9|80
+`,
+'lal:ATH':`
+Unai Simón|GK|ESP|27|1|84
+Julen Agirrezabala|GK|ESP|24|13|74
+Óscar de Marcos|RB|ESP|35|18|74
+Andoni Gorosabel|RB|ESP|28|2|73
+Dani Vivian|CB|ESP|25|3|81
+Aitor Paredes|CB|ESP|25|4|77
+Yeray Álvarez|CB|ESP|30|5|75
+Yuri Berchiche|LB|ESP|35|17|75
+Mikel Ruiz de Galarreta|DM|ESP|31|24|75
+Mikel Vesga|DM|ESP|31|16|74
+Beñat Prados|CM|ESP|24|20|74
+Oihan Sancet|AM|ESP|24|8|82
+Mikel Jauregizar|CM|ESP|21|30|75
+Nico Williams|LW|ESP|22|10|86
+Iñaki Williams|RW|ESP|30|9|82
+Álex Berenguer|LW|ESP|29|7|77
+Gorka Guruzeta|ST|ESP|28|12|77
+Maroan Sannadi|ST|ESP|24|11|72
+`,
+'lal:RSO':`
+Álex Remiro|GK|ESP|30|1|81
+Unai Marrero|GK|ESP|23|13|68
+Jon Aramburu|RB|VEN|22|20|74
+Hamari Traoré|RB|MLI|33|2|74
+Igor Zubeldia|CB|ESP|28|5|79
+Jon Pacheco|CB|ESP|24|3|76
+Nayef Aguerd|CB|MAR|28|4|78
+Aihen Muñoz|LB|ESP|27|12|75
+Sergio Gómez|LB|ESP|24|17|76
+Martín Zubimendi|DM|ESP|26|6|84
+Beñat Turrientes|DM|ESP|23|18|76
+Brais Méndez|CM|ESP|28|23|79
+Pablo Marín|CM|ESP|21|28|73
+Arsen Zakharyan|AM|RUS|21|8|75
+Takefusa Kubo|RW|JPN|23|14|82
+Ander Barrenetxea|LW|ESP|23|7|78
+Mikel Oyarzabal|ST|ESP|27|10|84
+Orri Óskarsson|ST|ISL|20|9|76
+Sheraldo Becker|ST|SUR|30|11|74
+`,
+'lal:BET':`
+Adrián|GK|ESP|38|13|73
+Fran Vieites|GK|ESP|25|1|70
+Youssouf Sabaly|RB|SEN|32|23|75
+Héctor Bellerín|RB|ESP|30|2|76
+Marc Bartra|CB|ESP|34|5|76
+Natan|CB|BRA|24|4|76
+Diego Llorente|CB|ESP|31|3|75
+Romain Perraud|LB|FRA|27|15|74
+Ricardo Rodríguez|LB|SUI|32|12|73
+Johnny Cardoso|DM|USA|23|20|78
+Sergi Altimira|DM|ESP|23|6|76
+Pablo Fornals|CM|ESP|29|18|78
+Isco|AM|ESP|32|22|85
+Giovani Lo Celso|AM|ARG|28|8|80
+Antony|RW|BRA|25|7|81
+Ez Abde|LW|MAR|23|10|79
+Aitor Ruibal|RW|ESP|29|24|74
+Cucho Hernández|ST|COL|25|9|79
+Cédric Bakambu|ST|COD|34|11|74
+`,
+'lal:SEV':`
+Ørjan Nyland|GK|NOR|34|1|76
+Álvaro Fernández|GK|ESP|26|31|70
+José Ángel Carmona|RB|ESP|23|17|75
+Juanlu Sánchez|RB|ESP|21|16|74
+Loïc Badé|CB|FRA|25|22|80
+Kike Salas|CB|ESP|22|4|74
+Tanguy Nianzou|CB|FRA|22|5|74
+Adrià Pedrosa|LB|ESP|26|3|74
+Rubén Vargas|LW|SUI|26|23|77
+Lucien Agoumé|DM|FRA|23|25|76
+Nemanja Gudelj|DM|SRB|33|6|74
+Djibril Sow|CM|SUI|28|18|76
+Saúl Ñíguez|CM|ESP|30|8|76
+Chidera Ejuke|LW|NGA|27|11|74
+Dodi Lukébakio|RW|BEL|27|7|80
+Isaac Romero|ST|ESP|24|9|75
+Akor Adams|ST|NGA|25|12|74
+`,
+'lal:VIL':`
+Diego Conde|GK|ESP|26|13|76
+Luiz Júnior|GK|BRA|24|1|72
+Kiko Femenía|RB|ESP|34|21|73
+Juan Foyth|CB|ARG|27|8|78
+Raúl Albiol|CB|ESP|39|3|73
+Logan Costa|CB|CPV|24|4|76
+Sergi Cardona|LB|ESP|25|24|76
+Alfonso Pedraza|LB|ESP|29|12|74
+Dani Parejo|CM|ESP|35|10|80
+Santi Comesaña|DM|ESP|28|14|77
+Pape Gueye|DM|SEN|26|6|76
+Álex Baena|AM|ESP|23|16|83
+Yeremy Pino|RW|ESP|22|20|79
+Ilias Akhomach|RW|MAR|21|22|74
+Ayoze Pérez|ST|ESP|31|19|81
+Thierno Barry|ST|FRA|22|9|78
+Gerard Moreno|ST|ESP|32|7|78
+`,
+'lal:CEL':`
+Vicente Guaita|GK|ESP|38|13|73
+Iván Villar|GK|ESP|27|1|71
+Óscar Mingueza|RB|ESP|25|3|79
+Javi Rodríguez|RB|ESP|26|2|71
+Carl Starfelt|CB|SWE|29|4|76
+Marcos Alonso|CB|ESP|34|21|73
+Carlos Domínguez|CB|ESP|24|22|72
+Mihailo Ristić|LB|SRB|29|15|73
+Fran Beltrán|DM|ESP|26|8|77
+Ilaix Moriba|DM|GUI|22|14|75
+Hugo Sotelo|CM|ESP|21|20|72
+Iago Aspas|AM|ESP|37|10|82
+Williot Swedberg|AM|SWE|21|18|74
+Franco Cervi|LW|ARG|30|11|72
+Pablo Durán|ST|ESP|24|36|74
+Borja Iglesias|ST|ESP|32|9|77
+Alfon González|LW|ESP|25|17|73
+`,
+'lal:GET':`
+David Soria|GK|ESP|32|13|77
+Jiří Letáček|GK|CZE|26|1|69
+Djené Dakonam|CB|TOG|33|2|75
+Omar Alderete|CB|PAR|28|4|77
+Domingos Duarte|CB|POR|30|22|73
+Juan Iglesias|RB|ESP|26|17|74
+Diego Rico|LB|ESP|32|3|73
+Mauro Arambarri|DM|URU|29|18|78
+Luis Milla|CM|ESP|30|6|76
+Christantus Uche|AM|NGA|22|8|77
+Carles Pérez|RW|ESP|27|10|73
+Álex Sola|RW|ESP|26|20|72
+Borja Mayoral|ST|ESP|28|9|78
+Álvaro Rodríguez|ST|URU|20|24|72
+`,
+'lal:GIR':`
+Paulo Gazzaniga|GK|ARG|33|13|77
+Juan Carlos|GK|ESP|36|1|68
+Arnau Martínez|RB|ESP|21|20|77
+Alejandro Francés|CB|ESP|22|24|74
+David López|CB|ESP|35|5|74
+Daley Blind|CB|NED|35|17|75
+Ladislav Krejčí|CB|CZE|25|21|76
+Miguel Gutiérrez|LB|ESP|23|3|80
+Oriol Romeu|DM|ESP|33|14|74
+Yangel Herrera|CM|VEN|27|22|77
+Iván Martín|CM|ESP|26|23|75
+Donny van de Beek|AM|NED|27|6|74
+Viktor Tsygankov|RW|UKR|27|8|79
+Bryan Gil|LW|ESP|24|11|76
+Arnaut Danjuma|LW|NED|28|7|76
+Yaser Asprilla|AM|COL|21|10|74
+Cristhian Stuani|ST|URU|38|9|74
+Bojan Miovski|ST|MKD|25|18|74
+Abel Ruiz|ST|ESP|25|19|73
+`,
+'lal:ALA':`
+Antonio Sivera|GK|ESP|28|1|76
+Jesús Owono|GK|EQG|24|13|69
+Nahuel Tenaglia|RB|ARG|28|19|73
+Abdel Abqar|CB|MAR|26|4|75
+Santiago Mouriño|CB|URU|23|22|74
+Facundo Garcés|CB|ARG|25|5|73
+Manu Sánchez|LB|ESP|24|12|74
+Antonio Blanco|DM|ESP|24|6|76
+Ander Guevara|DM|ESP|27|20|74
+Jon Guridi|AM|ESP|30|8|75
+Carlos Vicente|RW|ESP|25|17|77
+Abde Rebbach|LW|ALG|26|10|74
+Kike García|ST|ESP|35|9|75
+Toni Martínez|ST|ESP|27|7|73
+`,
+'lal:RAY':`
+Augusto Batalla|GK|ARG|29|1|76
+Dani Cárdenas|GK|ESP|28|13|70
+Andrei Ratiu|RB|ROU|26|2|78
+Florian Lejeune|CB|FRA|33|24|77
+Abdul Mumin|CB|GHA|26|4|74
+Pep Chavarría|LB|ESP|27|3|74
+Pathé Ciss|DM|SEN|31|6|75
+Unai López|CM|ESP|29|8|75
+Óscar Valentín|DM|ESP|30|14|73
+Isi Palazón|RW|ESP|30|17|78
+Jorge de Frutos|RW|ESP|28|11|77
+Álvaro García|LW|ESP|32|18|77
+Sergio Camello|ST|ESP|24|9|75
+Randy Nteka|ST|FRA|27|12|73
+`,
+'lal:MLL':`
+Dominik Greif|GK|SVK|28|1|77
+Leo Román|GK|ESP|24|13|71
+Pablo Maffeo|RB|ESP|27|21|75
+Martin Valjent|CB|SVK|29|4|76
+Antonio Raíllo|CB|ESP|33|5|75
+Johan Mojica|LB|COL|32|3|74
+Samú Costa|DM|POR|24|6|78
+Omar Mascarell|DM|ESP|32|14|73
+Manu Morlanes|CM|ESP|26|8|75
+Dani Rodríguez|AM|ESP|36|10|74
+Sergi Darder|AM|ESP|31|20|77
+Takuma Asano|RW|JPN|30|11|74
+Vedat Muriqi|ST|KOS|30|9|78
+Cyle Larin|ST|CAN|29|7|74
+Abdón Prats|ST|ESP|33|17|72
+`,
+'lal:OSA':`
+Sergio Herrera|GK|ESP|31|1|76
+Aitor Fernández|GK|ESP|33|13|71
+Jesús Areso|RB|ESP|25|21|76
+Alejandro Catena|CB|ESP|30|24|76
+Enzo Boyomo|CB|CMR|23|4|76
+Juan Cruz|LB|ESP|26|3|74
+Lucas Torró|DM|ESP|30|6|74
+Jon Moncayola|CM|ESP|27|7|75
+Aimar Oroz|AM|ESP|23|10|75
+Rubén García|LW|ESP|31|14|74
+Bryan Zaragoza|LW|ESP|23|17|77
+Moi Gómez|AM|ESP|30|11|74
+Ante Budimir|ST|CRO|33|9|80
+Raúl García de Haro|ST|ESP|24|19|72
+`,
+'lal:VAL':`
+Giorgi Mamardashvili|GK|GEO|24|25|83
+Stole Dimitrievski|GK|MKD|31|1|72
+Dimitri Foulquier|RB|FRA|32|12|74
+Thierry Correia|RB|POR|26|20|73
+Cristhian Mosquera|CB|ESP|20|4|79
+Mouctar Diakhaby|CB|FRA|28|3|74
+César Tárrega|CB|ESP|23|24|75
+José Gayà|LB|ESP|30|14|79
+Jesús Vázquez|LB|ESP|22|23|71
+Enzo Barrenechea|DM|ARG|23|18|75
+Pepelu|DM|ESP|26|8|77
+Javi Guerra|CM|ESP|22|10|78
+André Almeida|AM|POR|24|16|74
+Luis Rioja|LW|ESP|31|17|75
+Diego López|RW|ESP|22|21|76
+Hugo Duro|ST|ESP|25|9|77
+Umar Sadiq|ST|NGA|28|11|75
+Dani Gómez|ST|ESP|26|19|71
+`,
+'lal:VLL':`
+Karl Hein|GK|EST|23|1|72
+André Ferreira|GK|POR|24|13|69
+Luis Pérez|RB|ESP|30|2|72
+Eray Cömert|CB|SUI|27|4|71
+Javi Sánchez|CB|ESP|28|5|71
+David Torres|CB|ESP|24|15|69
+Lucas Rosa|LB|BRA|25|12|70
+Mario Martín|DM|ESP|21|6|70
+Stanko Jurić|DM|CRO|28|8|70
+Chuki|AM|ESP|22|23|71
+Kenedy|LW|BRA|29|17|72
+Raúl Moro|LW|ESP|22|10|75
+Iván Sánchez|RW|ESP|32|11|70
+Selim Amallah|AM|MAR|28|14|72
+Latasa|ST|ESP|24|9|72
+Mamadou Sylla|ST|SEN|31|19|71
+Marcos André|ST|BRA|28|7|70
+`,
+'lal:ESP':`
+Joan García|GK|ESP|24|13|82
+Ángel Fortuño|GK|ESP|23|1|66
+Omar El Hilali|RB|MAR|21|20|74
+Marash Kumbulla|CB|ALB|25|24|74
+Leandro Cabrera|CB|URU|33|5|74
+Fernando Calero|CB|ESP|29|4|72
+Carlos Romero|LB|ESP|23|3|73
+Brian Oliván|LB|ESP|30|17|72
+Alex Kral|DM|CZE|26|6|73
+Edu Expósito|CM|ESP|28|10|74
+Pol Lozano|CM|ESP|25|14|72
+Urko González|CM|ESP|24|8|72
+Javi Puado|ST|ESP|26|7|77
+Roberto Fernández|ST|ESP|22|9|72
+Jofre Carreras|RW|ESP|23|19|73
+`,
+'lal:LPA':`
+Jasper Cillessen|GK|NED|35|13|74
+Dinko Horkaš|GK|CRO|25|1|66
+Marvin Park|RB|ESP|24|17|72
+Viti Rozada|RB|ESP|24|2|71
+Scott McKenna|CB|SCO|28|5|74
+Juanma Herzog|CB|ESP|24|22|71
+Mika Mármol|CB|ESP|23|3|74
+Daley Sinkgraven|LB|NED|29|12|71
+Javi Muñoz|CM|ESP|30|6|74
+Kirian Rodríguez|CM|ESP|29|8|75
+Enzo Loiodice|DM|FRA|24|14|73
+Alberto Moleiro|AM|ESP|21|10|79
+Sandro Ramírez|LW|ESP|29|9|74
+Oli McBurnie|ST|SCO|28|18|73
+Fábio Silva|ST|POR|22|24|76
+Adnan Januzaj|RW|BEL|30|11|71
+`,
+'lal:LEG':`
+Marko Dmitrović|GK|SRB|33|1|74
+Juan Soriano|GK|ESP|27|13|71
+Adrià Altimira|RB|ESP|23|2|71
+Sergio González|CB|ESP|32|22|72
+Matija Nastasić|CB|SRB|32|4|72
+Jorge Sáenz|CB|ESP|28|5|70
+Javi Hernández|LB|ESP|26|3|72
+Enric Franquesa|LB|ESP|27|12|70
+Renato Tapia|DM|PER|29|14|74
+Yvan Neyou|DM|CMR|28|6|72
+Seydouba Cissé|CM|GUI|25|18|72
+Óscar Rodríguez|AM|ESP|26|10|73
+Dani Raba|AM|ESP|29|21|74
+Juan Cruz Díaz|LW|ARG|26|11|72
+Munir El Haddadi|RW|MAR|29|7|72
+Miguel de la Fuente|ST|ESP|26|9|71
+Diego García|ST|ESP|24|17|70
+`,
+
+/* ===== SERIE A — 2024/25 squads ===== */
+'ser:INT':`
+Yann Sommer|GK|SUI|36|1|84
+Josep Martínez|GK|ESP|26|13|74
+Benjamin Pavard|CB|FRA|29|28|81
+Francesco Acerbi|CB|ITA|37|15|79
+Alessandro Bastoni|CB|ITA|26|95|86
+Stefan de Vrij|CB|NED|33|6|79
+Yann Bisseck|CB|GER|24|31|77
+Denzel Dumfries|RB|NED|28|2|82
+Matteo Darmian|RB|ITA|35|36|76
+Federico Dimarco|LB|ITA|27|32|84
+Carlos Augusto|LB|BRA|26|30|77
+Nicolò Barella|CM|ITA|28|23|86
+Hakan Çalhanoğlu|DM|TUR|31|20|85
+Henrikh Mkhitaryan|CM|ARM|36|22|78
+Davide Frattesi|CM|ITA|25|16|78
+Piotr Zieliński|CM|POL|30|7|77
+Kristjan Asllani|DM|ALB|23|21|74
+Lautaro Martínez|ST|ARG|27|10|88
+Marcus Thuram|ST|FRA|27|9|85
+Mehdi Taremi|ST|IRN|32|99|76
+Marko Arnautović|ST|AUT|35|8|73
+`,
+'ser:JUV':`
+Michele Di Gregorio|GK|ITA|27|29|81
+Mattia Perin|GK|ITA|32|1|75
+Pierre Kalulu|CB|FRA|24|15|79
+Gleison Bremer|CB|BRA|28|3|84
+Federico Gatti|CB|ITA|26|4|78
+Juan Cabal|CB|COL|24|32|75
+Lloyd Kelly|CB|ENG|26|6|74
+Andrea Cambiaso|LB|ITA|25|27|80
+Nicolò Savona|RB|ITA|22|37|74
+Manuel Locatelli|DM|ITA|27|5|79
+Khéphren Thuram|CM|FRA|24|19|80
+Weston McKennie|CM|USA|26|16|77
+Teun Koopmeiners|AM|NED|27|8|79
+Kenan Yıldız|AM|TUR|20|10|82
+Francisco Conceição|RW|POR|22|7|78
+Nico González|LW|ARG|27|11|77
+Timothy Weah|RW|USA|25|22|76
+Dušan Vlahović|ST|SRB|25|9|82
+Randal Kolo Muani|ST|FRA|26|20|80
+`,
+'ser:MIL':`
+Mike Maignan|GK|FRA|29|16|85
+Marco Sportiello|GK|ITA|32|57|72
+Kyle Walker|RB|ENG|34|32|80
+Davide Calabria|RB|ITA|28|2|75
+Fikayo Tomori|CB|ENG|27|23|80
+Malick Thiaw|CB|GER|23|28|77
+Matteo Gabbia|CB|ITA|25|46|76
+Strahinja Pavlović|CB|SRB|24|31|78
+Theo Hernández|LB|FRA|27|19|83
+Alex Jiménez|LB|ESP|20|20|73
+Youssouf Fofana|DM|FRA|26|29|79
+Tijjani Reijnders|CM|NED|26|14|84
+Ruben Loftus-Cheek|CM|ENG|29|8|77
+Yunus Musah|CM|USA|22|80|75
+Christian Pulisic|RW|USA|26|11|84
+Rafael Leão|LW|POR|25|10|85
+João Félix|AM|POR|25|79|78
+Samuel Chukwueze|RW|NGA|25|21|75
+Santiago Giménez|ST|MEX|24|7|80
+Tammy Abraham|ST|ENG|27|90|76
+Luka Jović|ST|SRB|27|9|74
+`,
+'ser:NAP':`
+Alex Meret|GK|ITA|28|1|80
+Elia Caprile|GK|ITA|23|25|73
+Giovanni Di Lorenzo|RB|ITA|31|22|81
+Pasquale Mazzocchi|RB|ITA|29|30|72
+Amir Rrahmani|CB|KOS|31|13|79
+Alessandro Buongiorno|CB|ITA|25|4|82
+Juan Jesus|CB|BRA|33|5|73
+Rafa Marín|CB|ESP|22|3|72
+Mathías Olivera|LB|URU|27|17|78
+Leonardo Spinazzola|LB|ITA|32|37|74
+Stanislav Lobotka|DM|SVK|30|68|82
+Frank Anguissa|CM|CMR|29|99|80
+Scott McTominay|CM|SCO|28|8|84
+Billy Gilmour|CM|SCO|23|6|76
+Matteo Politano|RW|ITA|31|21|79
+David Neres|LW|BRA|28|7|79
+Giacomo Raspadori|AM|ITA|25|81|77
+Romelu Lukaku|ST|BEL|31|11|81
+Giovanni Simeone|ST|ARG|29|18|74
+`,
+'ser:ATA':`
+Marco Carnesecchi|GK|ITA|24|29|80
+Rui Patrício|GK|POR|37|1|72
+Berat Djimsiti|CB|ALB|32|19|77
+Isak Hien|CB|SWE|26|4|78
+Sead Kolašinac|CB|BIH|31|23|76
+Odilon Kossounou|CB|CIV|24|3|76
+Raoul Bellanova|RB|ITA|24|16|77
+Davide Zappacosta|RB|ITA|33|77|75
+Matteo Ruggeri|LB|ITA|22|22|76
+Marten de Roon|DM|NED|34|15|77
+Éderson|DM|BRA|25|13|81
+Mario Pašalić|CM|CRO|30|8|78
+Marco Brescianini|CM|ITA|25|44|75
+Ademola Lookman|LW|NGA|27|11|85
+Charles De Ketelaere|AM|BEL|24|17|81
+Lazar Samardžić|AM|SRB|23|24|76
+Nicolò Zaniolo|RW|ITA|25|10|74
+Mateo Retegui|ST|ITA|26|32|82
+Daniel Maldini|AM|ITA|23|70|74
+Juan Cuadrado|RW|COL|36|7|72
+`,
+'ser:ROM':`
+Mile Svilar|GK|SRB|25|99|82
+Gianluca Mancini|CB|ITA|29|23|78
+Evan Ndicka|CB|CIV|25|5|79
+Mats Hummels|CB|GER|36|15|75
+Zeki Çelik|RB|TUR|28|19|75
+Angeliño|LB|ESP|28|64|77
+Bryan Cristante|DM|ITA|30|4|77
+Manu Koné|DM|FRA|23|17|79
+Leandro Paredes|DM|ARG|30|16|77
+Lorenzo Pellegrini|AM|ITA|28|7|78
+Paulo Dybala|AM|ARG|31|21|82
+Matías Soulé|RW|ARG|22|18|76
+Tommaso Baldanzi|AM|ITA|22|35|74
+Stephan El Shaarawy|LW|ITA|32|92|74
+Alexis Saelemaekers|RW|BEL|25|56|76
+Artem Dovbyk|ST|UKR|27|11|79
+Eldor Shomurodov|ST|UZB|29|14|72
+`,
+'ser:LAZ':`
+Ivan Provedel|GK|ITA|31|94|79
+Christos Mandas|GK|GRE|23|35|74
+Adam Marušić|RB|MNE|32|77|76
+Manuel Lazzari|RB|ITA|31|29|75
+Alessio Romagnoli|CB|ITA|30|13|78
+Mario Gila|CB|ESP|24|34|78
+Patric|CB|ESP|32|4|73
+Nuno Tavares|LB|POR|25|30|77
+Luca Pellegrini|LB|ITA|26|3|72
+Matéo Guendouzi|CM|FRA|26|8|78
+Nicolò Rovella|DM|ITA|23|6|78
+Matías Vecino|CM|URU|33|5|74
+Fisayo Dele-Bashiru|CM|NGA|24|7|74
+Gustav Isaksen|RW|DEN|24|18|75
+Mattia Zaccagni|LW|ITA|29|10|80
+Loum Tchaouna|RW|FRA|21|20|73
+Pedro|AM|ESP|37|9|76
+Valentín Castellanos|ST|ARG|26|11|78
+Boulaye Dia|ST|SEN|28|19|76
+`,
+'ser:FIO':`
+David de Gea|GK|ESP|34|43|82
+Tommaso Martinelli|GK|ITA|19|30|68
+Dodô|RB|BRA|26|2|78
+Pietro Comuzzo|CB|ITA|20|15|77
+Luca Ranieri|CB|ITA|26|6|76
+Marin Pongračić|CB|CRO|27|5|75
+Robin Gosens|LB|GER|30|21|77
+Fabiano Parisi|LB|ITA|24|65|73
+Danilo Cataldi|DM|ITA|30|32|75
+Yacine Adli|CM|FRA|24|29|75
+Rolando Mandragora|CM|ITA|27|38|75
+Michael Folorunsho|CM|ITA|27|90|74
+Andrea Colpani|AM|ITA|25|8|75
+Riccardo Sottil|LW|ITA|25|7|73
+Albert Gudmundsson|AM|ISL|27|10|79
+Lucas Beltrán|ST|ARG|24|9|74
+Moise Kean|ST|ITA|25|20|83
+`,
+'ser:BOL':`
+Łukasz Skorupski|GK|POL|33|1|78
+Federico Ravaglia|GK|ITA|25|34|70
+Stefan Posch|RB|AUT|27|3|75
+Emil Holm|RB|SWE|24|29|75
+Sam Beukema|CB|NED|26|31|78
+Jhon Lucumí|CB|COL|26|26|77
+Martin Erlić|CB|CRO|27|5|73
+Juan Miranda|LB|ESP|25|33|74
+Charalampos Lykogiannis|LB|GRE|31|22|72
+Remo Freuler|DM|SUI|33|8|76
+Lewis Ferguson|CM|SCO|25|19|77
+Nikola Moro|DM|CRO|27|6|74
+Tommaso Pobega|CM|ITA|25|4|73
+Giovanni Fabbian|CM|ITA|22|80|73
+Riccardo Orsolini|RW|ITA|28|7|80
+Dan Ndoye|LW|SUI|24|11|78
+Benjamin Domínguez|LW|ARG|21|30|74
+Jens Odgaard|AM|DEN|26|21|74
+Santiago Castro|ST|ARG|20|9|76
+Thijs Dallinga|ST|NED|24|24|74
+`,
+'ser:TOR':`
+Vanja Milinković-Savić|GK|SRB|28|32|79
+Alberto Paleari|GK|ITA|32|1|69
+Marcus Pedersen|RB|NOR|24|16|73
+Valentino Lazaro|RB|AUT|29|20|73
+Sebastian Walukiewicz|CB|POL|24|4|74
+Saúl Coco|CB|EQG|26|23|75
+Adam Masina|CB|MAR|31|5|73
+Guillermo Maripán|CB|CHI|30|13|74
+Cristiano Biraghi|LB|ITA|32|34|72
+Samuele Ricci|DM|ITA|23|28|79
+Ivan Ilić|CM|SRB|24|8|75
+Karol Linetty|CM|POL|30|77|72
+Gvidas Gineitis|CM|LTU|21|66|71
+Nikola Vlašić|AM|CRO|27|10|76
+Yann Karamoh|LW|CIV|26|7|72
+Che Adams|ST|SCO|28|18|76
+Antonio Sanabria|ST|PAR|29|9|74
+Duván Zapata|ST|COL|34|91|73
+`,
+'ser:UDI':`
+Maduka Okoye|GK|NGA|25|40|75
+Razvan Sava|GK|ROU|22|1|71
+Kingsley Ehizibue|RB|NGA|29|19|72
+Thomas Kristensen|CB|DEN|22|31|74
+Jaka Bijol|CB|SVN|26|29|78
+Oumar Solet|CB|FRA|25|3|77
+Christian Kabasele|CB|BEL|34|27|72
+Hassane Kamara|LB|CIV|31|11|74
+Jordan Zemura|LB|ZIM|25|33|72
+Jesper Karlström|DM|SWE|29|6|74
+Sandi Lovrić|CM|SVN|27|8|75
+Martín Payero|CM|ARG|26|10|73
+Arthur Atta|CM|FRA|22|4|73
+Florian Thauvin|RW|FRA|32|26|77
+Jurgen Ekkelenkamp|AM|NED|25|7|74
+Lorenzo Lucca|ST|ITA|24|17|77
+Keinan Davis|ST|ENG|27|9|72
+Iker Bravo|ST|ESP|20|20|71
+`,
+'ser:GEN':`
+Nicola Leali|GK|ITA|32|1|75
+Pierluigi Gollini|GK|ITA|30|95|71
+Stefano Sabelli|RB|ITA|32|20|72
+Koni De Winter|CB|BEL|22|3|76
+Mattia Bani|CB|ITA|31|13|74
+Johan Vásquez|CB|MEX|26|22|75
+Alessandro Vogliacco|CB|ITA|26|4|71
+Aarón Martín|LB|ESP|28|30|73
+Morten Frendrup|DM|DEN|24|32|77
+Milan Badelj|DM|CRO|36|47|72
+Patrizio Masini|CM|ITA|23|14|72
+Morten Thorsby|CM|NOR|28|2|72
+Ruslan Malinovskyi|CM|UKR|32|17|74
+Alessandro Zanoli|RB|ITA|24|59|72
+Junior Messias|RW|BRA|33|10|73
+Andrea Pinamonti|ST|ITA|25|19|75
+Vitinha|ST|POR|25|9|73
+Jeff Ekhator|ST|ITA|18|18|70
+Fabio Miretti|CM|ITA|21|24|73
+`,
+'ser:COM':`
+Jean Butez|GK|FRA|29|24|73
+Emil Audero|GK|ITA|28|1|73
+Ignace van der Brempt|RB|BEL|23|29|72
+Edoardo Goldaniga|CB|ITA|31|5|72
+Marc-Oliver Kempf|CB|GER|30|4|73
+Alberto Dossena|CB|ITA|26|33|73
+Alberto Moreno|LB|ESP|32|3|72
+Alessandro Gabrielloni|ST|ITA|30|9|69
+Matthias Braunöder|CM|AUT|22|21|71
+Máximo Perrone|DM|ARG|22|32|73
+Lucas Da Cunha|CM|FRA|23|20|73
+Sergi Roberto|CM|ESP|33|14|72
+Nico Paz|AM|ARG|20|10|80
+Gabriel Strefezza|RW|BRA|28|7|74
+Alieu Fadera|LW|GAM|23|11|72
+Assane Diao|RW|SEN|19|45|74
+Patrick Cutrone|ST|ITA|27|63|73
+Andrea Belotti|ST|ITA|31|18|72
+Tasos Douvikas|ST|GRE|25|12|73
+`,
+'ser:EMP':`
+Devis Vásquez|GK|COL|26|1|72
+Samuele Perisan|GK|ITA|27|22|69
+Ardian Ismajli|CB|ALB|28|44|73
+Mattia Viti|CB|ITA|23|33|72
+Saba Goglichidze|CB|GEO|20|24|72
+Liberato Cacace|LB|NZL|24|3|73
+Emmanuel Gyasi|RW|GHA|31|11|71
+Tino Anjorin|CM|ENG|23|10|72
+Alberto Grassi|DM|ITA|30|18|71
+Liam Henderson|CM|SCO|29|8|70
+Youssef Maleh|CM|MAR|26|16|71
+Jacopo Fazzini|AM|ITA|22|30|73
+Sebastiano Esposito|ST|ITA|22|99|73
+Lorenzo Colombo|ST|ITA|23|9|72
+Ola Solbakken|RW|NOR|26|7|70
+`,
+'ser:CAG':`
+Simone Scuffet|GK|ITA|28|22|73
+Alen Sherri|GK|ALB|27|1|68
+Gabriele Zappa|RB|ITA|25|28|73
+Yerry Mina|CB|COL|30|26|75
+Sebastiano Luperto|CB|ITA|28|6|74
+José Luis Palomino|CB|ARG|35|3|70
+Tommaso Augello|LB|ITA|30|27|73
+Adam Obert|LB|SVK|22|33|71
+Antoine Makoumbou|DM|CGO|26|29|72
+Michel Adopo|DM|FRA|24|14|71
+Răzvan Marin|CM|ROU|28|18|74
+Alessandro Deiola|CM|ITA|29|10|72
+Gianluca Gaetano|AM|ITA|24|70|73
+Nicolas Viola|AM|ITA|35|17|71
+Nadir Zortea|RB|ITA|25|19|74
+Zito Luvumbo|LW|ANG|23|77|73
+Mattia Felici|LW|ITA|24|21|70
+Roberto Piccoli|ST|ITA|24|91|74
+Leonardo Pavoletti|ST|ITA|36|30|70
+`,
+'ser:VER':`
+Lorenzo Montipò|GK|ITA|29|1|74
+Simone Perilli|GK|ITA|30|22|66
+Jackson Tchatchoua|RB|CMR|23|38|73
+Diego Coppola|CB|ITA|21|42|74
+Pawel Dawidowicz|CB|POL|29|27|72
+Giangiacomo Magnani|CB|ITA|29|23|71
+Domagoj Bradarić|LB|CRO|25|31|72
+Martin Frese|LB|DEN|26|17|71
+Ondrej Duda|CM|SVK|30|25|73
+Reda Belahyane|DM|MAR|20|24|73
+Suat Serdar|CM|GER|27|10|73
+Tomáš Suslov|AM|SVK|22|31|73
+Abdou Harroui|CM|NED|27|16|71
+Darko Lazović|LW|SRB|34|8|72
+Daniel Mosquera|ST|COL|25|9|72
+Casper Tengstedt|ST|DEN|24|11|72
+Amin Sarr|ST|SWE|24|20|70
+`,
+'ser:LEC':`
+Wladimiro Falcone|GK|ITA|30|30|74
+Christian Früchtl|GK|GER|25|1|68
+Danilo Veiga|RB|POR|24|2|70
+Federico Baschirotto|CB|ITA|28|6|74
+Kialonda Gaspar|CB|ANG|27|4|72
+Jean|CB|BRA|22|55|70
+Antonino Gallo|LB|ITA|25|25|73
+Ylber Ramadani|DM|ALB|29|20|73
+Lassana Coulibaly|CM|MLI|29|29|72
+Balthazar Pierret|CM|FRA|24|13|71
+Hamza Rafia|AM|TUN|26|8|71
+Tete Morente|LW|ESP|28|7|72
+Santiago Pierotti|RW|ARG|24|50|72
+Lameck Banda|LW|ZAM|24|22|71
+Nikola Krstović|ST|MNE|24|9|75
+Ante Rebić|ST|CRO|31|11|70
+`,
+'ser:MON':`
+Stefano Turati|GK|ITA|23|1|72
+Semuel Pizzignacco|GK|ITA|23|22|66
+Pedro Pereira|RB|POR|27|3|70
+Samuele Birindelli|RB|ITA|25|19|71
+Armando Izzo|CB|ITA|33|4|71
+Andrea Carboni|CB|ITA|24|44|71
+Danilo D'Ambrosio|CB|ITA|36|33|69
+Giorgos Kyriakopoulos|LB|GRE|28|77|71
+Warren Bondo|DM|FRA|21|38|72
+Matteo Pessina|CM|ITA|28|32|73
+Alessandro Bianco|DM|ITA|22|14|71
+Jean-Daniel Akpa Akpro|CM|CIV|32|8|69
+Gianluca Caprari|AM|ITA|31|10|71
+Dany Mota|ST|POR|26|47|72
+Milan Djurić|ST|BIH|34|9|70
+Samuele Vignato|AM|ITA|21|80|70
+`,
+'ser:PAR':`
+Zion Suzuki|GK|JPN|22|31|76
+Edoardo Corvi|GK|ITA|21|1|66
+Enrico Delprato|RB|ITA|25|15|73
+Botond Balogh|CB|HUN|22|4|72
+Alessandro Circati|CB|AUS|21|39|73
+Yordan Osorio|CB|VEN|30|5|71
+Emanuele Valeri|LB|ITA|26|14|72
+Woyo Coulibaly|RB|FRA|25|20|71
+Simon Sohm|CM|SUI|24|16|74
+Adrián Bernabé|CM|ESP|23|10|76
+Hernani|DM|BRA|31|28|72
+Mandela Keita|DM|BEL|22|18|72
+Nahuel Estévez|CM|ARG|29|23|71
+Dennis Man|RW|ROU|26|98|75
+Valentin Mihăilă|LW|ROU|25|21|72
+Matteo Cancellieri|RW|ITA|23|27|72
+Pontus Almqvist|RW|SWE|25|17|71
+Ange-Yoan Bonny|ST|FRA|21|24|74
+Gabriel Charpentier|ST|FRA|26|9|70
+`,
+'ser:VEN':`
+Filip Stanković|GK|SRB|23|29|72
+Jesse Joronen|GK|FIN|32|1|69
+Jay Idzes|CB|IDN|24|4|73
+Michael Svoboda|CB|AUT|26|17|71
+Marin Šverko|CB|CRO|27|5|70
+Antonio Candela|RB|ITA|24|27|71
+Franco Zampano|LB|ITA|31|13|70
+Ridgeciano Haps|LB|SUR|31|33|70
+Hans Nicolussi Caviglia|DM|ITA|24|20|72
+Gianluca Busio|CM|USA|22|8|72
+Alfred Duncan|CM|GHA|32|32|70
+Mikael Ellertsson|CM|ISL|23|10|70
+Gaetano Oristanio|AM|ITA|22|7|72
+Joel Pohjanpalo|ST|FIN|30|9|74
+Christian Gytkjær|ST|DEN|35|11|68
+John Yeboah|RW|GHA|24|21|70
+`,
+
+/* ===== BUNDESLIGA — 2024/25 squads ===== */
+'bun:FCB':`
+Manuel Neuer|GK|GER|39|1|84
+Sven Ulreich|GK|GER|36|26|71
+Joshua Kimmich|RB|GER|30|6|85
+Konrad Laimer|RB|AUT|27|24|79
+Sacha Boey|RB|FRA|24|23|74
+Dayot Upamecano|CB|FRA|26|2|82
+Kim Min-jae|CB|KOR|28|3|81
+Eric Dier|CB|ENG|31|15|76
+Hiroki Ito|CB|JPN|25|21|76
+Alphonso Davies|LB|CAN|24|19|84
+Raphaël Guerreiro|LB|POR|31|22|77
+Aleksandar Pavlović|DM|GER|21|45|80
+Leon Goretzka|CM|GER|30|8|79
+João Palhinha|DM|POR|29|16|78
+Jamal Musiala|AM|GER|22|42|89
+Thomas Müller|AM|GER|35|25|79
+Michael Olise|RW|FRA|23|17|86
+Serge Gnabry|RW|GER|29|7|78
+Leroy Sané|LW|GER|29|10|81
+Kingsley Coman|LW|FRA|28|11|80
+Harry Kane|ST|ENG|31|9|90
+`,
+'bun:B04':`
+Lukáš Hrádecký|GK|FIN|35|1|79
+Matěj Kovář|GK|CZE|24|17|74
+Jeremie Frimpong|RB|NED|24|30|83
+Edmond Tapsoba|CB|BFA|26|12|81
+Jonathan Tah|CB|GER|29|4|84
+Piero Hincapié|CB|ECU|23|3|81
+Nordi Mukiele|CB|FRA|27|32|75
+Alejandro Grimaldo|LB|ESP|29|20|85
+Arthur|RB|BRA|21|2|73
+Granit Xhaka|DM|SUI|32|34|84
+Robert Andrich|DM|GER|30|8|78
+Exequiel Palacios|CM|ARG|26|25|80
+Aleix García|CM|ESP|27|24|78
+Florian Wirtz|AM|GER|22|10|90
+Jonas Hofmann|AM|GER|32|7|75
+Amine Adli|LW|MAR|24|31|76
+Martin Terrier|LW|FRA|28|11|75
+Nathan Tella|RW|NGA|25|19|76
+Patrik Schick|ST|CZE|29|14|81
+Victor Boniface|ST|NGA|24|22|80
+`,
+'bun:BVB':`
+Gregor Kobel|GK|SUI|27|1|85
+Alexander Meyer|GK|GER|34|33|71
+Julian Ryerson|RB|NOR|27|26|76
+Yan Couto|RB|BRA|22|2|75
+Niklas Süle|CB|GER|29|25|77
+Nico Schlotterbeck|CB|GER|25|4|82
+Waldemar Anton|CB|GER|28|3|77
+Emre Can|DM|GER|31|23|75
+Ramy Bensebaini|LB|ALG|30|5|75
+Daniel Svensson|LB|SWE|23|14|73
+Marcel Sabitzer|CM|AUT|31|20|76
+Pascal Groß|CM|GER|33|13|78
+Felix Nmecha|CM|GER|24|8|76
+Salih Özcan|DM|TUR|27|6|73
+Julian Brandt|AM|GER|29|10|80
+Giovanni Reyna|AM|USA|22|7|72
+Karim Adeyemi|LW|GER|23|27|79
+Jamie Gittens|LW|ENG|20|43|79
+Julien Duranville|RW|BEL|18|16|72
+Serhou Guirassy|ST|GUI|29|9|85
+Maximilian Beier|ST|GER|22|14|77
+`,
+'bun:RBL':`
+Péter Gulácsi|GK|HUN|35|1|78
+Maarten Vandevoordt|GK|BEL|23|12|74
+Benjamin Henrichs|RB|GER|28|39|76
+Lukas Klostermann|CB|GER|28|16|74
+Willi Orbán|CB|HUN|32|4|78
+Castello Lukeba|CB|FRA|22|23|79
+Lutsharel Geertruida|CB|NED|24|3|76
+David Raum|LB|GER|27|22|78
+Amadou Haidara|DM|MLI|27|8|75
+Nicolas Seiwald|DM|AUT|24|13|76
+Kevin Kampl|CM|SVN|34|44|73
+Arthur Vermeeren|DM|BEL|20|6|76
+Christoph Baumgartner|AM|AUT|25|14|77
+Xavi Simons|AM|NED|22|10|83
+Antonio Nusa|LW|NOR|20|7|77
+Loïs Openda|ST|BEL|25|17|82
+Benjamin Šeško|ST|SVN|21|30|82
+André Silva|ST|POR|29|33|72
+`,
+'bun:SGE':`
+Kevin Trapp|GK|GER|34|1|78
+Kauã Santos|GK|BRA|22|33|73
+Rasmus Kristensen|RB|DEN|27|2|76
+Robin Koch|CB|GER|28|4|78
+Tuta|CB|BRA|25|35|76
+Arthur Theate|CB|BEL|24|3|76
+Nnamdi Collins|RB|GER|21|24|72
+Nathaniel Brown|LB|GER|21|22|75
+Hugo Larsson|CM|SWE|20|16|79
+Ellyes Skhiri|DM|TUN|29|15|76
+Mario Götze|AM|GER|32|27|76
+Can Uzun|AM|TUR|19|10|75
+Farès Chaïbi|AM|ALG|22|21|74
+Jean-Mattéo Bahoya|LW|FRA|19|29|73
+Ansgar Knauff|RW|GER|23|14|75
+Hugo Ekitiké|ST|FRA|22|11|82
+Elye Wahi|ST|FRA|22|9|75
+Igor Matanović|ST|CRO|22|19|72
+`,
+'bun:VFB':`
+Alexander Nübel|GK|GER|28|33|78
+Fabian Bredlow|GK|GER|30|1|70
+Josha Vagnoman|RB|GER|24|21|73
+Lorenz Assignon|RB|FRA|24|2|74
+Anthony Rouault|CB|FRA|23|24|75
+Jeff Chabot|CB|GER|27|4|76
+Finn Jeltsch|CB|GER|18|5|72
+Ameen Al-Dakhil|CB|BEL|23|15|73
+Maximilian Mittelstädt|LB|GER|28|7|78
+Atakan Karazor|DM|GER|28|16|75
+Angelo Stiller|DM|GER|24|6|80
+Enzo Millot|AM|FRA|22|8|78
+Chris Führich|LW|GER|27|27|75
+Jamie Leweling|RW|GER|24|18|76
+Fabian Rieder|AM|SUI|23|14|73
+Deniz Undav|ST|GER|28|26|79
+Ermedin Demirović|ST|BIH|27|9|77
+Nick Woltemade|ST|GER|23|11|77
+El Bilal Touré|ST|MLI|23|97|73
+`,
+'bun:SCF':`
+Noah Atubolu|GK|GER|22|1|77
+Florian Müller|GK|GER|27|21|71
+Lukas Kübler|RB|GER|32|17|72
+Matthias Ginter|CB|GER|31|28|77
+Philipp Lienhart|CB|AUT|28|3|75
+Kiliann Sildillia|RB|FRA|22|25|73
+Christian Günter|LB|GER|32|30|73
+Jordy Makengo|LB|FRA|23|4|71
+Maximilian Eggestein|DM|GER|28|8|74
+Patrick Osterhage|DM|GER|25|6|73
+Nicolas Höfler|DM|GER|35|27|72
+Vincenzo Grifo|LW|ITA|32|32|76
+Ritsu Doan|RW|JPN|26|42|78
+Merlin Röhl|CM|GER|22|34|74
+Eren Dinkçi|RW|GER|23|38|72
+Jan-Niklas Beste|LW|GER|26|37|73
+Lucas Höler|ST|GER|30|9|72
+Junior Adamu|ST|AUT|23|26|72
+Michael Gregoritsch|ST|AUT|31|38|72
+`,
+'bun:WOB':`
+Kamil Grabara|GK|POL|26|1|75
+Marius Müller|GK|GER|31|12|70
+Joakim Maehle|RB|DEN|27|20|75
+Kilian Fischer|RB|GER|24|2|72
+Sebastiaan Bornauw|CB|BEL|26|4|74
+Konstantinos Koulierakis|CB|GRE|21|3|75
+Maximilian Arnold|DM|GER|30|27|76
+Mattias Svanberg|CM|SWE|26|21|74
+Yannick Gerhardt|CM|GER|31|13|73
+Bence Dárdai|CM|HUN|19|40|72
+Lovro Majer|AM|CRO|27|7|75
+Patrick Wimmer|RW|AUT|23|16|74
+Tiago Tomás|RW|POR|22|18|74
+Jonas Wind|ST|DEN|26|10|76
+Mohamed Amoura|ST|ALG|24|9|78
+`,
+'bun:BMG':`
+Moritz Nicolas|GK|GER|27|1|74
+Jonas Omlin|GK|SUI|31|21|73
+Joe Scally|RB|USA|22|29|74
+Stefan Lainer|RB|AUT|32|18|72
+Nico Elvedi|CB|SUI|28|30|75
+Ko Itakura|CB|JPN|28|3|76
+Marvin Friedrich|CB|GER|29|5|72
+Luca Netz|LB|GER|22|3|73
+Lukas Ullrich|LB|GER|20|27|71
+Julian Weigl|DM|GER|29|8|75
+Rocco Reitz|CM|GER|23|6|76
+Philipp Sander|DM|GER|27|32|72
+Franck Honorat|RW|FRA|28|9|74
+Robin Hack|LW|GER|26|14|74
+Alassane Pléa|AM|FRA|32|10|75
+Kevin Stöger|AM|AUT|31|22|73
+Tim Kleindienst|ST|GER|29|11|78
+Tomáš Čvančara|ST|CZE|24|33|71
+`,
+'bun:TSG':`
+Oliver Baumann|GK|GER|34|1|77
+Luca Philipp|GK|GER|24|31|68
+Pavel Kadeřábek|RB|CZE|33|3|72
+Kevin Akpoguma|CB|NGA|30|25|72
+Robin Hranáč|CB|CZE|25|4|73
+Anton Stach|DM|GER|26|16|75
+Arthur Chaves|CB|BRA|23|13|71
+David Jurásek|LB|CZE|24|18|71
+Alexander Prass|LB|AUT|24|30|73
+Grischa Prömel|CM|GER|30|6|73
+Dennis Geiger|DM|GER|26|8|72
+Tom Bischof|CM|GER|19|20|76
+Andrej Kramarić|AM|CRO|33|27|78
+Adam Hložek|AM|CZE|22|10|74
+Marius Bülter|LW|GER|32|14|72
+Ihlas Bebou|ST|TOG|31|9|71
+Gift Orban|ST|NGA|22|19|72
+Haris Tabaković|ST|BIH|30|11|72
+`,
+'bun:M05':`
+Robin Zentner|GK|GER|30|27|76
+Lasse Rieß|GK|GER|24|1|68
+Anthony Caci|RB|FRA|27|3|74
+Danny da Costa|RB|GER|31|24|72
+Stefan Bell|CB|GER|33|16|72
+Andreas Hanche-Olsen|CB|NOR|28|30|74
+Moritz Jenz|CB|GER|26|25|72
+Phillipp Mwene|LB|AUT|31|30|73
+Silvan Widmer|RB|SUI|32|31|72
+Dominik Kohr|DM|GER|31|21|73
+Kaishu Sano|DM|JPN|24|6|75
+Nadiem Amiri|CM|GER|28|10|77
+Lee Jae-sung|AM|KOR|32|7|76
+Paul Nebel|RW|GER|22|29|74
+Karim Onisiwo|ST|AUT|33|9|73
+Jonathan Burkardt|ST|GER|24|29|79
+Nelson Weiper|ST|GER|20|40|72
+`,
+'bun:FCA':`
+Finn Dahmen|GK|GER|27|1|74
+Nediljko Labrović|GK|CRO|25|22|71
+Kevin Mbabu|RB|SUI|30|19|72
+Marius Wolf|RB|GER|30|25|72
+Jeffrey Gouweleeuw|CB|NED|33|6|73
+Keven Schlotterbeck|CB|GER|28|30|73
+Chrislain Matsima|CB|FRA|22|4|73
+Cédric Zesiger|CB|SUI|26|5|72
+Dimitrios Giannoulis|LB|GRE|29|3|72
+Frank Onyeka|DM|NGA|27|21|73
+Kristijan Jakić|DM|CRO|28|16|73
+Elvis Rexhbeçaj|CM|KOS|27|8|72
+Arne Maier|CM|GER|26|10|73
+Alexis Claude-Maurice|AM|FRA|26|11|75
+Fredrik Jensen|AM|FIN|27|23|71
+Phillip Tietz|ST|GER|27|9|72
+Samuel Essende|ST|COD|27|26|72
+Mert Kömür|AM|GER|19|36|72
+`,
+'bun:SVW':`
+Michael Zetterer|GK|GER|29|1|74
+Mio Backhaus|GK|GER|21|30|69
+Mitchell Weiser|RB|GER|31|8|75
+Felix Agu|RB|GER|25|17|72
+Marco Friedl|CB|AUT|27|32|74
+Niklas Stark|CB|GER|30|4|73
+Miloš Veljković|CB|SRB|29|13|72
+Anthony Jung|LB|GER|33|3|72
+Senne Lynen|DM|BEL|26|20|72
+Jens Stage|CM|DEN|28|6|74
+Leonardo Bittencourt|CM|GER|31|10|72
+Romano Schmid|AM|AUT|25|18|74
+Marvin Ducksch|ST|GER|31|7|75
+Justin Njinmah|ST|GER|24|11|72
+Marco Grüll|LW|AUT|26|29|72
+Keke Topp|ST|GER|21|24|71
+`,
+'bun:BOC':`
+Patrick Drewes|GK|GER|32|1|71
+Timo Horn|GK|GER|32|30|69
+Cristian Gamboa|RB|CRC|35|11|69
+Erhan Mašović|CB|SRB|26|4|72
+Ivan Ordets|CB|UKR|32|5|71
+Bernardo|CB|BRA|30|3|71
+Maximilian Wittek|LB|GER|29|17|71
+Anthony Losilla|DM|FRA|39|8|70
+Matúš Bero|CM|SVK|29|6|71
+Dani de Wit|CM|NED|27|10|72
+Ibrahima Sissoko|DM|FRA|27|20|72
+Gerrit Holtmann|LW|PHI|30|7|71
+Koji Miyoshi|RW|JPN|28|23|70
+Philipp Hofmann|ST|GER|32|33|71
+Myron Boadu|ST|NED|24|9|72
+Moritz Broschinski|ST|GER|24|22|69
+`,
+'bun:KIE':`
+Timon Weiner|GK|GER|26|1|71
+Thomas Dähne|GK|GER|31|12|67
+Nicolai Remberg|RB|GER|24|6|70
+John Tolkin|LB|USA|22|47|72
+Carl Johansson|CB|SWE|30|5|70
+Marko Ivezić|CB|SRB|24|4|69
+Timo Becker|CB|GER|28|13|70
+Patrick Erras|DM|GER|30|29|69
+Lewis Holtby|CM|GER|34|10|71
+Finn Porath|CM|GER|28|17|70
+Alexander Bernhardsson|RW|SWE|26|27|70
+Armin Gigović|CM|BIH|23|8|71
+Steven Skrzybski|AM|GER|32|7|71
+Shuto Machino|ST|JPN|25|30|74
+Phil Harres|ST|GER|22|21|69
+Fiete Arp|ST|GER|25|11|68
+`,
+'bun:STP':`
+Nikola Vasilj|GK|BIH|29|1|73
+Sascha Burchert|GK|GER|35|30|66
+Manolis Saliakas|RB|GRE|28|20|71
+Karol Mets|CB|EST|32|4|71
+Eric Smith|CB|SWE|28|3|72
+Hauke Wahl|CB|GER|30|5|71
+Philipp Treu|LB|GER|24|18|70
+Jackson Irvine|CM|AUS|32|13|73
+Carlo Boukhalfa|CM|GER|25|8|70
+Connor Metcalfe|CM|AUS|25|6|71
+Danel Sinani|AM|LUX|28|10|71
+Oladapo Afolayan|LW|ENG|27|22|72
+Noah Weißhaupt|RW|GER|23|7|70
+Elias Saad|LW|GER|25|17|72
+Morgan Guilavogui|ST|GUI|27|9|72
+Johannes Eggestein|ST|GER|27|11|70
+`,
+'bun:HDH':`
+Kevin Müller|GK|GER|34|1|72
+Frank Feller|GK|GER|24|22|65
+Marnon Busch|RB|GER|30|2|70
+Patrick Mainka|CB|GER|30|6|72
+Tim Siersleben|CB|GER|25|5|70
+Benedikt Gimber|CB|GER|28|23|69
+Jonas Föhrenbach|LB|GER|29|19|70
+Niklas Dorsch|DM|GER|27|31|71
+Lennard Maloney|DM|USA|25|14|71
+Jan Schöppner|CM|GER|26|18|70
+Paul Wanner|AM|GER|19|10|74
+Adrian Beck|AM|GER|27|26|70
+Mathias Honsak|LW|AUT|28|17|70
+Marvin Pieringer|ST|GER|25|9|71
+Mikkel Kaufmann|ST|DEN|24|20|69
+Budu Zivzivadze|ST|GEO|31|21|71
+`,
+'bun:FCU':`
+Frederik Rønnow|GK|DEN|32|1|76
+Alexander Schwolow|GK|GER|32|21|69
+Josip Juranović|RB|CRO|29|13|74
+Christopher Trimmel|RB|AUT|38|28|70
+Danilho Doekhi|CB|NED|26|5|75
+Leopold Querfeld|CB|AUT|21|3|73
+Diogo Leite|CB|POR|26|4|74
+Jérôme Roussillon|LB|FRA|32|17|70
+Rani Khedira|DM|GER|31|8|73
+András Schäfer|CM|HUN|26|16|72
+Janik Haberer|CM|GER|31|19|72
+László Bénes|AM|SVK|27|10|72
+Yorbe Vertessen|RW|BEL|24|29|72
+Wooyeong Jeong|AM|KOR|25|11|71
+Benedict Hollerbach|LW|GER|24|38|73
+Andrej Ilić|ST|SRB|25|9|72
+Jordan Siebatcheu|ST|USA|29|14|71
+`,
+
+/* ===== LIGUE 1 — 2024/25 squads ===== */
+'lig:PSG':`
+Gianluigi Donnarumma|GK|ITA|26|1|87
+Matvey Safonov|GK|RUS|26|39|76
+Achraf Hakimi|RB|MAR|26|2|87
+Warren Zaïre-Emery|CM|FRA|19|33|80
+Marquinhos|CB|BRA|30|5|84
+Willian Pacho|CB|ECU|23|51|82
+Lucas Beraldo|CB|BRA|21|35|76
+Lucas Hernández|CB|FRA|29|21|78
+Nuno Mendes|LB|POR|22|25|85
+Vitinha|CM|POR|25|17|87
+João Neves|CM|POR|20|87|84
+Fabián Ruiz|CM|ESP|29|8|82
+Lee Kang-in|AM|KOR|24|19|78
+Ousmane Dembélé|ST|FRA|27|10|89
+Bradley Barcola|LW|FRA|22|29|83
+Désiré Doué|RW|FRA|19|14|83
+Khvicha Kvaratskhelia|LW|GEO|24|7|86
+Gonçalo Ramos|ST|POR|23|9|79
+Ibrahim Mbaye|RW|FRA|17|49|72
+`,
+'lig:OM':`
+Gerónimo Rulli|GK|ARG|33|1|81
+Jeffrey de Lange|GK|NED|27|16|70
+Amir Murillo|RB|PAN|29|62|75
+Pol Lirola|RB|ESP|27|29|72
+Leonardo Balerdi|CB|ARG|26|5|79
+Derek Cornelius|CB|CAN|27|13|74
+Luiz Felipe|CB|ITA|28|3|74
+Amine Harit|AM|MAR|27|11|75
+Ulisses Garcia|LB|SUI|29|25|73
+Quentin Merlin|LB|FRA|22|3|74
+Pierre-Emile Højbjerg|DM|DEN|29|23|80
+Geoffrey Kondogbia|DM|CAF|32|19|74
+Adrien Rabiot|CM|FRA|30|25|81
+Valentin Rongier|CM|FRA|30|21|76
+Mason Greenwood|RW|ENG|23|10|82
+Luis Henrique|RW|BRA|23|22|78
+Amine Gouiri|ST|ALG|25|9|79
+Neal Maupay|ST|FRA|28|27|74
+Robinio Vaz|ST|FRA|18|45|71
+`,
+'lig:ASM':`
+Philipp Köhn|GK|SUI|27|1|76
+Radosław Majecki|GK|POL|25|16|74
+Vanderson|RB|BRA|23|2|79
+Wilfried Singo|CB|CIV|24|31|78
+Thilo Kehrer|CB|GER|28|5|76
+Mohammed Salisu|CB|GHA|26|4|76
+Christian Mawissa|CB|FRA|20|20|73
+Caio Henrique|LB|BRA|27|12|77
+Jordan Teze|RB|NED|25|29|74
+Denis Zakaria|DM|SUI|28|6|80
+Lamine Camara|CM|SEN|21|18|77
+Aleksandr Golovin|AM|RUS|28|10|79
+Maghnes Akliouche|RW|FRA|23|11|80
+Takumi Minamino|AM|JPN|30|17|76
+Eliesse Ben Seghir|LW|FRA|20|27|77
+Folarin Balogun|ST|USA|23|29|76
+Breel Embolo|ST|SUI|28|36|76
+Mika Biereth|ST|DEN|22|14|77
+George Ilenikhena|ST|NGA|18|9|72
+`,
+'lig:LIL':`
+Lucas Chevalier|GK|FRA|23|30|82
+Vito Mannone|GK|ITA|37|16|68
+Thomas Meunier|RB|BEL|33|12|74
+Tiago Santos|RB|POR|22|2|74
+Bafodé Diakité|CB|FRA|24|18|78
+Alexsandro|CB|BRA|25|4|78
+Aïssa Mandi|CB|ALG|33|23|73
+Gabriel Gudmundsson|LB|SWE|26|11|75
+Ismaily|LB|BRA|35|31|71
+Benjamin André|DM|FRA|34|21|76
+Ayyoub Bouaddi|CM|FRA|17|29|76
+Nabil Bentaleb|DM|ALG|30|8|74
+Angel Gomes|AM|ENG|24|10|77
+Rémy Cabella|AM|FRA|35|7|74
+Edon Zhegrova|RW|KOS|26|9|78
+Hákon Haraldsson|AM|ISL|22|15|77
+Osame Sahraoui|LW|MAR|24|22|76
+Mitchel Bakker|LB|NED|24|3|72
+Jonathan David|ST|CAN|25|9|84
+Chuba Akpom|ST|ENG|29|20|72
+`,
+'lig:OL':`
+Lucas Perri|GK|BRA|27|1|78
+Rémy Descamps|GK|FRA|28|30|68
+Ainsley Maitland-Niles|RB|ENG|27|29|74
+Saël Kumbedi|RB|FRA|20|27|72
+Moussa Niakhaté|CB|SEN|29|19|76
+Duje Ćaleta-Car|CB|CRO|28|55|74
+Clinton Mata|CB|ANG|32|20|74
+Nicolás Tagliafico|LB|ARG|32|3|77
+Abner|LB|BRA|24|12|73
+Nemanja Matić|DM|SRB|36|31|73
+Corentin Tolisso|CM|FRA|30|88|77
+Tanner Tessmann|DM|USA|23|42|73
+Thiago Almada|AM|ARG|24|26|80
+Rayan Cherki|AM|FRA|21|18|82
+Malick Fofana|LW|BEL|20|11|79
+Ernest Nuamah|RW|GHA|21|24|74
+Georges Mikautadze|ST|GEO|24|69|79
+Alexandre Lacazette|ST|FRA|33|10|78
+`,
+'lig:OGC':`
+Marcin Bułka|GK|POL|25|1|77
+Teddy Boulhendi|GK|FRA|24|30|66
+Jonathan Clauss|RB|FRA|32|7|76
+Jordan Lotomba|RB|SUI|26|24|73
+Dante|CB|BRA|41|31|74
+Moïse Bombito|CB|CAN|25|32|74
+Antoine Mendy|RB|FRA|21|26|72
+Melvin Bard|LB|FRA|24|3|75
+Ali Abdi|LB|TUN|31|12|73
+Youssouf Ndayishimiye|DM|BDI|26|18|74
+Hicham Boudaoui|CM|ALG|25|8|75
+Pablo Rosario|DM|NED|28|6|73
+Morgan Sanson|CM|FRA|30|14|73
+Sofiane Diop|AM|MAR|24|10|76
+Jérémie Boga|LW|CIV|28|14|74
+Badredine Bouanani|RW|ALG|20|21|73
+Evann Guessand|ST|FRA|23|9|78
+Gaëtan Laborde|ST|FRA|31|29|75
+Terem Moffi|ST|NGA|26|19|76
+`,
+'lig:RCL':`
+Hervé Koffi|GK|BFA|28|16|72
+Mathew Ryan|GK|AUS|33|1|72
+Jonathan Gradit|CB|FRA|32|24|74
+Facundo Medina|CB|ARG|26|4|77
+Malang Sarr|CB|FRA|26|22|72
+Ruben Aguilar|RB|FRA|32|26|73
+Deiver Machado|LB|COL|31|3|73
+Jhoanner Chávez|LB|ECU|23|12|71
+Salis Abdul Samed|DM|GHA|25|26|73
+Andy Diouf|CM|FRA|22|18|75
+Adrien Thomasson|AM|FRA|31|21|74
+Neil El Aynaoui|CM|MAR|23|8|75
+Angelo Fulgini|AM|FRA|28|10|73
+Wesley Saïd|LW|FRA|29|22|72
+Florian Sotoca|ST|FRA|34|7|74
+M'Bala Nzola|ST|ANG|28|9|73
+Goduine Koyalipou|ST|CAF|24|29|71
+`,
+'lig:SRF':`
+Brice Samba|GK|FRA|31|30|78
+Steve Mandanda|GK|FRA|40|16|71
+Hans Hateboer|RB|NED|31|20|72
+Leo Ostigard|CB|NOR|25|3|75
+Christopher Wooh|CB|CMR|23|22|73
+Jérémy Jacquet|CB|FRA|19|24|73
+Adrien Truffert|LB|FRA|23|3|76
+Azor Matusiwa|DM|NED|27|8|74
+Baptiste Santamaria|DM|FRA|30|6|73
+Ludovic Blas|AM|FRA|27|10|76
+Jordan James|CM|WAL|20|17|72
+Mahdi Camara|CM|FRA|27|21|73
+Arnaud Kalimuendo|ST|FRA|23|9|78
+Henrik Meister|ST|DEN|21|29|72
+Mousa Al-Taamari|RW|JOR|27|11|74
+Kader Meïté|ST|FRA|17|39|71
+`,
+'lig:RCS':`
+Đorđe Petrović|GK|SRB|25|1|78
+Karl-Johan Johnsson|GK|SWE|35|16|68
+Guéla Doué|RB|FRA|22|29|74
+Marvin Senaya|RB|FRA|24|22|71
+Abakar Sylla|CB|CIV|22|4|73
+Saïdou Sow|CB|GUI|22|21|72
+Mamadou Sarr|CB|FRA|19|5|73
+Thomas Delaine|LB|FRA|33|12|71
+Ismaël Doukouré|CB|FRA|21|20|73
+Andrey Santos|DM|BRA|21|8|79
+Habib Diarra|CM|SEN|21|19|77
+Junior Mwanga|DM|FRA|21|24|72
+Sékou Mara|ST|FRA|22|11|72
+Dilane Bakwa|RW|FRA|22|26|77
+Sebastian Nanasi|LW|SWE|23|10|75
+Pape Diong|CM|SEN|20|17|70
+Emanuel Emegha|ST|NED|22|9|77
+Félix Lemaréchal|AM|FRA|20|14|71
+`,
+'lig:FCN':`
+Alban Lafont|GK|FRA|26|1|75
+Anthony Lopes|GK|POR|34|16|73
+Kelvin Amian|RB|FRA|27|29|72
+Jean-Charles Castelletto|CB|CMR|30|18|73
+Nicolas Pallois|CB|FRA|37|4|71
+Nathan Zézé|CB|FRA|20|24|74
+Chidozie Awaziem|CB|NGA|28|5|72
+Nicolas Cozza|LB|FRA|26|3|72
+Pedro Chirivella|DM|ESP|28|21|74
+Douglas Augusto|DM|BRA|28|25|73
+Johann Lepenant|CM|FRA|22|28|73
+Florent Mollet|AM|FRA|33|10|72
+Sorba Thomas|RW|WAL|26|7|72
+Moses Simon|LW|NGA|29|11|75
+Yassine Benhattab|AM|FRA|20|35|70
+Mostafa Mohamed|ST|EGY|27|9|73
+Matthis Abline|ST|FRA|22|70|75
+`,
+'lig:TFC':`
+Guillaume Restes|GK|FRA|20|30|77
+Kjetil Haug|GK|NOR|26|1|69
+Mark McKenzie|CB|USA|26|4|74
+Rasmus Nicolaisen|CB|DEN|28|5|74
+Charlie Cresswell|CB|ENG|22|3|74
+Gabriel Suazo|LB|CHI|27|23|74
+Warren Kamanzi|RB|NOR|24|27|72
+Aron Dønnum|RW|NOR|27|11|73
+Vincent Sierro|CM|SUI|29|8|75
+Cristian Cásseres|CM|VEN|25|6|73
+Yann Gboho|AM|CIV|24|10|74
+Zakaria Aboukhlal|RW|MAR|25|7|75
+Josh King|ST|NOR|33|17|71
+Frank Magri|ST|CMR|25|9|73
+Shavy Babicka|RW|GAB|24|24|71
+`,
+'lig:BRE':`
+Marco Bizot|GK|NED|34|1|75
+Grégoire Coudert|GK|FRA|25|30|67
+Kenny Lala|RB|FRA|33|29|73
+Brendan Chardonnet|CB|FRA|30|4|73
+Julien Le Cardinal|CB|FRA|27|24|72
+Bradley Locko|LB|FRA|23|3|74
+Jordan Amavi|LB|FRA|31|12|71
+Hugo Magnetti|DM|FRA|26|21|73
+Mahdi Camara|DM|FRA|26|8|73
+Pierre Lees-Melou|CM|FRA|31|10|76
+Kamory Doumbia|AM|MLI|22|20|74
+Romain Del Castillo|RW|FRA|29|7|76
+Mathias Pereira Lage|LW|POR|28|11|72
+Abdallah Sima|LW|SEN|23|29|74
+Ludovic Ajorque|ST|FRA|31|9|74
+Mama Baldé|ST|GNB|29|26|71
+`,
+'lig:HAC':`
+Mathieu Gorgelin|GK|FRA|34|30|69
+Mory Diaw|GK|SEN|31|1|70
+Arouna Sangante|CB|SEN|23|4|74
+Gautier Lloris|CB|FRA|29|24|72
+Étienne Youté|CB|FRA|23|5|71
+Loïc Nego|RB|HUN|34|2|71
+Yoann Salmier|CB|FRA|32|18|70
+Oussama Targhalline|DM|MAR|23|8|73
+Abdoulaye Touré|DM|FRA|31|21|73
+Rassoul Ndiaye|CM|SEN|23|17|71
+Yassine Kechta|AM|MAR|22|10|74
+Josué Casimir|RW|FRA|23|11|72
+André Ayew|LW|GHA|35|20|71
+Issa Soumaré|LW|SEN|25|7|72
+Abdoulaye Niakhaté Ndiaye|ST|SEN|24|9|71
+Antoine Joujou|ST|FRA|20|29|69
+`,
+'lig:AJA':`
+Donovan Léon|GK|FRA|32|1|71
+Théo De Percin|GK|FRA|24|30|66
+Jubal|CB|BRA|31|4|72
+Clément Akpa|CB|FRA|28|5|71
+Kevin Danois|CM|FRA|21|18|71
+Elisha Owusu|DM|GHA|27|6|72
+Hamed Traorè|AM|CIV|25|10|74
+Gaëtan Perrin|AM|FRA|28|7|73
+Lassine Sinayoko|ST|MLI|25|9|74
+Ado Onaiwu|ST|JPN|29|21|70
+Théo Bair|ST|CAN|25|20|71
+`,
+'lig:SCO':`
+Yahia Fofana|GK|CIV|24|1|74
+Melvin Zinga|GK|FRA|24|30|65
+Florent Hanin|LB|FRA|35|3|70
+Jordan Lefort|CB|FRA|31|5|71
+Cédric Hountondji|CB|BEN|31|4|70
+Marius Courcoul|RB|FRA|22|20|69
+Ousmane Camara|CB|FRA|21|24|70
+Yassin Belkhdim|CM|FRA|24|8|70
+Himad Abdelli|AM|ALG|25|10|75
+Pierre Capelle|DM|FRA|38|21|70
+Jean-Eudes Aholou|DM|CIV|31|19|70
+Farid El Melali|RW|ALG|27|7|71
+Bamba Dieng|ST|SEN|25|11|71
+Esteban Lepaul|ST|FRA|25|9|72
+Sidiki Chérif|ST|GUI|18|29|70
+`,
+'lig:MHS':`
+Benjamin Lecomte|GK|FRA|34|1|73
+Dimitry Bertaud|GK|FRA|26|30|68
+Enzo Tchato|RB|CMR|22|2|71
+Modibo Sagnan|CB|MLI|26|4|71
+Kiki Kouyaté|CB|MLI|28|5|71
+Christopher Jullien|CB|FRA|32|24|70
+Théo Sainte-Luce|LB|FRA|26|3|70
+Joris Chotard|DM|FRA|23|8|74
+Jordan Ferri|DM|FRA|33|21|72
+Téji Savanier|AM|FRA|33|10|76
+Arnaud Nordin|LW|FRA|26|7|73
+Musa Al-Tamari|RW|JOR|27|11|74
+Wahbi Khazri|ST|TUN|34|9|71
+Tanguy Coulibaly|LW|FRA|24|17|70
+`,
+'lig:SDR':`
+Yehvann Diouf|GK|SEN|25|1|75
+Alexandre Olliero|GK|FRA|29|30|66
+Sergio Akieme|LB|EQG|27|3|72
+Joseph Okumu|CB|KEN|28|5|73
+Cédric Kipré|CB|CIV|28|24|72
+Maxime Busi|RB|BEL|25|2|71
+Amadou Koné|DM|CIV|24|29|71
+Valentin Atangana Edoa|DM|FRA|19|8|73
+Teddy Teuma|CM|MLT|31|10|74
+Junya Ito|RW|JPN|32|7|75
+Keito Nakamura|LW|JPN|24|11|75
+Mohamed Daramy|LW|DEN|23|21|73
+Amine Salama|ST|FRA|24|9|71
+Oumar Diakité|ST|CIV|21|20|71
+Mamadou Diakhon|RW|FRA|19|17|70
+`,
+'lig:ASS':`
+Gautier Larsonneur|GK|FRA|28|30|73
+Brice Maubleu|GK|FRA|35|1|66
+Dennis Appiah|RB|GHA|32|2|70
+Dylan Batubinsika|CB|COD|29|4|71
+Mickaël Nadé|CB|FRA|26|22|71
+Yunis Abdelhamid|CB|MAR|37|5|70
+Léo Pétrot|LB|FRA|28|3|70
+Pierre Ekwah|DM|FRA|23|29|72
+Benjamin Bouchouari|CM|MAR|23|8|72
+Florian Tardieu|DM|FRA|33|21|71
+Mathieu Cafaro|AM|FRA|28|19|70
+Irvin Cardona|RW|FRA|27|7|72
+Zuriko Davitashvili|LW|GEO|24|11|74
+Ibrahim Sissoko|ST|MLI|33|9|72
+Lucas Stassin|ST|BEL|20|26|74
+Augustine Boakye|AM|GHA|24|10|71
+`,
+
+/* ===== REST OF WORLD — flagship clubs, 2024/25 (MLS: 2025 season) ===== */
+'pri:POR':`
+Diogo Costa|GK|POR|25|99|83
+Cláudio Ramos|GK|POR|33|14|70
+João Mário|RB|POR|25|23|74
+Martim Fernandes|RB|POR|19|52|72
+Nehuén Pérez|CB|ARG|24|24|75
+Otávio|CB|POR|22|4|73
+Iván Marcano|CB|ESP|37|5|72
+Zaidu Sanusi|LB|NGA|27|12|72
+Francisco Moura|LB|POR|25|21|73
+Alan Varela|DM|ARG|23|22|79
+Stephen Eustáquio|CM|CAN|28|6|75
+Marko Grujić|CM|SRB|29|8|72
+Fábio Vieira|AM|POR|24|10|76
+Pepê|RW|BRA|28|11|79
+Gonçalo Borges|RW|POR|24|17|72
+Danny Namaso|ST|ENG|24|29|72
+Samu Aghehowa|ST|ESP|21|9|80
+`,
+'pri:BEN':`
+Anatoliy Trubin|GK|UKR|23|1|79
+Samuel Soares|GK|POR|22|24|70
+Alexander Bah|RB|DEN|27|2|76
+Tomás Araújo|CB|POR|22|4|75
+Nicolás Otamendi|CB|ARG|37|30|77
+António Silva|CB|POR|21|66|78
+Álvaro Carreras|LB|ESP|22|3|78
+Samuel Dahl|LB|SWE|21|26|72
+Florentino Luís|DM|POR|25|61|76
+Orkun Kökçü|CM|TUR|24|10|80
+Fredrik Aursnes|CM|NOR|29|8|77
+Leandro Barreiro|CM|LUX|25|17|73
+Kerem Aktürkoğlu|LW|TUR|26|7|77
+Ángel Di María|RW|ARG|37|11|84
+Andreas Schjelderup|LW|NOR|20|19|74
+Vangelis Pavlidis|ST|GRE|26|14|81
+Zeki Amdouni|ST|SUI|24|9|74
+`,
+'pri:SCP':`
+Rui Silva|GK|POR|31|1|77
+Vladan Kovačević|GK|BIH|27|41|73
+Iván Fresneda|RB|ESP|20|2|74
+Eduardo Quaresma|CB|POR|23|13|74
+Zeno Debast|CB|BEL|21|5|76
+Ousmane Diomande|CB|CIV|21|26|77
+Gonçalo Inácio|CB|POR|23|25|79
+Jeremiah St. Juste|CB|NED|28|24|74
+Matheus Reis|LB|BRA|30|22|75
+Maxi Araújo|LW|URU|25|20|76
+Morten Hjulmand|DM|DEN|25|42|79
+Hidemasa Morita|CM|JPN|30|6|76
+Daniel Bragança|CM|POR|25|18|75
+Francisco Trincão|RW|POR|25|17|78
+Geovany Quenda|RW|POR|17|77|77
+Marcus Edwards|RW|ENG|26|10|76
+Pedro Gonçalves|AM|POR|26|8|80
+Viktor Gyökeres|ST|SWE|26|9|88
+Conrad Harder|ST|DEN|19|11|74
+`,
+'pri:BRA':`
+Matheus Magalhães|GK|BRA|32|1|74
+Lukas Horníček|GK|CZE|22|24|69
+Víctor Gómez|RB|ESP|24|20|74
+Sikou Niakaté|CB|MLI|25|4|74
+Paulo Oliveira|CB|POR|33|5|72
+Robson Bambu|CB|BRA|27|3|71
+Adrián Marín|LB|ESP|28|17|71
+João Moutinho|CM|POR|38|8|74
+Rodrigo Zalazar|AM|URU|25|10|76
+Vítor Carvalho|DM|BRA|27|6|73
+André Horta|CM|POR|28|22|73
+Ricardo Horta|LW|POR|30|21|79
+Bruma|RW|POR|30|7|76
+Roger Fernandes|RW|GNB|19|11|74
+Amine El Ouazzani|ST|MAR|24|9|71
+Gabri Martínez|LW|ESP|22|19|72
+`,
+'ere:AJA':`
+Remko Pasveer|GK|NED|41|22|73
+Diant Ramaj|GK|GER|23|1|71
+Devyne Rensch|RB|NED|22|2|74
+Anton Gaaei|RB|DEN|22|4|71
+Josip Šutalo|CB|CRO|25|37|75
+Youri Baas|CB|NED|22|3|74
+Jorrel Hato|CB|NED|19|4|79
+Ahmetcan Kaplan|CB|TUR|22|15|72
+Owen Wijndal|LB|NED|25|5|71
+Kenneth Taylor|CM|NED|22|8|77
+Davy Klaassen|CM|NED|32|6|74
+Jordan Henderson|DM|ENG|34|20|75
+Kian Fitz-Jim|CM|NED|21|16|72
+Steven Berghuis|RW|NED|33|23|76
+Mika Godts|LW|BEL|19|10|74
+Bertrand Traoré|RW|BFA|29|9|73
+Brian Brobbey|ST|NED|23|18|77
+Wout Weghorst|ST|NED|32|11|76
+`,
+'ere:PSV':`
+Walter Benítez|GK|ARG|32|1|78
+Joël Drommel|GK|NED|28|13|69
+Mauro Júnior|RB|BRA|25|18|75
+Richard Ledezma|RB|USA|24|8|72
+Ryan Flamingo|CB|NED|22|3|76
+Olivier Boscagli|CB|FRA|27|5|77
+Armando Obispo|CB|NED|26|4|73
+Matteo Dams|LB|BEL|20|33|71
+Jerdy Schouten|DM|NED|28|25|80
+Joey Veerman|CM|NED|26|23|79
+Ismael Saibari|CM|MAR|24|20|77
+Guus Til|AM|NED|27|41|76
+Malik Tillman|AM|USA|22|10|78
+Johan Bakayoko|RW|BEL|22|7|77
+Noa Lang|LW|NED|25|11|79
+Ivan Perišić|RW|CRO|36|14|76
+Luuk de Jong|ST|NED|34|9|78
+Ricardo Pepi|ST|USA|22|16|77
+Couhaib Driouech|LW|MAR|22|27|72
+`,
+'ere:FEY':`
+Timon Wellenreuther|GK|GER|29|1|76
+Justin Bijlow|GK|NED|27|21|74
+Givairo Read|RB|NED|18|2|73
+Bart Nieuwkoop|RB|NED|29|4|73
+Thomas Beelen|CB|NED|23|3|73
+Dávid Hancko|CB|SVK|27|33|79
+Gernot Trauner|CB|AUT|33|5|73
+Gijs Smal|LB|NED|27|17|72
+Quilindschy Hartman|LB|NED|23|29|74
+Quinten Timber|CM|NED|23|8|78
+Jakub Moder|CM|POL|26|20|74
+Ramiz Zerrouki|DM|ALG|26|6|74
+Antoni Milambo|CM|NED|20|30|75
+Calvin Stengs|AM|NED|26|10|75
+In-beom Hwang|CM|KOR|28|24|76
+Igor Paixão|LW|BRA|24|14|80
+Luka Ivanušec|RW|CRO|26|7|74
+Ayase Ueda|ST|JPN|26|9|76
+Julián Carranza|ST|ARG|24|11|73
+`,
+'ere:AZ':`
+Rome-Jayden Owusu-Oduro|GK|NED|21|1|74
+Jeroen Zoet|GK|NED|34|16|70
+Denso Kasius|RB|NED|22|15|71
+Alexandre Penetra|CB|POR|23|4|73
+Wouter Goes|CB|NED|20|3|75
+Maxim Dekker|CB|NED|20|32|72
+David Møller Wolfe|LB|NOR|22|5|73
+Jordy Clasie|DM|NED|33|6|75
+Peer Koopmeiners|CM|NED|24|8|73
+Sven Mijnans|AM|NED|25|10|76
+Kees Smit|CM|NED|19|34|73
+Ernest Poku|RW|NED|20|7|74
+Mexx Meerdink|ST|NED|21|9|74
+Troy Parrott|ST|IRL|23|11|77
+Ruben van Bommel|LW|NED|20|19|74
+`,
+'ere:TWE':`
+Lars Unnerstall|GK|NED|34|1|76
+Przemysław Tytoń|GK|POL|38|16|66
+Bas Kuipers|LB|NED|30|5|70
+Youri Regeer|RB|NED|21|20|73
+Max Bruns|CB|NED|22|4|73
+Mees Hilgers|CB|IDN|23|2|75
+Anass Salah-Eddine|LB|MAR|23|3|72
+Michal Sadílek|DM|CZE|25|17|72
+Sem Steijn|AM|NED|23|14|78
+Michel Vlap|AM|NED|27|10|74
+Mathias Kjølø|DM|NOR|23|6|72
+Daan Rots|RW|NED|23|11|72
+Sayfallah Ltaief|LW|TUN|24|22|72
+Sam Lammers|ST|NED|27|9|72
+Ricky van Wolfswinkel|ST|NED|36|29|73
+Naci Ünüvar|AM|NED|21|21|71
+`,
+'ere:UTR':`
+Vasilis Barkas|GK|GRE|30|1|72
+Michael Brouwer|GK|NED|26|22|67
+Nick Viergever|CB|NED|35|4|72
+Mike van der Hoorn|CB|NED|32|2|72
+Siebe Van der Heyden|CB|BEL|26|3|72
+Souffian El Karouani|LB|MAR|24|5|74
+Alonzo Engwanda|DM|BEL|22|24|71
+Zidane Iqbal|CM|IRQ|22|8|71
+Oscar Fraulo|CM|DEN|21|18|72
+Victor Jensen|AM|DEN|25|10|73
+Miguel Rodríguez|LW|ESP|22|11|71
+Yoann Cathline|LW|FRA|22|7|72
+Sébastien Haller|ST|CIV|30|9|75
+David Min|ST|NED|25|19|71
+Noah Ohio|ST|NED|22|20|71
+`,
+'bra:FLA':`
+Agustín Rossi|GK|ARG|29|1|78
+Matheus Cunha|GK|BRA|24|25|71
+Guillermo Varela|RB|URU|32|2|74
+Wesley|RB|BRA|21|43|76
+Léo Ortiz|CB|BRA|29|3|76
+Léo Pereira|CB|BRA|29|4|76
+Danilo|CB|BRA|33|13|76
+Ayrton Lucas|LB|BRA|27|6|76
+Alex Sandro|LB|BRA|34|26|74
+Erick Pulgar|DM|CHI|31|5|76
+Evertton Araújo|DM|BRA|21|29|72
+Nicolás De la Cruz|CM|URU|27|18|79
+Gerson|CM|BRA|27|8|80
+Giorgian de Arrascaeta|AM|URU|30|10|83
+Everton Cebolinha|LW|BRA|28|11|75
+Luiz Araújo|RW|BRA|28|7|76
+Gonzalo Plata|RW|ECU|24|50|75
+Bruno Henrique|ST|BRA|34|27|76
+Pedro|ST|BRA|27|9|82
+Michael|LW|BRA|29|30|74
+`,
+'bra:PAL':`
+Weverton|GK|BRA|37|21|78
+Marcelo Lomba|GK|BRA|38|14|68
+Marcos Rocha|RB|BRA|36|2|71
+Mayke|RB|BRA|32|12|72
+Gustavo Gómez|CB|PAR|31|15|78
+Murilo|CB|BRA|28|26|76
+Bruno Fuchs|CB|BRA|26|13|72
+Joaquín Piquerez|LB|URU|26|22|77
+Vanderlan|LB|BRA|22|6|71
+Aníbal Moreno|DM|ARG|26|5|77
+Richard Ríos|CM|COL|25|27|79
+Emiliano Martínez|DM|URU|25|32|73
+Raphael Veiga|AM|BRA|29|23|79
+Maurício|AM|BRA|23|18|76
+Felipe Anderson|RW|BRA|32|9|76
+Estêvão|RW|BRA|18|41|82
+Facundo Torres|LW|URU|25|17|76
+Paulinho|ST|BRA|24|10|77
+Flaco López|ST|ARG|24|42|77
+Vitor Roque|ST|BRA|20|9|77
+`,
+'bra:BOT':`
+John|GK|BRA|29|1|77
+Gatito Fernández|GK|PAR|37|12|68
+Vitinho|RB|BRA|25|2|72
+Mateo Ponte|RB|URU|21|29|71
+Alexander Barboza|CB|ARG|30|4|76
+Bastos|CB|ANG|33|3|74
+Lucas Halter|CB|BRA|24|15|72
+Cuiabano|LB|BRA|22|16|74
+Alex Telles|LB|BRA|32|13|75
+Gregore|DM|BRA|31|26|75
+Marlon Freitas|DM|BRA|30|17|75
+Danilo Barbosa|DM|BRA|29|25|72
+Patrick de Paula|CM|BRA|25|8|71
+Jeffinho|LW|BRA|25|11|73
+Savarino|AM|VEN|28|10|77
+Artur|RW|BRA|27|7|74
+Matheus Martins|RW|BRA|21|30|73
+Igor Jesus|ST|BRA|24|99|77
+Arthur Cabral|ST|BRA|27|98|75
+`,
+'bra:COR':`
+Hugo Souza|GK|BRA|26|1|76
+Matheus Donelli|GK|BRA|23|32|69
+Fagner|RB|BRA|35|23|72
+Matheuzinho|RB|BRA|24|2|74
+André Ramalho|CB|BRA|33|3|73
+Cacá|CB|BRA|25|4|73
+Félix Torres|CB|ECU|28|5|72
+Matheus Bidu|LB|BRA|25|21|72
+Hugo|LB|BRA|28|16|71
+Raniele|DM|BRA|28|14|73
+José Martínez|DM|VEN|30|8|73
+Charles|CM|BRA|28|18|72
+Alex Santana|CM|BRA|29|80|72
+Rodrigo Garro|AM|ARG|27|10|79
+Igor Coronado|AM|BRA|32|77|73
+Ángel Romero|RW|PAR|32|11|74
+Talles Magno|LW|BRA|22|43|73
+Memphis Depay|ST|NED|31|94|79
+Yuri Alberto|ST|BRA|24|9|78
+`,
+'bra:SAO':`
+Rafael|GK|BRA|35|23|76
+Jandrei|GK|BRA|32|1|70
+Igor Vinícius|RB|BRA|28|2|72
+Cédric Soares|RB|POR|33|16|71
+Robert Arboleda|CB|ECU|33|5|75
+Alan Franco|CB|ARG|28|13|74
+Ferraresi|CB|VEN|26|4|73
+Sabino|CB|BRA|28|44|71
+Enzo Díaz|LB|ARG|29|6|73
+Welington|LB|BRA|24|18|73
+Pablo Maia|DM|BRA|23|29|75
+Alisson|CM|BRA|31|25|73
+Damián Bobadilla|CM|PAR|24|15|73
+Luiz Gustavo|DM|BRA|37|16|71
+Oscar|AM|BRA|33|8|79
+Lucas Moura|AM|BRA|32|7|78
+Luciano|ST|BRA|31|10|76
+Ferreirinha|LW|BRA|27|11|74
+Jonathan Calleri|ST|ARG|31|9|78
+André Silva|ST|BRA|27|17|72
+`,
+'bra:CRU':`
+Cássio|GK|BRA|37|1|76
+Anderson|GK|BRA|24|12|68
+William|RB|BRA|30|2|72
+Fabrício Bruno|CB|BRA|29|15|75
+João Marcelo|CB|BRA|24|4|72
+Jonathan Jesus|CB|BRA|23|3|71
+Villalba|CB|ARG|21|34|72
+Kaiki Bruno|LB|BRA|21|26|71
+Marlon|LB|BRA|27|12|72
+Walace|DM|BRA|30|13|73
+Lucas Romero|DM|ARG|31|21|73
+Christian|CM|BRA|30|8|73
+Matheus Pereira|AM|BRA|29|10|80
+Eduardo|AM|BRA|30|37|72
+Gabriel Barbosa|ST|BRA|28|9|77
+Kaio Jorge|ST|BRA|23|19|78
+Lautaro Díaz|ST|ARG|26|11|72
+Dudu|LW|BRA|33|92|75
+`,
+'bra:FLU':`
+Fábio|GK|BRA|44|1|75
+Vitor Eudes|GK|BRA|26|22|67
+Samuel Xavier|RB|BRA|35|2|72
+Guga|RB|BRA|26|90|71
+Thiago Silva|CB|BRA|40|3|78
+Manoel|CB|BRA|35|4|71
+Ignácio|CB|BRA|28|15|72
+Gabriel Fuentes|LB|COL|28|94|72
+Renê|LB|BRA|32|6|71
+Martinelli|DM|BRA|23|8|75
+Facundo Bernal|DM|URU|21|20|73
+Hércules|CM|BRA|24|35|74
+Ganso|AM|BRA|35|10|75
+Jhon Arias|RW|COL|27|21|80
+Kevin Serna|RW|COL|27|70|73
+Keno|LW|BRA|35|11|71
+Germán Cano|ST|ARG|37|14|76
+Everaldo|ST|BRA|33|9|73
+Agustín Canobbio|RW|URU|26|44|73
+`,
+'bra:CAM':`
+Everson|GK|BRA|34|22|76
+Matheus Mendes|GK|BRA|24|1|67
+Saravia|RB|ARG|31|2|71
+Natanael|RB|BRA|23|28|72
+Lyanco|CB|BRA|28|3|74
+Junior Alonso|CB|PAR|32|4|75
+Vitor Hugo|CB|BRA|33|13|71
+Rodrigo Battaglia|DM|ARG|33|25|75
+Guilherme Arana|LB|BRA|28|13|77
+Rubens|LB|BRA|24|12|72
+Fausto Vera|CM|ARG|25|26|73
+Alan Franco|CM|ARG|28|8|74
+Otávio|DM|BRA|30|20|73
+Matías Zaracho|AM|ARG|27|10|75
+Gustavo Scarpa|AM|BRA|31|6|77
+Igor Gomes|CM|BRA|26|15|72
+Bernard|LW|BRA|32|11|74
+Cadu Cuello|LW|BRA|24|43|72
+Hulk|ST|BRA|38|7|79
+Deyverson|ST|BRA|33|9|74
+Rony|ST|BRA|29|30|74
+`,
+'bra:GRE':`
+Tiago Volpi|GK|BRA|34|1|74
+Caíque|GK|BRA|24|24|67
+João Pedro|RB|BRA|28|22|71
+Igor Serrote|RB|BRA|20|43|70
+Walter Kannemann|CB|ARG|34|4|75
+Jemerson|CB|BRA|32|3|72
+Rodrigo Ely|CB|BRA|31|33|70
+Reinaldo|LB|BRA|35|6|72
+Lucas Esteves|LB|BRA|24|12|70
+Mathías Villasanti|CM|PAR|28|20|76
+Franco Cristaldo|AM|ARG|28|10|76
+Dodi|DM|BRA|28|8|71
+Cuéllar|DM|COL|33|5|72
+Edenilson|CM|BRA|35|14|72
+Monsalve|AM|COL|21|30|73
+Yeferson Soteldo|LW|VEN|27|30|74
+Pavón|RW|ARG|29|17|73
+Aravena|LW|CHI|22|29|72
+Martin Braithwaite|ST|DEN|33|9|77
+Arezo|ST|URU|22|18|73
+`,
+'bra:INT':`
+Sergio Rochet|GK|URU|32|1|77
+Anthoni|GK|BRA|24|24|68
+Aguirre|RB|URU|26|2|73
+Braian|RB|BRA|23|33|69
+Vitão|CB|BRA|25|4|75
+Gabriel Mercado|CB|ARG|38|25|72
+Rogel|CB|URU|30|3|72
+Bernabei|LB|ARG|24|26|75
+Fernando|DM|BRA|38|5|72
+Bruno Henrique|CM|BRA|35|8|72
+Thiago Maia|DM|BRA|28|29|73
+Alan Patrick|AM|BRA|33|10|79
+Gabriel Carvalho|AM|BRA|17|40|72
+Wesley|LW|BRA|26|21|75
+Wanderson|LW|BRA|30|11|74
+Vitinho|RW|BRA|31|28|71
+Enner Valencia|ST|ECU|35|13|76
+Rafael Borré|ST|COL|29|19|77
+Ricardo Mathias|ST|BRA|19|30|70
+`,
+'bra:BAH':`
+Marcos Felipe|GK|BRA|29|12|74
+Ronaldo|GK|BRA|23|1|68
+Santiago Arias|RB|COL|33|13|73
+Gilberto|RB|BRA|32|2|71
+Kanu|CB|BRA|28|4|73
+Gabriel Xavier|CB|BRA|31|34|73
+David Duarte|CB|BRA|30|44|71
+Luciano Juba|LB|BRA|25|46|75
+Iago Borduchi|LB|BRA|28|16|71
+Caio Alexandre|DM|BRA|26|19|75
+Rezende|DM|BRA|28|88|72
+Jean Lucas|CM|BRA|27|6|76
+Everton Ribeiro|AM|BRA|36|10|76
+Cauly|AM|BRA|29|8|76
+Ademir|RW|BRA|30|7|72
+Erick Pulga|LW|BRA|24|16|74
+Rodrigo Nestor|CM|BRA|24|30|72
+Lucho Rodríguez|ST|URU|31|9|76
+Willian José|ST|BRA|33|12|73
+`,
+'bra:VAS':`
+Léo Jardim|GK|BRA|30|1|76
+Keiller|GK|BRA|29|24|67
+Puma Rodríguez|RB|URU|28|2|72
+Paulo Henrique|RB|BRA|28|27|71
+João Victor|CB|BRA|26|13|73
+Léo|CB|BRA|29|4|72
+Maicon|CB|BRA|36|5|70
+Lucas Piton|LB|BRA|24|6|75
+Victor Luis|LB|BRA|31|16|69
+Hugo Moura|DM|BRA|27|25|73
+Jair|DM|BRA|30|8|71
+Sforza|CM|ARG|23|35|72
+Philippe Coutinho|AM|BRA|32|10|77
+Dimitri Payet|AM|FRA|38|18|76
+Nuno Moreira|LW|POR|25|17|73
+Rayan|RW|BRA|18|77|74
+David|LW|BRA|29|7|71
+Pablo Vegetti|ST|ARG|36|99|77
+Jean David|ST|ARG|26|9|71
+`,
+'bra:FOR':`
+João Ricardo|GK|BRA|36|1|74
+Magrão|GK|BRA|28|22|66
+Tinga|RB|BRA|31|2|71
+Eros Mancuso|RB|ARG|25|13|70
+Emanuel Brítez|CB|ARG|32|33|73
+Titi|CB|BRA|36|4|72
+Benjamín Kuscevic|CB|CHI|28|3|72
+Gastón Ávila|CB|ARG|23|14|71
+Bruno Pacheco|LB|BRA|33|12|70
+Diogo Barbosa|LB|BRA|32|16|70
+Matheus Rossetto|DM|BRA|28|17|71
+Pol Fernández|DM|ARG|33|30|72
+Zé Welison|DM|BRA|29|88|70
+Tomás Pochettino|AM|ARG|29|7|73
+Calebe|AM|BRA|24|20|71
+Marinho|RW|BRA|34|11|72
+Yago Pikachu|RW|BRA|32|22|74
+Moisés|LW|BRA|30|21|73
+Breno Lopes|LW|BRA|29|19|72
+Juan Martín Lucero|ST|ARG|33|9|75
+Renato Kayzer|ST|BRA|29|18|71
+`,
+'arg:RIV':`
+Franco Armani|GK|ARG|38|1|78
+Jeremías Ledesma|GK|ARG|32|25|71
+Gonzalo Montiel|RB|ARG|28|29|77
+Fabricio Bustos|RB|ARG|29|33|73
+Germán Pezzella|CB|ARG|33|6|74
+Paulo Díaz|CB|CHI|30|17|77
+Lautaro Rivero|CB|ARG|21|2|72
+Lucas Martínez Quarta|CB|ARG|28|28|74
+Marcos Acuña|LB|ARG|33|8|78
+Milton Casco|LB|ARG|37|20|71
+Enzo Pérez|DM|ARG|39|24|72
+Matías Kranevitter|DM|ARG|32|5|72
+Rodrigo Aliendro|CM|ARG|34|29|72
+Ignacio Fernández|AM|ARG|35|26|74
+Manuel Lanzini|AM|ARG|32|10|75
+Franco Mastantuono|AM|ARG|17|30|79
+Maximiliano Meza|RW|ARG|32|11|72
+Facundo Colidio|ST|ARG|25|9|77
+Miguel Borja|ST|COL|32|19|75
+Sebastián Driussi|ST|ARG|29|7|77
+`,
+'arg:BOC':`
+Agustín Marchesín|GK|ARG|37|1|75
+Sergio Romero|GK|ARG|38|25|71
+Luis Advíncula|RB|PER|35|17|75
+Juan Barinaga|RB|ARG|24|29|71
+Nicolás Figal|CB|ARG|31|4|74
+Marcos Rojo|CB|ARG|35|6|73
+Cristian Lema|CB|ARG|35|13|71
+Ayrton Costa|CB|ARG|25|3|72
+Lautaro Blanco|LB|ARG|26|18|73
+Marcelo Saracchi|LB|URU|27|29|72
+Frank Fabra|LB|COL|34|18|70
+Tomás Belmonte|DM|ARG|27|30|73
+Milton Delgado|DM|ARG|19|36|73
+Guillermo Fernández|CM|ARG|33|8|72
+Kevin Zenón|AM|ARG|24|22|76
+Carlos Palacios|AM|CHI|24|5|75
+Alan Velasco|AM|ARG|22|20|73
+Exequiel Zeballos|LW|ARG|22|7|74
+Lucas Janson|LW|ARG|30|17|72
+Miguel Merentiel|ST|URU|29|16|77
+Edinson Cavani|ST|URU|38|10|77
+Milton Giménez|ST|ARG|28|9|74
+`,
+'arg:RAC':`
+Gabriel Arias|GK|CHI|37|1|75
+Facundo Cambeses|GK|ARG|28|12|71
+Gastón Martirena|RB|URU|25|2|75
+Santiago Sosa|CB|ARG|26|5|74
+Agustín García Basso|CB|ARG|27|4|73
+Nazareno Colombo|CB|ARG|25|13|72
+Marco Di Cesare|CB|ARG|23|24|72
+Gabriel Rojas|LB|ARG|27|3|74
+Juan Nardoni|DM|ARG|23|8|76
+Agustín Almendra|CM|ARG|25|32|74
+Bruno Zuculini|DM|ARG|32|6|72
+Juan Fernando Quintero|AM|COL|32|10|76
+Baltasar Rodríguez|AM|ARG|22|40|72
+Santiago Solari|RW|ARG|26|17|74
+Luciano Vietto|LW|ARG|31|11|73
+Maximiliano Salas|ST|ARG|27|7|76
+Adrián Martínez|ST|ARG|32|9|78
+Roger Martínez|ST|COL|31|30|73
+`,
+'arg:EST':`
+Matías Mansilla|GK|ARG|30|1|72
+Leandro González Pírez|CB|ARG|33|15|72
+Ramiro Funes Mori|CB|ARG|34|6|71
+Facundo Rodríguez|CB|ARG|24|2|72
+Gastón Benedetti|LB|ARG|23|3|73
+Eric Meza|RB|ARG|25|29|71
+Santiago Ascacíbar|DM|ARG|28|5|76
+Mikel Amondarain|DM|ARG|22|30|73
+Tiago Palacios|RW|ARG|22|11|73
+Edwuin Cetré|LW|COL|27|10|74
+Cristian Medina|CM|ARG|23|8|74
+José Sosa|CM|ARG|40|18|70
+Guido Carrillo|ST|ARG|34|9|73
+Lucas Alario|ST|ARG|32|20|72
+`,
+'arg:IND':`
+Rodrigo Rey|GK|ARG|34|1|74
+Federico Vera|RB|ARG|25|29|71
+Kevin Lomónaco|CB|ARG|23|34|75
+Sebastián Valdez|CB|URU|27|2|72
+Adrián Sporle|LB|ARG|29|3|70
+Iván Marcone|DM|ARG|35|5|73
+Felipe Loyola|CM|CHI|24|21|74
+Federico Mancuello|AM|ARG|36|13|71
+Luciano Cabral|AM|CHI|30|10|73
+Diego Tarzia|RW|ARG|22|36|71
+Santiago Montiel|LW|ARG|24|26|73
+Gabriel Ávalos|ST|PAR|34|9|73
+Matías Giménez|ST|ARG|27|7|71
+`,
+'arg:SLO':`
+Orlando Gill|GK|ARG|26|1|72
+Facundo Altamirano|GK|ARG|28|12|69
+Jhohan Romaña|CB|COL|26|2|73
+Gastón Hernández|CB|ARG|27|6|72
+Elías Báez|LB|ARG|24|3|70
+Eric Remedi|DM|ARG|30|5|72
+Nery Domínguez|DM|ARG|35|20|70
+Malcom Braida|CM|ARG|27|8|71
+Iker Muniain|AM|ESP|32|10|74
+Alexis Cuello|ST|ARG|27|7|72
+Andrés Vombergar|ST|SVN|30|9|72
+Matías Reali|LW|ARG|24|11|71
+`,
+'arg:TAL':`
+Guido Herrera|GK|ARG|33|1|74
+Gastón Benavídez|RB|ARG|28|17|72
+Matías Catalán|CB|ARG|32|2|72
+Blas Riveros|LB|PAR|27|3|71
+Ulises Ortegoza|DM|ARG|27|22|72
+Juan Portillo|DM|ARG|24|5|73
+Rubén Botta|AM|ARG|35|10|72
+Valentín Depietri|RW|ARG|24|7|72
+Federico Girotti|ST|ARG|25|9|73
+`,
+'arg:LAN':`
+Nahuel Losada|GK|ARG|31|1|72
+Carlos Izquierdoz|CB|ARG|36|5|72
+José Canale|CB|ARG|24|2|71
+Sasha Marcich|LB|ARG|24|3|70
+Agustín Cardozo|DM|ARG|24|30|71
+Felipe Peña Biafore|CM|ARG|25|8|72
+Marcelino Moreno|AM|ARG|29|10|73
+Eduardo Salvio|RW|ARG|34|11|73
+Franco Watson|LW|ARG|22|36|70
+Walter Bou|ST|ARG|31|7|72
+Rodrigo Castillo|ST|ARG|26|9|71
+`,
+'mls:MIA':`
+Óscar Ustari|GK|ARG|38|19|72
+Drake Callender|GK|USA|27|1|72
+Marcelo Weigandt|RB|ARG|25|57|72
+Ian Fray|RB|JAM|22|2|71
+Tomás Avilés|CB|ARG|21|6|73
+Maximiliano Falcón|CB|URU|28|37|73
+Noah Allen|LB|USA|21|32|71
+Jordi Alba|LB|ESP|36|18|79
+Sergio Busquets|DM|ESP|36|5|81
+Federico Redondo|DM|ARG|22|55|73
+Benjamin Cremaschi|CM|USA|20|30|73
+Yannick Bright|DM|ITA|23|41|71
+Telasco Segovia|CM|VEN|22|8|73
+Lionel Messi|AM|ARG|37|10|90
+Tadeo Allende|RW|ARG|26|21|72
+Robert Taylor|LW|FIN|30|16|72
+Luis Suárez|ST|URU|38|9|82
+Fafà Picault|LW|HAI|34|14|70
+`,
+'mls:LAF':`
+Hugo Lloris|GK|FRA|38|1|78
+David Ochoa|GK|USA|24|77|68
+Sergi Palencia|RB|ESP|29|4|72
+Ryan Hollingshead|LB|USA|34|24|72
+Aaron Long|CB|USA|32|33|72
+Eddie Segura|CB|COL|28|3|72
+Maxime Chanot|CB|LUX|35|5|70
+Marlon|CB|BRA|29|12|71
+Igor Jesus|CM|BRA|24|28|72
+Timothy Tillman|CM|GER|26|11|74
+Mark Delgado|CM|USA|29|8|73
+Eduard Atuesta|DM|COL|27|20|72
+Denis Bouanga|LW|GAB|30|99|82
+David Martínez|RW|VEN|19|17|72
+Cengiz Ünder|RW|TUR|27|7|74
+Olivier Giroud|ST|FRA|38|9|78
+Nathan Ordaz|ST|SLV|21|29|72
+`,
+'mls:LAG':`
+Novak Micovic|GK|SRB|25|1|71
+John McCarthy|GK|USA|32|77|70
+Miki Yamane|RB|JPN|31|2|73
+Julián Aude|LB|ARG|22|3|72
+Maya Yoshida|CB|JPN|36|4|72
+Emiro Garcés|CB|COL|24|5|71
+Zanka|CB|DEN|35|25|70
+John Nelson|LB|USA|26|14|70
+Edwin Cerrillo|DM|USA|24|6|72
+Riqui Puig|CM|ESP|25|10|79
+Marco Reus|AM|GER|35|18|78
+Isaiah Parente|CM|USA|24|8|70
+Gabriel Pec|RW|BRA|24|11|77
+Joseph Paintsil|LW|GHA|27|28|77
+Diego Fagundez|AM|URU|30|7|71
+Christian Ramírez|ST|USA|34|9|70
+Matheus Nascimento|ST|BRA|21|30|71
+`,
+'mls:ATL':`
+Brad Guzan|GK|USA|40|1|71
+Josh Cohen|GK|USA|32|31|69
+Brooks Lennon|RB|USA|27|11|72
+Ronald Hernández|RB|VEN|27|2|70
+Luis Abram|CB|PER|29|4|71
+Stian Gregersen|CB|NOR|30|5|71
+Derrick Williams|CB|IRL|32|3|69
+Pedro Amador|LB|POR|27|21|71
+Bartosz Slisz|DM|POL|26|6|73
+Tristan Muyumba|DM|FRA|28|8|71
+Mateusz Klich|CM|POL|34|43|71
+Alexey Miranchuk|AM|RUS|29|59|77
+Saba Lobzhanidze|RW|GEO|30|9|73
+Jamal Thiaré|ST|SEN|32|26|70
+Emmanuel Latte Lath|ST|CIV|26|7|76
+Cayman Togashi|ST|JPN|21|18|68
+`,
+'mls:CLB':`
+Patrick Schulte|GK|USA|24|28|73
+Nicholas Hagen|GK|GUA|28|1|68
+Yevhen Cheberko|CB|UKR|27|24|71
+Rudy Camacho|CB|FRA|34|4|71
+Malte Amundsen|CB|DEN|26|12|71
+Sean Zawadzki|CB|USA|25|25|71
+Mohamed Farsi|RB|ALG|25|23|72
+Max Arfsten|LB|USA|24|38|73
+Darlington Nagbe|DM|USA|34|6|74
+Dylan Chambost|CM|FRA|27|8|71
+Daniel Gazdag|AM|HUN|29|10|75
+Jacen Russell-Rowe|ST|CAN|22|29|72
+Diego Rossi|AM|URU|27|9|77
+Wessam Abou Ali|ST|PLE|26|11|73
+Taha Habroune|CM|USA|20|31|68
+`,
+'mls:SEA':`
+Stefan Frei|GK|SUI|39|24|73
+Andrew Thomas|GK|USA|26|1|68
+Alex Roldán|RB|SLV|28|16|73
+Yeimar Gómez|CB|COL|33|28|73
+Jackson Ragen|CB|USA|26|25|72
+Nouhou|LB|CMR|27|5|73
+Kim Kee-hee|CB|KOR|35|20|70
+Reed Baker-Whiting|LB|USA|20|31|70
+João Paulo|DM|BRA|34|6|72
+Obed Vargas|DM|USA|19|73|74
+Cristian Roldán|CM|USA|29|7|74
+Albert Rusnák|AM|SVK|30|11|75
+Pedro de la Vega|RW|ARG|24|10|73
+Paul Rothrock|RW|USA|26|14|72
+Jordan Morris|ST|USA|30|13|75
+Jesús Ferreira|ST|USA|24|8|74
+Danny Musovski|ST|USA|31|22|71
+Georgi Minoungou|RW|CIV|22|17|70
+`,
+'mls:CIN':`
+Roman Celentano|GK|USA|24|18|73
+Evan Louro|GK|USA|29|1|66
+DeAndre Yedlin|RB|USA|31|91|71
+Alvas Powell|RB|JAM|30|92|69
+Nick Hagglund|CB|USA|32|4|70
+Matt Miazga|CB|USA|29|21|72
+Miles Robinson|CB|USA|28|12|74
+Teenage Hadebe|CB|ZIM|29|33|70
+Lukas Engel|LB|DEN|26|3|70
+Obinna Nwobodo|DM|NGA|28|5|74
+Pavel Bucha|CM|CZE|27|8|74
+Tah Brian Anunga|DM|CMR|28|29|70
+Evander|AM|BRA|26|10|79
+Luca Orellano|RW|ARG|25|11|73
+Yuya Kubo|CM|JPN|31|7|71
+Kévin Denkey|ST|TOG|24|9|77
+Sergio Santos|ST|BRA|30|17|70
+Gerardo Valenzuela|AM|MEX|20|30|68
+`,
+'mls:DAL':`
+Maarten Paes|GK|NED|26|30|74
+Jacob Jackson|GK|USA|24|1|66
+Nolan Norris|LB|USA|20|13|69
+Marco Farfan|LB|USA|26|4|71
+Sebastien Ibeagha|CB|USA|33|3|70
+Shaq Moore|RB|USA|28|2|71
+Osaze Urhoghide|CB|ENG|24|15|70
+Lalas Abubakar|CB|GHA|30|6|70
+Patrickson Delgado|CM|ECU|22|8|71
+Asier Illarramendi|DM|ESP|35|14|73
+Sebastian Lletget|CM|USA|32|12|70
+Luciano Acosta|AM|ARG|30|10|78
+Petar Musa|ST|CRO|27|9|76
+Anderson Julio|RW|ECU|29|11|71
+Logan Farrington|ST|USA|25|17|70
+Bernard Kamungo|RW|TAN|23|77|70
+`,
+'mls:NYC':`
+Matt Freese|GK|USA|26|49|73
+Greg Ranjitsingh|GK|TRI|31|1|65
+Mitja Ilenič|RB|SVN|20|32|70
+Tayvon Gray|RB|USA|22|24|71
+Thiago Martins|CB|BRA|30|5|73
+Birk Risa|CB|NOR|26|4|71
+Justin Haak|DM|USA|23|8|70
+Kevin O'Toole|LB|USA|25|2|71
+Keaton Parks|CM|USA|27|55|72
+James Sands|DM|USA|24|16|72
+Andrés Perea|CM|COL|24|21|71
+Hannes Wolf|AM|AUT|26|17|73
+Julián Fernández|RW|ARG|21|11|72
+Agustín Ojeda|LW|ARG|20|19|71
+Alonso Martínez|ST|CRC|26|9|76
+Mounsef Bakrar|ST|ALG|24|29|71
+`,
+'mls:RBNY':`
+Carlos Coronel|GK|BRA|28|1|73
+AJ Marcucci|GK|USA|25|31|66
+Kyle Duncan|RB|USA|27|6|72
+Sean Nealis|CB|USA|27|15|72
+Noah Eile|CB|SWE|22|4|70
+Andrés Reyes|CB|COL|25|3|72
+Dylan Nealis|RB|USA|26|12|70
+Peter Stroud|DM|USA|23|8|71
+Daniel Edelman|DM|USA|22|75|71
+Felipe Carballo|CM|URU|28|30|71
+Emil Forsberg|AM|SWE|33|10|76
+Lewis Morgan|RW|SCO|28|9|73
+Dennis Gjengaar|LW|NOR|21|20|69
+Wikelman Carmona|AM|VEN|21|16|71
+Eric Maxim Choupo-Moting|ST|CMR|36|13|76
+Julian Hall|ST|USA|17|29|68
+`,
+'mls:NSH':`
+Joe Willis|GK|USA|36|1|71
+Brian Schwake|GK|USA|24|22|65
+Andy Najar|RB|HON|32|14|72
+Walker Zimmerman|CB|USA|32|25|73
+Jack Maher|CB|USA|25|5|72
+Josh Bauer|CB|USA|26|4|69
+Daniel Lovitz|LB|USA|33|2|70
+Edvard Tagseth|CM|NOR|24|8|71
+Patrick Yazbek|CM|AUS|23|6|72
+Bryan Acosta|DM|HON|31|20|70
+Hany Mukhtar|AM|GER|30|10|79
+Jacob Shaffelburg|LW|CAN|25|24|74
+Sam Surridge|ST|ENG|26|9|77
+`,
+'mls:CLT':`
+Kristijan Kahlina|GK|CRO|32|1|74
+David Bingham|GK|USA|35|24|66
+Nathan Byrne|RB|ENG|32|2|71
+Adilson Malanda|CB|FRA|23|5|73
+Andrew Privett|CB|USA|26|4|71
+Tim Ream|CB|USA|37|3|73
+Jere Uronen|LB|FIN|30|54|71
+Ashley Westwood|DM|ENG|35|8|73
+Brandt Bronico|CM|USA|30|13|71
+Djibril Diani|DM|FRA|27|93|70
+Pep Biel|AM|ESP|28|10|73
+Wilfried Zaha|LW|CIV|32|11|77
+Liel Abada|RW|ISR|23|9|73
+Kerwin Vargas|RW|COL|23|18|71
+Patrick Agyemang|ST|USA|24|33|74
+Idan Toklomati|ST|ISR|20|20|71
+`,
+'mls:ATX':`
+Brad Stuver|GK|USA|34|1|73
+Stefan Cleveland|GK|USA|30|30|66
+Jon Gallagher|RB|IRL|28|17|71
+Guilherme Biro|LB|BRA|21|16|70
+Julio Cascante|CB|CRC|31|18|71
+Brendan Hines-Ike|CB|USA|30|4|70
+Oleksandr Svatok|CB|UKR|30|5|71
+Mikkel Desler|RB|DEN|30|77|70
+Daniel Pereira|DM|VEN|24|6|72
+Ilie Sánchez|DM|ESP|34|24|70
+Owen Wolff|CM|USA|20|33|72
+Besard Šabović|CM|SWE|27|14|70
+Jáder Obrian|RW|COL|29|7|70
+Osman Bukari|RW|GHA|26|10|73
+Myrto Uzuni|ST|ALB|29|9|74
+Brandon Vázquez|ST|USA|26|19|75
+Diego Rubio|ST|CHI|32|11|69
+`,
+'mls:HOU':`
+Jonathan Bond|GK|ENG|32|1|70
+Andrew Tarbell|GK|USA|31|22|65
+Griffin Dorsey|RB|USA|26|25|71
+Daniel Steres|CB|USA|34|5|68
+Ethan Bartlow|CB|USA|25|4|70
+Femi Awodesu|CB|USA|22|3|68
+Franco Escobar|RB|ARG|30|2|70
+Artur|DM|BRA|29|6|72
+Jack McGlynn|CM|USA|21|8|74
+Amine Bassi|AM|MAR|27|10|73
+Sebastian Kowalczyk|AM|POL|26|11|70
+Lawrence Ennali|LW|GER|23|7|71
+Ezequiel Ponce|ST|ARG|28|9|72
+Gabe Segal|ST|USA|22|30|66
+`,
+'mls:NE':`
+Aljaž Ivačič|GK|SVN|31|1|71
+Brandon Bye|RB|USA|29|15|71
+Keegan Hughes|CB|USA|25|5|69
+Mamadou Fofana|CB|MLI|27|4|70
+Will Sands|LB|USA|24|3|69
+Ilay Feingold|RB|ISR|20|22|69
+Matt Polster|DM|USA|31|8|71
+Carles Gil|AM|ESP|32|10|79
+Alhassan Yusuf|DM|NGA|24|16|71
+Tomás Chancalay|RW|ARG|26|30|72
+Noel Buck|CM|USA|20|6|71
+Luca Langoni|RW|ARG|23|17|72
+Leonardo Campana|ST|ECU|24|9|73
+Ignatius Ganago|ST|CMR|26|11|70
+`,
+'mls:CHI':`
+Chris Brady|GK|USA|21|1|72
+Jeff Gal|GK|USA|33|18|64
+Andrew Gutman|LB|USA|28|3|71
+Carlos Terán|CB|COL|24|4|71
+Jack Elliott|CB|ENG|29|5|71
+Mauricio Pineda|DM|USA|27|22|70
+Kellyn Acosta|DM|USA|29|23|71
+Brian Gutiérrez|AM|USA|21|17|73
+Jonathan Bamba|LW|CIV|29|10|74
+Hugo Cuypers|ST|BEL|28|9|74
+Tom Barlow|ST|USA|29|74|68
+Chris Mueller|RW|USA|28|8|70
+`,
+'mls:COL':`
+Zack Steffen|GK|USA|30|23|74
+Nico Hansen|GK|USA|27|1|65
+Keegan Rosenberry|RB|USA|31|2|70
+Ian Murphy|CB|USA|26|32|70
+Andreas Maxsø|CB|DEN|31|5|72
+Sam Vines|LB|USA|26|3|71
+Josh Atencio|DM|USA|23|8|71
+Connor Ronan|CM|IRL|27|18|71
+Cole Bassett|CM|USA|23|26|73
+Djordje Mihailovic|AM|USA|26|10|75
+Jonathan Lewis|LW|USA|27|7|70
+Calvin Harris|RW|ENG|24|17|70
+Rafael Navarro|ST|BRA|25|9|72
+Kévin Cabral|LW|FRA|25|20|70
+Darren Yapi|ST|USA|20|19|68
+`,
+'mls:ORL':`
+Pedro Gallese|GK|PER|35|1|74
+Javier Otero|GK|VEN|21|30|66
+Alex Freeman|RB|USA|20|24|72
+Kyle Smith|RB|USA|33|8|69
+Robin Jansson|CB|SWE|33|6|72
+Rodrigo Schlegel|CB|ARG|27|15|71
+David Brekalo|CB|SVN|26|5|71
+Rafael Santos|LB|BRA|25|3|70
+César Araújo|DM|URU|24|20|73
+Wilder Cartagena|DM|PER|30|16|71
+Marco Pašalić|RW|CRO|24|11|74
+Martín Ojeda|AM|ARG|26|10|75
+Iván Angulo|LW|COL|26|77|72
+Luis Muriel|ST|COL|34|9|76
+Duncan McGuire|ST|USA|24|13|73
+Ramiro Enrique|ST|ARG|24|7|71
+`,
+'mls:MIN':`
+Dayne St. Clair|GK|CAN|27|97|74
+Alec Smir|GK|USA|26|1|64
+DJ Taylor|RB|USA|26|27|70
+Michael Boxall|CB|NZL|36|15|71
+Micky Tapias|CB|MEX|26|4|71
+Nicolás Romero|CB|ARG|24|20|71
+Anthony Markanich|LB|USA|25|14|71
+Joseph Rosales|LB|HON|24|8|71
+Wil Trapp|DM|USA|32|20|71
+Hassani Dotson|DM|USA|27|31|71
+Robin Lod|CM|FIN|32|17|72
+Joaquín Pereyra|AM|ARG|26|10|73
+Bongokuhle Hlongwane|RW|RSA|24|21|72
+Kelvin Yeboah|ST|GHA|24|9|74
+Tani Oluwaseyi|ST|CAN|24|14|73
+Sang Bin Jeong|LW|KOR|23|11|71
+`,
+'mls:PHI':`
+Andre Blake|GK|JAM|34|18|74
+Oliver Semmle|GK|GER|26|1|67
+Nathan Harriel|RB|USA|23|26|72
+Jakob Glesnes|CB|NOR|30|5|73
+Olivier Mbaizo|RB|CMR|27|15|70
+Damion Lowe|CB|JAM|31|17|70
+Ian Glavinovich|CB|ARG|24|4|70
+Kai Wagner|LB|GER|28|27|73
+José Andrés Martínez|DM|VEN|30|8|72
+Jesús Bueno|DM|VEN|25|20|70
+Danley Jean Jacques|CM|HAI|24|6|71
+Quinn Sullivan|AM|USA|21|33|73
+Cavan Sullivan|AM|USA|15|34|68
+Indiana Vassilev|LW|USA|24|19|71
+Bruno Damiani|ST|URU|23|9|72
+Mikael Uhre|ST|DEN|30|7|73
+Tai Baribo|ST|ISR|27|29|74
+`,
+
+
+};
+function parseRoster(txt){
+  return txt.trim().split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const a = l.split('|');
+    return { name:a[0], pos:a[1], nat:a[2], age:+a[3], num:+a[4], rat:+a[5] };
+  });
+}
 LEAGUES.forEach(L=>{
   const cl = CLUBS[L.id];
   cl.forEach((c,i)=>{
@@ -247,8 +3588,18 @@ LEAGUES.forEach(L=>{
   });
 });
 DB.teams.forEach(t=>{
+  const raw = ROSTER[t.lg + ':' + t.abbr];
+  const list = raw ? parseRoster(raw) : null;
+  const used = list ? list.map(()=>false) : null;
   SQUAD_SHAPE.forEach(pos=>{
-    const p = makePlayer(t, pos, t.tierQ);
+    let real = null;
+    if (list){
+      let bi=-1, br=-1;
+      list.forEach((r,j)=>{ if(!used[j] && r.pos===pos && r.rat>br){ br=r.rat; bi=j; } });
+      if (bi<0) list.forEach((r,j)=>{ if(!used[j] && GROUP[r.pos]===GROUP[pos] && r.rat>br){ br=r.rat; bi=j; } });
+      if (bi>=0){ used[bi]=true; real = list[bi]; }
+    }
+    const p = makePlayer(t, real ? real.pos : pos, real ? t.tierQ : t.tierQ*(list?0.72:1), real);
     DB.players.push(p); DB.byId[p.id]=p; t.squad.push(p.id);
   });
   // team season record, correlated with squad quality
@@ -714,9 +4065,29 @@ const money = v => v>=1000 ? '€'+(v/1000).toFixed(2)+'bn' : '€'+v.toFixed(v<
 
 /* Crest: club initials in a lozenge, tinted with the club colour.
    No logos — those are licensed marks. Initials read fine at 24px. */
+function readable(hex){
+  const n = parseInt(hex.slice(1),16);
+  const r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+  let h=0, s=0, l=(mx+mn)/2;
+  if(mx!==mn){
+    const d=mx-mn;
+    s = l>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+    h = (mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4)/6;
+  }
+  l = Math.max(l,0.60);
+  if(s>0.05) s = Math.max(s,0.42);
+  const q = l<0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+  const f = t => {
+    t=(t%1+1)%1;
+    const v = t<1/6 ? p+(q-p)*6*t : t<1/2 ? q : t<2/3 ? p+(q-p)*(2/3-t)*6 : p;
+    return Math.round(v*255).toString(16).padStart(2,'0');
+  };
+  return '#'+f(h+1/3)+f(h)+f(h-1/3);
+}
 function crest(t, cls=''){
-  const c = t.color;
-  return `<span class="crest ${cls}" style="background:${c}1F;color:${c};border-color:${c}44">${esc(t.abbr)}</span>`;
+  const c = readable(t.color);
+  return `<span class="crest ${cls}" style="background:${c}1A;color:${c};border-color:${c}3D">${esc(t.abbr)}</span>`;
 }
 function ratColor(v){ return v>=50 ? 'var(--sodium)' : 'var(--chalk-3)'; }
 
@@ -1649,7 +5020,7 @@ function searchAll(q){
   return [...pl,...tm,...mg];
 }
 function wireSearch(inputSel,resSel,onPick){
-  const inp=$(inputSel), box=$(resSel); if(!inp) return;
+  const inp=$(inputSel), box=$(resSel); if(!inp||!box) return;
   inp.oninput = ()=>{
     const r = searchAll(inp.value);
     if(!r.length){ box.hidden=true; return; }
@@ -1728,6 +5099,14 @@ const h = location.hash.slice(1);
 if (VIEWS[h]) ST8.view = h;
 if (ST8.view==='player') ARG = DB.players.slice().sort((a,b)=>b.ps-a.ps)[0].id;
 if (ST8.view==='match')  ARG = DB.matches[0].id;
-if (!ST8.cmp.length){ const t=[...DB.players].sort((a,b)=>b.ps-a.ps); ST8.cmp=[t[0].id, t.find(p=>p.grp===t[0].grp&&p.id!==t[0].id).id]; }
+if (!ST8.cmp.length){
+  const t = [...DB.players].sort((a,b)=>b.ps-a.ps);
+  const mate = t.find(p=>p.grp===t[0].grp && p.id!==t[0].id) || t[1];
+  ST8.cmp = mate ? [t[0].id, mate.id] : [t[0].id];
+}
 window.addEventListener('hashchange',()=>{ const v=location.hash.slice(1); if(VIEWS[v]&&v!==ST8.view) go(v); });
 render();
+
+</script>
+</body>
+</html>
