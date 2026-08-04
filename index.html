@@ -3828,7 +3828,8 @@ function marketValue(p){
   const a = AGEV[p.age] ?? .3;
   const potBoost = 1 + (p.pot - p.rat)*0.055;
   const contractF = clamp(0.62 + (p.contract-2026)*0.12, .62, 1.06);
-  if (DEAL_FEE[p.name] != null) return DEAL_FEE[p.name];     // fee actually paid this summer
+ if (DEAL_FEE[p.name] != null) return DEAL_FEE[p.name];     // fee actually paid this summer
+  if (TOP500[p.name] != null)   return TOP500[p.name];       // verified board value
   if (TM_VALUES[p.name] != null) return TM_VALUES[p.name];   // real Transfermarkt figure
   const v = Math.pow(Math.max(p.rat-40,1), 3.40) * 0.000082 * a * (0.5+coef*0.75) * potBoost * contractF;
   const posMult = {ST:1.22,W:1.16,AM:1.1,CM:1.0,DM:.94,FB:.9,CB:.92,GK:.72}[p.grp];
