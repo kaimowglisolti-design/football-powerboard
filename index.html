@@ -5426,7 +5426,10 @@ VIEWS.player = (id) => {
     </tbody></table></div></div>`:''}
 
   ${tab==='value'?`<div class="grid gside"><div class="panel"><div class="panel-h"><h3>Market value</h3><span class="eyebrow">12 windows</span></div><div class="panel-b">
-      <div class="spread mb"><span class="num" style="font-size:30px;font-weight:700">${money(p.mv)}</span>${delta(p.mvd,'m')}</div>
+  <div class="spread mb"><span class="num" style="font-size:30px;font-weight:700">${money(p.mv)}</span>${delta(p.mvd,'m')}</div>
+      <div class="mb">${p.tmReal
+        ? `<span class="vbadge">✓ ${p.feeReal ? 'confirmed fee' : 'sourced'}</span>`
+        : `<span class="vbadge" style="color:var(--chalk-3);background:transparent;border-color:var(--line)">model estimate</span>`}</div>
       ${spark(p.mvh,520,110)}
       <div class="wp-lab"><span>3 yrs ago</span><span>Now</span></div>
       <div class="chalk-rule mt mb"></div>
