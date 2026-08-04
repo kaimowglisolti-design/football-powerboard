@@ -5036,6 +5036,7 @@ VIEWS.today = () => {
   return vhead('Matchday · '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
     'Today',
     `${live.length ? live.length + ' in play right now. ' : 'Nothing in play right now. '}${DB.matches.length} real fixtures loaded from the match feed — real clubs, real kickoff times, and real scores for matches already played.`)
+  + valueDisclosure()
   + `<div class="grid gside">
     <div>
       ${live.length?`<div class="panel mb"><div class="panel-h"><h3>Live now</h3><span class="live">${live.length} in play</span></div>${live.map(matchRow).join('')}</div>`:''}
