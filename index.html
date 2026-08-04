@@ -3917,7 +3917,8 @@ DB.players.forEach(p=>{
   p.mv  = marketValue(p);
   p.mvh = mvHistory(p);
   p.mvd = +(p.mvh[11]-p.mvh[8]).toFixed(1);
-  p.tmReal = TM_VALUES[p.name] != null || DEAL_FEE[p.name] != null;
+p.tmReal = TOP500[p.name] != null || TM_VALUES[p.name] != null || DEAL_FEE[p.name] != null;
+  p.onBoard = Object.prototype.hasOwnProperty.call(TOP500, p.name);
   p.feeReal = DEAL_FEE[p.name] != null;
   p.styles = styles(p);
   p.axes = axes(p);
