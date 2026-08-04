@@ -3834,7 +3834,19 @@ function marketValue(p){
   const posMult = {ST:1.22,W:1.16,AM:1.1,CM:1.0,DM:.94,FB:.9,CB:.92,GK:.72}[p.grp];
   return Math.max(0.2, +(v*posMult).toFixed(1));   // € millions, Transfermarkt-calibrated
 }
+/* 12-month market value history.
+   TM_HISTORY holds real Transfermarkt curves, keyed by player name:
+   [oldest ... newest], twelve monthly values in € millions.
+   Anything not in there falls back to an estimated curve and is
+   flagged mvhReal:false so the UI can label it honestly. */
+const TM_HISTORY = {};
 function mvHistory(p){
+  const real = TM_HISTORY[p.name];
+  if (Array.isArray(real) && real.length === 12){
+    p.mvhReal = true;
+    return real.map(v => +(+v).toFixed(1));
+  }
+  p.mvhReal = false;
   const out=[]; let v = p.mv * rf(.55,.85);
   for(let i=0;i<12;i++){ v = Math.max(.2, v * rf(.94,1.14)); out.push(+v.toFixed(1)); }
   out[11] = p.mv; return out;
