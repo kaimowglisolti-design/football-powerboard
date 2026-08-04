@@ -5079,6 +5079,49 @@ VIEWS.today = () => {
       </div></div>
     </div></div>`;
 };
+   /* ---------- VALUE DISCLOSURE PANEL ----------
+   The football equivalent of the VC board's "NOT PUBLIC DATA" panel.
+   Counts are computed live from DB.players so the numbers can never
+   drift away from what's actually loaded. */
+function valueDisclosure(){
+  const pool     = DB.players;
+  const board    = pool.filter(p => p.onBoard);
+  const verified = pool.filter(p => p.tmReal);
+  const feeReal  = pool.filter(p => p.feeReal);
+  const pct      = board.length ? Math.round(verified.length / board.length * 100) : 0;
+
+  return `<div class="disclose">
+    <div class="disclose-mark"><span>NOT</span><span>A</span><span>FEE</span></div>
+    <div class="disclose-body">
+      <p><b>A market value is an estimate, not a price anybody paid.</b>
+      Clubs don't publish what a player is worth, and most transfer fees stay confidential or
+      get reported in ranges. What follows is the closest honest picture: Transfermarkt's
+      published valuations where they exist, actual fees where a deal is confirmed, and a
+      clearly-flagged model estimate everywhere else.</p>
+
+      <div class="disclose-bar" role="img"
+           aria-label="${verified.length} of ${board.length} board players carry a sourced value">
+        <div class="disclose-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="disclose-legend">
+        <span><i class="sw-real"></i>Sourced value</span>
+        <span><i class="sw-est"></i>Model estimate</span>
+        <span class="disclose-pct">${pct}% sourced</span>
+      </div>
+
+      <div class="disclose-stats">
+        <div><b>${board.length}</b><s>on the board</s></div>
+        <div><b>${verified.length}</b><s>sourced value</s></div>
+        <div><b>${feeReal.length}</b><s>confirmed fee</s></div>
+        <div><b>${board.length - verified.length}</b><s>estimated</s></div>
+      </div>
+
+      <p class="disclose-foot">Every figure carrying a sourced value is marked
+      <span class="vbadge">✓ sourced</span> wherever it appears. Anything without that badge
+      came out of the model and should be read as an approximation, not a fact.</p>
+    </div>
+  </div>`;
+}
 
 /* ---------------- MATCH CENTRE ---------------- */
 VIEWS.match = (id) => {
