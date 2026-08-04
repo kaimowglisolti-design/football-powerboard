@@ -618,7 +618,7 @@ const RUMOUR_STAGE = [
 ];
 
 /* ---------- build ---------- */
-const DB = { leagues:LEAGUES, teams:[], players:[], byId:{}, teamById:{}, matches:[], managers:[], rumours:[] };
+const DB = { leagues:LEAGUES, teams:[], players:[], byId:{}, teamById:{}, matches:[], managers:[], rumours:[], deals:[] };
 let _pid = 0, _tid = 0;
 
 function tier(i,n){ // club quality 0..1 — a rough Elo prior by table position
@@ -678,6 +678,7 @@ function ageCurve(a){ if(a<=20)return 'Rising'; if(a<=23)return 'Developing'; if
 const ROSTER = {
 /* ===== PREMIER LEAGUE — squads current to Aug 2026 transfer window ===== */
 'epl:ARS':`
+Piero Hincapié|CB|ECU|23|3|81
 Eberechi Eze|AM|ENG|26|10|83
 Noni Madueke|RW|ENG|22|11|79
 Martín Zubimendi|DM|ESP|26|6|84
@@ -718,10 +719,8 @@ Lucas Digne|LB|FRA|31|12|78
 Ian Maatsen|LB|NED|22|22|77
 Boubacar Kamara|DM|FRA|25|44|81
 Amadou Onana|DM|BEL|23|24|79
-Youri Tielemans|CM|BEL|27|8|82
 John McGinn|CM|SCO|30|7|79
 Jacob Ramsey|CM|ENG|23|41|76
-Morgan Rogers|AM|ENG|22|27|80
 Leon Bailey|RW|JAM|27|31|79
 Marco Asensio|LW|ESP|29|10|80
 Ollie Watkins|ST|ENG|29|11|85
@@ -732,7 +731,6 @@ Kepa Arrizabalaga|GK|ESP|30|1|79
 Mark Travers|GK|IRL|25|43|71
 Adam Smith|RB|ENG|33|15|74
 Julián Araujo|RB|MEX|23|16|74
-Marcos Senesi|CB|ARG|27|25|79
 James Hill|CB|ENG|22|2|72
 Miloš Kerkez|LB|HUN|21|3|80
 Tyler Adams|DM|USA|25|12|78
@@ -772,7 +770,6 @@ Jason Steele|GK|ENG|34|23|71
 Tariq Lamptey|RB|GHA|24|2|75
 Joël Veltman|RB|NED|32|6|76
 Lewis Dunk|CB|ENG|33|5|81
-Jan Paul van Hecke|CB|NED|24|29|79
 Adam Webster|CB|ENG|29|4|74
 Igor Julio|CB|BRA|26|3|77
 Pervis Estupiñán|LB|ECU|26|30|80
@@ -785,10 +782,14 @@ Kaoru Mitoma|LW|JPN|27|22|82
 Simon Adingra|LW|CIV|22|24|76
 Yankuba Minteh|RW|GAM|20|17|76
 Solly March|RW|ENG|30|7|76
-Danny Welbeck|ST|ENG|34|18|77
 Georginio Rutter|ST|FRA|22|11|76
 `,
 'epl:CHE':`
+Emanuel Emegha|ST|NED|22|9|77
+Geovany Quenda|RW|POR|17|77|77
+Danny Welbeck|ST|ENG|34|18|77
+Maxence Lacroix|CB|FRA|24|5|78
+Morgan Rogers|AM|ENG|22|27|80
 Jamie Gittens|LW|ENG|20|43|79
 João Pedro|ST|BRA|23|9|80
 Robert Sánchez|GK|ESP|27|1|77
@@ -799,7 +800,6 @@ Levi Colwill|CB|ENG|21|6|81
 Wesley Fofana|CB|FRA|24|29|80
 Benoît Badiashile|CB|FRA|23|5|77
 Tosin Adarabioyo|CB|ENG|27|4|77
-Marc Cucurella|LB|ESP|26|3|80
 Moisés Caicedo|DM|ECU|23|25|85
 Roméo Lavia|DM|BEL|21|45|77
 Enzo Fernández|CM|ARG|24|8|84
@@ -815,7 +815,6 @@ Remi Matthews|GK|ENG|30|13|68
 Daniel Muñoz|RB|COL|28|12|79
 Nathaniel Clyne|RB|ENG|33|17|72
 Chris Richards|CB|USA|24|26|77
-Maxence Lacroix|CB|FRA|24|5|78
 Chadi Riad|CB|MAR|21|34|74
 Tyrick Mitchell|LB|ENG|25|3|77
 Ben Chilwell|LB|ENG|28|21|76
@@ -914,6 +913,7 @@ Jamie Vardy|ST|ENG|38|9|76
 Patson Daka|ST|ZAM|26|20|74
 `,
 'epl:LIV':`
+Jérémy Jacquet|CB|FRA|19|24|73
 Hugo Ekitiké|ST|FRA|22|11|82
 Florian Wirtz|AM|GER|22|10|90
 Jeremie Frimpong|RB|NED|24|30|83
@@ -924,7 +924,6 @@ Conor Bradley|RB|NIR|21|84|76
 Virgil van Dijk|CB|NED|33|4|89
 Joe Gomez|CB|ENG|27|2|79
 Jarell Quansah|CB|ENG|21|78|76
-Andrew Robertson|LB|SCO|30|26|83
 Kostas Tsimikas|LB|GRE|28|21|77
 Ryan Gravenberch|DM|NED|22|38|82
 Wataru Endo|DM|JPN|31|3|77
@@ -937,6 +936,7 @@ Diogo Jota|ST|POR|28|20|83
 Federico Chiesa|RW|ITA|27|14|79
 `,
 'epl:MCI':`
+Elliot Anderson|CM|ENG|22|8|77
 Gianluigi Donnarumma|GK|ITA|26|1|87
 Antoine Semenyo|RW|GHA|24|24|79
 Rayan Cherki|AM|FRA|21|18|82
@@ -953,7 +953,6 @@ Joško Gvardiol|LB|CRO|23|24|85
 Rodri|DM|ESP|28|16|91
 Mateo Kovačić|DM|CRO|30|8|83
 Ilkay Gündoğan|CM|GER|34|19|82
-Bernardo Silva|CM|POR|30|20|86
 Matheus Nunes|CM|POR|26|27|78
 Phil Foden|AM|ENG|24|47|88
 Savinho|RW|BRA|20|26|80
@@ -966,6 +965,8 @@ Nico González|DM|ESP|23|14|78
 Vitor Reis|CB|BRA|19|26|74
 `,
 'epl:MUN':`
+Youri Tielemans|CM|BEL|27|8|82
+Andrey Santos|DM|BRA|21|8|79
 Benjamin Šeško|ST|SVN|21|30|82
 Bryan Mbeumo|RW|CMR|25|19|83
 Matheus Cunha|AM|BRA|25|12|83
@@ -995,7 +996,6 @@ Patrick Dorgu|LB|DEN|20|13|75
 Anthony Elanga|RW|SWE|22|21|79
 Yoane Wissa|ST|COD|28|11|80
 Nick Pope|GK|ENG|32|22|80
-Martin Dúbravka|GK|SVK|35|1|75
 Kieran Trippier|RB|ENG|34|2|80
 Tino Livramento|RB|ENG|22|21|79
 Sven Botman|CB|NED|24|4|81
@@ -1006,10 +1006,8 @@ Lewis Hall|LB|ENG|20|20|78
 Matt Targett|LB|ENG|29|13|72
 Bruno Guimarães|DM|BRA|27|39|85
 Joelinton|DM|BRA|28|7|82
-Sandro Tonali|CM|ITA|24|8|83
 Sean Longstaff|CM|ENG|27|36|75
 Joe Willock|CM|ENG|25|28|76
-Anthony Gordon|LW|ENG|23|10|83
 Harvey Barnes|LW|ENG|27|15|79
 Jacob Murphy|RW|ENG|29|23|78
 Callum Wilson|ST|ENG|32|9|77
@@ -1030,7 +1028,6 @@ Harry Toffolo|LB|ENG|29|15|71
 Ibrahim Sangaré|DM|CIV|27|6|78
 Ryan Yates|DM|ENG|27|22|74
 Nicolás Domínguez|CM|ARG|26|16|76
-Elliot Anderson|CM|ENG|22|8|77
 Morgan Gibbs-White|AM|ENG|24|10|82
 Callum Hudson-Odoi|LW|ENG|24|14|78
 Chris Wood|ST|NZL|33|11|79
@@ -1049,7 +1046,6 @@ Ryan Manning|LB|IRL|28|3|72
 Flynn Downes|DM|ENG|25|4|74
 Will Smallbone|DM|IRL|24|16|71
 Joe Aribo|CM|NGA|28|7|75
-Mateus Fernandes|CM|POR|20|8|74
 Adam Lallana|AM|ENG|36|20|71
 Tyler Dibling|AM|ENG|18|33|73
 Kamaldeen Sulemana|LW|GHA|22|20|75
@@ -1058,6 +1054,12 @@ Cameron Archer|ST|ENG|23|9|74
 Adam Armstrong|ST|ENG|27|9|75
 `,
 'epl:TOT':`
+Martin Dúbravka|GK|SVK|35|1|75
+Marcos Senesi|CB|ARG|27|25|79
+Andrew Robertson|LB|SCO|30|26|83
+Mateus Fernandes|CM|POR|20|8|74
+Sandro Tonali|CM|ITA|24|8|83
+Jan Paul van Hecke|CB|NED|24|29|79
 Mohammed Kudus|RW|GHA|24|14|82
 Xavi Simons|AM|NED|22|10|83
 Guglielmo Vicario|GK|ITA|28|1|82
@@ -1124,6 +1126,8 @@ Hwang Hee-chan|ST|KOR|28|11|77
 
 /* ===== LA LIGA — squads current to Aug 2026 transfer window ===== */
 'lal:RMA':`
+Marc Cucurella|LB|ESP|26|3|80
+Bernardo Silva|CM|POR|30|20|86
 Ibrahima Konaté|CB|FRA|25|5|84
 Denzel Dumfries|RB|NED|28|2|82
 Franco Mastantuono|AM|ARG|17|30|81
@@ -1153,6 +1157,7 @@ Kylian Mbappé|ST|FRA|26|9|91
 Endrick|ST|BRA|18|16|76
 `,
 'lal:BAR':`
+Anthony Gordon|LW|ENG|23|10|83
 Karim Adeyemi|LW|GER|23|27|81
 Joan García|GK|ESP|24|13|82
 Marcus Rashford|LW|ENG|27|9|81
@@ -1561,6 +1566,7 @@ Dušan Vlahović|ST|SRB|25|9|82
 Randal Kolo Muani|ST|FRA|26|20|80
 `,
 'ser:MIL':`
+Gonçalo Ramos|ST|POR|23|9|79
 Luka Modrić|CM|CRO|39|10|81
 Mike Maignan|GK|FRA|29|16|85
 Marco Sportiello|GK|ITA|32|57|72
@@ -1924,6 +1930,8 @@ John Yeboah|RW|GHA|24|21|70
 
 /* ===== BUNDESLIGA — squads current to Aug 2026 transfer window ===== */
 'bun:FCB':`
+Ismael Saibari|CM|MAR|24|20|77
+Nathaniel Brown|LB|GER|21|22|75
 Nicolas Jackson|ST|SEN|23|15|80
 Luis Díaz|LW|COL|28|7|85
 Manuel Neuer|GK|GER|39|1|84
@@ -1953,7 +1961,6 @@ Lukáš Hrádecký|GK|FIN|35|1|79
 Matěj Kovář|GK|CZE|24|17|74
 Edmond Tapsoba|CB|BFA|26|12|81
 Jonathan Tah|CB|GER|29|4|84
-Piero Hincapié|CB|ECU|23|3|81
 Nordi Mukiele|CB|FRA|27|32|75
 Alejandro Grimaldo|LB|ESP|29|20|85
 Arthur|RB|BRA|21|2|73
@@ -2015,7 +2022,6 @@ Robin Koch|CB|GER|28|4|78
 Tuta|CB|BRA|25|35|76
 Arthur Theate|CB|BEL|24|3|76
 Nnamdi Collins|RB|GER|21|24|72
-Nathaniel Brown|LB|GER|21|22|75
 Hugo Larsson|CM|SWE|20|16|79
 Ellyes Skhiri|DM|TUN|29|15|76
 Mario Götze|AM|GER|32|27|76
@@ -2293,7 +2299,6 @@ Ousmane Dembélé|ST|FRA|27|10|89
 Bradley Barcola|LW|FRA|22|29|83
 Désiré Doué|RW|FRA|19|14|83
 Khvicha Kvaratskhelia|LW|GEO|24|7|86
-Gonçalo Ramos|ST|POR|23|9|79
 Ibrahim Mbaye|RW|FRA|17|49|72
 `,
 'lig:OM':`
@@ -2423,7 +2428,6 @@ Steve Mandanda|GK|FRA|40|16|71
 Hans Hateboer|RB|NED|31|20|72
 Leo Ostigard|CB|NOR|25|3|75
 Christopher Wooh|CB|CMR|23|22|73
-Jérémy Jacquet|CB|FRA|19|24|73
 Adrien Truffert|LB|FRA|23|3|76
 Azor Matusiwa|DM|NED|27|8|74
 Baptiste Santamaria|DM|FRA|30|6|73
@@ -2445,14 +2449,12 @@ Saïdou Sow|CB|GUI|22|21|72
 Mamadou Sarr|CB|FRA|19|5|73
 Thomas Delaine|LB|FRA|33|12|71
 Ismaël Doukouré|CB|FRA|21|20|73
-Andrey Santos|DM|BRA|21|8|79
 Habib Diarra|CM|SEN|21|19|77
 Junior Mwanga|DM|FRA|21|24|72
 Sékou Mara|ST|FRA|22|11|72
 Dilane Bakwa|RW|FRA|22|26|77
 Sebastian Nanasi|LW|SWE|23|10|75
 Pape Diong|CM|SEN|20|17|70
-Emanuel Emegha|ST|NED|22|9|77
 Félix Lemaréchal|AM|FRA|20|14|71
 `,
 'lig:FCN':`
@@ -2662,7 +2664,6 @@ Morten Hjulmand|DM|DEN|25|42|79
 Hidemasa Morita|CM|JPN|30|6|76
 Daniel Bragança|CM|POR|25|18|75
 Francisco Trincão|RW|POR|25|17|78
-Geovany Quenda|RW|POR|17|77|77
 Marcus Edwards|RW|ENG|26|10|76
 Pedro Gonçalves|AM|POR|26|8|80
 Conrad Harder|ST|DEN|19|11|74
@@ -2716,7 +2717,6 @@ Armando Obispo|CB|NED|26|4|73
 Matteo Dams|LB|BEL|20|33|71
 Jerdy Schouten|DM|NED|28|25|80
 Joey Veerman|CM|NED|26|23|79
-Ismael Saibari|CM|MAR|24|20|77
 Guus Til|AM|NED|27|41|76
 Malik Tillman|AM|USA|22|10|78
 Johan Bakayoko|RW|BEL|22|7|77
@@ -3618,18 +3618,27 @@ LEAGUES.forEach(L=>{
 DB.teams.forEach(t=>{
   const raw = ROSTER[t.lg + ':' + t.abbr];
   const list = raw ? parseRoster(raw) : null;
-  const used = list ? list.map(()=>false) : null;
-  SQUAD_SHAPE.forEach(pos=>{
-    let real = null;
-    if (list){
-      let bi=-1, br=-1;
-      list.forEach((r,j)=>{ if(!used[j] && r.pos===pos && r.rat>br){ br=r.rat; bi=j; } });
-      if (bi<0) list.forEach((r,j)=>{ if(!used[j] && GROUP[r.pos]===GROUP[pos] && r.rat>br){ br=r.rat; bi=j; } });
-      if (bi>=0){ used[bi]=true; real = list[bi]; }
+  if (list){
+    list.forEach(real=>{
+      const p = makePlayer(t, real.pos, t.tierQ, real);
+      DB.players.push(p); DB.byId[p.id]=p; t.squad.push(p.id);
+    });
+    const need = SQUAD_SHAPE.slice();
+    list.forEach(r=>{ const k = need.indexOf(r.pos); if (k>=0) need.splice(k,1); });
+    while (t.squad.length < 18 && need.length){
+      const p = makePlayer(t, need.shift(), t.tierQ*0.72);
+      p.generated = true;
+      DB.players.push(p); DB.byId[p.id]=p; t.squad.push(p.id);
     }
-    const p = makePlayer(t, real ? real.pos : pos, real ? t.tierQ : t.tierQ*(list?0.72:1), real);
-    DB.players.push(p); DB.byId[p.id]=p; t.squad.push(p.id);
-  });
+  } else {
+    SQUAD_SHAPE.forEach(pos=>{
+      const p = makePlayer(t, pos, t.tierQ);
+      p.generated = true;
+      DB.players.push(p); DB.byId[p.id]=p; t.squad.push(p.id);
+    });
+  }
+  t.realSquad = !!list;
+  t.realCount = list ? list.length : 0;
   // team season record, correlated with squad quality
   const gp = ri(20,30), w = clamp(Math.round(gp*(.16+t.tierQ*.52)+gauss(0,1.4)),0,gp);
   const d = clamp(Math.round((gp-w)*rf(.15,.45)),0,gp-w);
@@ -4190,7 +4199,28 @@ function career(p){
 }
 
 /* ---- Transfer rumour feed ---- */
-(function buildRumours(){
+const REAL_DEALS = [["Morgan Rogers","epl:AVL","epl:CHE",138],["Elliot Anderson","epl:NFO","epl:MCI",135],["Sandro Tonali","epl:NEW","epl:TOT",108],["Mateus Fernandes","epl:SOU","epl:TOT",99],["Anthony Gordon","epl:NEW","lal:BAR",80],["Gonçalo Ramos","lig:PSG","ser:MIL",70],["Jérémy Jacquet","lig:SRF","epl:LIV",63.6],["Maxence Lacroix","epl:CRY","epl:CHE",60.7],["Jan Paul van Hecke","epl:BHA","epl:TOT",60],["Andrey Santos","lig:RCS","epl:MUN",56.3],["Nathaniel Brown","bun:SGE","bun:FCB",55],["Ismael Saibari","ere:PSV","bun:FCB",55],["Geovany Quenda","pri:SCP","epl:CHE",50],["Youri Tielemans","epl:AVL","epl:MUN",41],["Piero Hincapié","bun:B04","epl:ARS",40],["Emanuel Emegha","lig:RCS","epl:CHE",25.3],["Karim Adeyemi","bun:BVB","lal:BAR",22],["Denzel Dumfries","ser:INT","lal:RMA",20],["Danny Welbeck","epl:BHA","epl:CHE",5.85],["Ibrahima Konaté","epl:LIV","lal:RMA",0],["Bernardo Silva","epl:MCI","lal:RMA",0],["Marc Cucurella","epl:CHE","lal:RMA",0],["Andrew Robertson","epl:LIV","epl:TOT",0],["Marcos Senesi","epl:BOU","epl:TOT",0],["Martin Dúbravka","epl:NEW","epl:TOT",0]];
+const REAL_MANAGERS = {"epl:MCI":"Enzo Maresca","epl:CHE":"Xabi Alonso","epl:MUN":"Michael Carrick","epl:TOT":"Roberto De Zerbi","epl:LIV":"Andoni Iraola","epl:ARS":"Mikel Arteta","lal:RMA":"José Mourinho","ser:MIL":"Ruben Amorim"};
+(function buildRealDeals(){
+  const key = t => t.lg + ':' + t.abbr;
+  const byKey = {}; DB.teams.forEach(t => { byKey[key(t)] = t; });
+  REAL_DEALS.forEach((d, i) => {
+    const [name, fromK, toK, fee] = d;
+    const to = byKey[toK], from = byKey[fromK];
+    if (!to || !from) return;
+    const p = DB.players.find(x => x.name === name && x.team === to.id);
+    DB.deals.push({ id:'d'+i, pid: p ? p.id : null, name, from: from.id, to: to.id, fee });
+  });
+  DB.deals.sort((a, b) => b.fee - a.fee);
+})();
+(function applyRealManagers(){
+  DB.managers.forEach(m => {
+    const t = DB.teamById[m.team];
+    const real = REAL_MANAGERS[t.lg + ':' + t.abbr];
+    if (real) { m.name = real; m.real = true; }
+  });
+})();
+(function buildRumoursDISABLED(){
   const hot = [...DB.players].filter(p=>p.age<=29).sort((a,b)=>(b.ps*0.6+b.pot*0.4)-(a.ps*0.6+a.pot*0.4)).slice(0,140);
   for(let i=0;i<48;i++){
     const p = hot[ri(0,hot.length-1)];
@@ -4213,7 +4243,7 @@ function career(p){
     });
   }
   DB.rumours.sort((a,b)=> b.conf-a.conf);
-})();
+})/* disabled: invented rumours removed */;
 
 /* ---- Team of the Season & predicted TOTS ---- */
 function tots(lgId, predicted){
@@ -4337,7 +4367,7 @@ function pctRow(label,v,pc,k){
 }
 function pill(p){
   return `<button class="pname" data-p="${p.id}">${crest(T(p.team))}
-    <span class="who"><b>${esc(p.name)}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}${p.foxRank?` · <span class="amber">WC100 #${p.foxRank}</span>`:''}</s></span></button>`;
+    <span class="who"><b>${esc(p.name)}${p.generated?'<span class="dim" style="font-size:9px;font-weight:400" title="Placeholder — Power Board has no roster data for this slot"> gen</span>':''}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}${p.foxRank?` · <span class="amber">WC100 #${p.foxRank}</span>`:''}</s></span></button>`;
 }
 function formDots(f){
   return f.map(r=>`<span class="mono" style="font-size:10px;width:15px;height:15px;display:inline-grid;place-items:center;border-radius:2px;background:${r==='W'?'rgba(46,216,167,.16)':r==='D'?'var(--ink-3)':'rgba(255,77,94,.16)'};color:${r==='W'?'var(--jade)':r==='D'?'var(--chalk-3)':'var(--flare)'}">${r}</span>`).join('');
@@ -4841,7 +4871,7 @@ VIEWS.teams = () => {
       <td class="num">${t.rec.gf}</td><td class="num">${t.rec.ga}</td><td class="num ${t.rec.gd>0?'jd':t.rec.gd<0?'fl':''}">${t.rec.gd>0?'+':''}${t.rec.gd}</td>
       <td class="num amber" style="font-weight:700">${t.rec.pts}</td>
       <td class="num dim">${t.xg}</td><td class="num dim">${t.xga}</td>
-      <td class="num" style="color:${ratColor(t.ps)}">${t.ps}</td>
+      <td class="num" style="color:${ratColor(t.ps)}">${t.ps}${t.realSquad?'':'<span class="dim" style="font-size:9px" title="No roster data for this club — squad is generated"> gen</span>'}</td>
       <td class="num">${money(t.mv)}</td>
       <td><span style="display:flex;gap:2px;justify-content:flex-end">${formDots(t.form)}</span></td>
       ${['GK','DEF','MID','ATT'].map(l=>{const b=t.best[l];return `<td style="text-align:right"><button class="tag" data-p="${b.id}">${esc(b.name.split(' ').pop())} ${b.ps.toFixed(0)}</button></td>`}).join('')}
@@ -5035,9 +5065,26 @@ function mgrProse(m,t){
 
 /* ---------------- TRANSFERS ---------------- */
 VIEWS.transfers = () => {
+  const ds = DB.deals.filter(d=>ST8.lg==='all'||T(d.to).lg===ST8.lg||T(d.from).lg===ST8.lg);
+  const total = ds.reduce((s,d)=>s+d.fee,0);
+  return vhead('Transfer desk','Completed deals · summer 2026',
+    `${ds.length} confirmed moves, €${total.toFixed(0)}m of business. Every deal below was officially announced and is sourced from <a href="https://www.footballtransfers.com/en/transfer-news/uk-premier-league/2026/08/done-deals-every-official-completed-transfer-around-europe-today" target="_blank" rel="noopener" style="color:var(--sodium)">FootballTransfers</a> (2 Aug 2026). No speculative links or invented rumours.`)
+  + `<div class="panel"><div class="panel-h"><h3>Done deals</h3><span class="eyebrow">by fee</span></div>
+      ${ds.map(d=>{const f=T(d.from),to=T(d.to);
+        return `<div style="padding:13px;border-bottom:1px solid var(--line-soft)">
+          <div class="spread" style="align-items:center">
+            <div style="display:flex;gap:11px;align-items:center">${crest(f)}<span class="dim">→</span>${crest(to)}
+              <div><b style="font-size:14px">${esc(d.name)}</b>
+                <div class="dim" style="font-size:11.5px">${esc(f.name)} → ${esc(to.name)}</div></div></div>
+            <div style="text-align:right">
+              <div class="num ${d.fee?'amber':'jd'}" style="font-size:18px;font-weight:700">${d.fee?'€'+d.fee+'m':'Free'}</div>
+              <div class="eyebrow">${d.fee?'reported fee':'free transfer'}</div></div>
+          </div></div>`}).join('')}
+    </div>`;
+};
+VIEWS.transfersOLD = () => {
   const rs = DB.rumours.filter(r=>ST8.lg==='all'||P(r.pid).lg===ST8.lg||T(r.to).lg===ST8.lg);
-  return vhead('Transfer desk','Rumours & deals',
-    'Every link is tied to the reporter who broke it. Confidence blends how far the deal has progressed with that reporter’s historical hit rate — it is not a prediction of the transfer happening.')
+  return vhead('Transfer desk','Rumours & deals','')
   + `<div class="grid gside">
     <div class="panel"><div class="panel-h"><h3>Live feed</h3><span class="eyebrow">${rs.length} tracked stories</span></div>
       ${rs.map(r=>{const p=P(r.pid),f=T(r.from),to=T(r.to);
@@ -5149,6 +5196,7 @@ VIEWS.method = () => vhead('Under the hood','How the numbers work',
   <div class="note mt"><b>Sample data</b><span>This build runs on a deterministic synthetic dataset — real clubs and competitions, invented players — so every screen is explorable without a provider contract. Point the DATA layer at a live feed and nothing above it changes.</span></div>
   <div class="note mt"><b>World Top 100</b><span>The 97 of those 100 players Power Board could place on its roster have their Power Score pinned to <a href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" style="color:var(--sodium)">FOX Sports' 2026 World Cup Top 100</a> (Maurice Edu, Stu Holden and Alexi Lalas, updated Jun 14, 2026), so the global Rankings list matches their countdown exactly at the top. Everyone outside that 100 still runs on the formula to the left. Cristiano Ronaldo, Sadio Mané and N'Golo Kanté are on FOX's list but play in leagues this build doesn't model (Saudi Pro League, Süper Lig), so they don't have a Power Board profile to attach a score to.</span></div>
   <div class="note mt"><b>Club ranking sources</b><span>Club strength, the league tables and every win probability are driven by two ranking sources. The primary one is the <a href="https://www.uefa.com/nationalassociations/uefarankings/club/?year=2027" target="_blank" rel="noopener" style="color:var(--sodium)">UEFA club coefficient</a> for 2026/27 — the five-season sporting coefficient covering 2021/22 to 2025/26, as published in this season's Champions League seeding pots. UEFA ranks European clubs only, so it covers 23 clubs here and by definition none from Brazil, Argentina or MLS. Every club UEFA does not rank falls back to the <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--chalk-2)">FootballDatabase</a> world club ranking (CC BY-SA 4.0, snapshot 2 August 2026), marked <span class="dim">fdb</span> in the table. Where a club appears in both, UEFA wins. Clubs in neither list rank below both, ordered on squad strength. One quirk worth knowing: UEFA rates Stuttgart 80th on a thin five-year European record, well below where a domestic-form ranking would put them.</span></div>
+  <div class="note mt"><b>Transfers &amp; squads</b><span>Squads are current to the summer 2026 window, sourced from <a href="https://www.footballtransfers.com/en/transfer-news/uk-premier-league/2026/08/done-deals-every-official-completed-transfer-around-europe-today" target="_blank" rel="noopener" style="color:var(--sodium)">FootballTransfers</a>' done-deals record of 2 August 2026 — Rogers and Lacroix at Chelsea, Anderson at City, Tonali and Fernandes at Spurs, Konaté, Dumfries, Bernardo Silva and Cucurella at Real Madrid, Gonçalo Ramos at Milan. The Transfer desk lists those completed deals only. <b>The invented rumour feed has been removed</b>: it previously generated fake links between real players and random clubs, attributed to made-up reporters. Clubs with real squad data are no longer padded out with generated players either, so every name at those clubs is a real footballer — squads are therefore the size the data supports rather than a uniform 25. The clubs Power Board has no roster for are still filled with generated players and are marked <span class="dim">generated squad</span> in Tables &amp; squads.</span></div>
   <div class="note mt"><b>Market values</b><span>Squad and player values come from <a href="https://www.transfermarkt.com" target="_blank" rel="noopener" style="color:var(--sodium)">Transfermarkt</a>'s June 2026 market-value update. Transfermarkt blocks automated access, so the figures published for their most valuable players are used directly — those show a <span class="amber">✓</span> on the player profile — and every other player is estimated on a curve fitted to Transfermarkt's own distribution, so the scale and shape match even where the exact figure is Power Board's own. Market value is an estimate of open-market cost: not a release clause, not a wage, and not a fee any club has actually bid.</span></div>
   <div class="note mt"><b>How live are the matches?</b><span>Fixtures are real — real matchups, real kickoff times and real final scores for matches already played, pulled from a match feed on 4 August 2026. No invented games. Each fixture works out whether it is upcoming, in play or finished from your own device clock, so it changes state on its own. What a static page <i>cannot</i> do is discover a goal as it happens: for genuinely live in-play scores, set <span class="mono amber">LIVE_FEED</span> at the top of the file to your own provider's endpoint and key, and Power Board will fetch from it on load and fall back to these fixtures if it fails. Matches that have kicked off without a score in the data show a dash, never a made-up scoreline. Match commentary and player match ratings are still generated by the model. Fixtures involving clubs promoted after 2024/25 (Leeds, Sunderland, Levante, Paderborn and similar) are skipped, because this build has no squad data for them.</span></div>
   <div class="note mt"><b>Squads &amp; ages</b><span>Real rosters were refreshed against reported summer 2025, January 2026 and summer 2026 transfer business, so players sit at the club they actually play for today rather than a frozen 2024/25 snapshot. Ages aren't stored as fixed numbers: each player has a birth date, and age is calculated fresh from your device's clock every time this page loads — so it keeps advancing on its own, no rebuild needed. The ~100 highest-profile players use their real birthday; everyone else is approximated to Jan 1 of their birth year, since sourcing exact birthdates for a sample of 2,600 players isn't something this build can responsibly guarantee. Transfers, by contrast, can't self-update the same way — there's no live data feed wired in, so if a new move gets confirmed, the roster needs a manual refresh.</span></div>`;
