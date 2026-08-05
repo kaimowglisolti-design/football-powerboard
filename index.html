@@ -6,43 +6,43 @@
 <title>Power Board — football ratings, live</title>
 <meta name="description" content="Power Score ratings, live win probability, scouting and a lineup builder across ten leagues.">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0C0F14">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230C0F14'/%3E%3Cpath d='M7 21a9 9 0 0 1 18 0' fill='none' stroke='%23C9A227' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#090C12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23090C12'/%3E%3Cpath d='M7 21a9 9 0 0 1 18 0' fill='none' stroke='%23FFB020' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ===========================================================
    FLOODLIT — design system for the Power Board
    Night match, chalk lines, sodium-vapour light.
    =========================================================== */
 :root{
-  --ink:      #0C0F14;
-  --ink-2:    #14181F;
-  --ink-3:    #191E27;
-  --ink-4:    #1E2430;
+  --ink:      #090C12;
+  --ink-2:    #10151F;
+  --ink-3:    #1A2130;
+  --ink-4:    #232C3D;
 
-  --chalk:    #EDEFF3;
-  --chalk-2:  #8B93A7;
-  --chalk-3:  #5B6274;
+  --chalk:    #E9EEF6;
+  --chalk-2:  #A9B5C8;
+  --chalk-3:  #6C7889;
 
-  --sodium:   #C9A227;
-  --gold-bright: #E8C34A;
-  --jade:     #4ADE80;
-  --flare:    #F87171;
+  --sodium:   #FFB020;
+  --jade:     #2ED8A7;
+  --flare:    #FF4D5E;
   --violet:   #8B7BFF;
 
-  --line:      #2A3140;
-  --line-soft: rgba(42,49,64,.55);
+  --line:      rgba(233,238,246,.13);
+  --line-soft: rgba(233,238,246,.065);
 
-  --dsp:  'Fraunces', serif;
+  --dsp:  'Chivo', system-ui, sans-serif;
   --body: 'Inter', system-ui, -apple-system, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --rail-w: 232px;
   --pad: 22px;
   --r: 10px;
 }
+
 *,*::before,*::after{ box-sizing:border-box }
 [hidden]{ display:none !important }
 
@@ -59,8 +59,8 @@ body{
 body::before{
   content:''; position:fixed; inset:0 0 auto 0; height:70vh; pointer-events:none; z-index:0;
   background:
-   radial-gradient(58vw 42vh at 18% -14%, rgba(201,162,39,.075), transparent 62%),
-    radial-gradient(58vw 42vh at 82% -14%, rgba(201,162,39,.055), transparent 62%);
+    radial-gradient(58vw 42vh at 18% -14%, rgba(255,176,32,.075), transparent 62%),
+    radial-gradient(58vw 42vh at 82% -14%, rgba(255,176,32,.055), transparent 62%);
 }
 h1,h2,h3,h4,h5{ margin:0; font-family:var(--dsp); font-weight:700; letter-spacing:-.015em }
 p{ margin:0 }
@@ -96,9 +96,9 @@ svg{ display:block }
   color:var(--chalk-2); transition:background .13s, color .13s;
 }
 .rail-group a:hover{ background:var(--ink-3); color:var(--chalk) }
-.rail-group a.on{ background:rgba(201,162,39,.1); color:var(--sodium); font-weight:600 }
+.rail-group a.on{ background:rgba(255,176,32,.1); color:var(--sodium); font-weight:600 }
 .rail-group a k{ font:500 9px/1 var(--mono); color:var(--chalk-3); border:1px solid var(--line); border-radius:3px; padding:2.5px 4.5px }
-.rail-group a.on k{ border-color:rgba(201,162,39,.3); color:var(--sodium) }
+.rail-group a.on k{ border-color:rgba(255,176,32,.3); color:var(--sodium) }
 
 main{ min-width:0; padding-bottom:96px }
 
@@ -124,7 +124,7 @@ main{ min-width:0; padding-bottom:96px }
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%236C7889' stroke-width='1.8'><circle cx='5.8' cy='5.8' r='4.4'/><path d='M9.2 9.2 12 12'/></svg>");
   background-repeat:no-repeat; background-position:11px center;
 }
-.searchwrap input:focus{ border-color:rgba(201,162,39,.45) }
+.searchwrap input:focus{ border-color:rgba(255,176,32,.45) }
 .searchwrap input::placeholder{ color:var(--chalk-3) }
 .results{
   position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60; max-height:340px; overflow:auto;
@@ -151,78 +151,7 @@ main{ min-width:0; padding-bottom:96px }
 .panel-h h3{ font-size:13px; font-weight:700; letter-spacing:-.01em; flex:1; min-width:0 }
 .panel-h .eyebrow{ flex:none }
 .panel-b{ padding:13px 14px }
-/* ---------- VALUE DISCLOSURE PANEL ---------- */
-.disclose{
-  display:grid; grid-template-columns:132px minmax(0,1fr); gap:20px; align-items:start;
-  background:var(--ink-2); border:1px solid var(--line); border-radius:var(--r);
-  padding:18px 20px; margin-bottom:16px;
-}
-.disclose-mark{
-  display:flex; flex-direction:column; gap:2px;
-  border-right:1px solid var(--line); padding-right:18px;
-}
-.disclose-mark span{
-  font-family:var(--dsp); font-weight:900; font-size:23px; line-height:1.02;
-  letter-spacing:-.03em; color:var(--sodium);
-}
-.disclose-mark span:nth-child(2){ color:var(--chalk-3) }
-.disclose-body p{ font-size:12.8px; line-height:1.62; color:var(--chalk-2); margin:0 0 13px }
-.disclose-body p b{ color:var(--chalk); font-weight:600 }
 
-.disclose-bar{
-  height:7px; border-radius:4px; overflow:hidden;
-  background:var(--ink-4); border:1px solid var(--line-soft);
-}
-.disclose-fill{
-  height:100%; background:var(--sodium);
-  border-radius:4px 0 0 4px; transition:width .4s ease;
-}
-.disclose-legend{
-  display:flex; align-items:center; gap:16px; margin-top:8px;
-  font:500 10px/1 var(--mono); letter-spacing:.08em;
-  text-transform:uppercase; color:var(--chalk-3);
-}
-.disclose-legend i{
-  display:inline-block; width:8px; height:8px; border-radius:2px;
-  margin-right:6px; vertical-align:-1px;
-}
-.sw-real{ background:var(--sodium) }
-.sw-est{ background:var(--ink-4); border:1px solid var(--line) }
-.disclose-pct{ margin-left:auto; color:var(--sodium) }
-
-.disclose-stats{
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px; margin:15px 0 13px;
-}
-.disclose-stats div{
-  background:var(--ink-3); border:1px solid var(--line-soft);
-  border-radius:7px; padding:9px 11px;
-}
-.disclose-stats b{
-  display:block; font-family:var(--mono); font-weight:700;
-  font-size:17px; letter-spacing:-.02em; color:var(--chalk);
-}
-.disclose-stats s{
-  display:block; text-decoration:none; margin-top:3px;
-  font:500 8.5px/1.25 var(--mono); letter-spacing:.11em;
-  text-transform:uppercase; color:var(--chalk-3);
-}
-.disclose-foot{ font-size:11.8px !important; color:var(--chalk-3) !important; margin:0 !important }
-
-.vbadge{
-  display:inline-block; font:500 9.5px/1 var(--mono); letter-spacing:.06em;
-  color:var(--sodium); background:rgba(201,162,39,.12);
-  border:1px solid rgba(201,162,39,.32); border-radius:4px;
-  padding:2.5px 5px; white-space:nowrap;
-}
-@media (max-width:720px){
-  .disclose{ grid-template-columns:1fr; gap:14px }
-  .disclose-mark{
-    flex-direction:row; gap:9px; border-right:0; padding-right:0;
-    border-bottom:1px solid var(--line); padding-bottom:12px;
-  }
-  .disclose-stats{ grid-template-columns:repeat(2,minmax(0,1fr)) }
-}
 /* ---------- grids & utilities ---------- */
 .grid{ display:grid; gap:14px }
 .g2{ grid-template-columns:repeat(2,minmax(0,1fr)) }
@@ -270,7 +199,7 @@ main{ min-width:0; padding-bottom:96px }
   background:var(--ink-3); color:var(--chalk-2);
   font:500 10px/1.35 var(--mono); letter-spacing:.05em; white-space:nowrap;
 }
-.tag.amber{ background:rgba(201,162,39,.13); color:var(--sodium) }
+.tag.amber{ background:rgba(255,176,32,.13); color:var(--sodium) }
 .tag.jade { background:rgba(46,216,167,.13); color:var(--jade) }
 .tag.flare{ background:rgba(255,77,94,.13); color:var(--flare) }
 button.tag:hover{ background:var(--ink-4) }
@@ -282,7 +211,7 @@ button.tag:hover{ background:var(--ink-4) }
   transition:border-color .13s, color .13s, background .13s;
 }
 .chip:hover{ border-color:var(--chalk-3); color:var(--chalk) }
-.chip.on{ background:rgba(201,162,39,.12); border-color:rgba(201,162,39,.4); color:var(--sodium); font-weight:600 }
+.chip.on{ background:rgba(255,176,32,.12); border-color:rgba(255,176,32,.4); color:var(--sodium); font-weight:600 }
 
 .tabs{ display:flex; flex-wrap:wrap; gap:4px; margin-bottom:14px; border-bottom:1px solid var(--line-soft); padding-bottom:0 }
 .tabs button{
@@ -411,13 +340,13 @@ button.tag:hover{ background:var(--ink-4) }
 .slot .nm{ font-size:9.5px; font-weight:600; text-align:center; line-height:1.2; white-space:nowrap; max-width:64px; overflow:hidden; text-overflow:ellipsis }
 .slot .ps{ font:700 9px/1 var(--mono); color:var(--sodium) }
 .slot:hover .dot{ border-color:var(--chalk-3); color:var(--chalk) }
-.slot.filled .dot{ background:rgba(201,162,39,.14); border:1.5px solid rgba(201,162,39,.45); color:var(--sodium); font-weight:700 }
-.slot.sel .dot{ border-color:var(--sodium); box-shadow:0 0 0 4px rgba(201,162,39,.16) }
+.slot.filled .dot{ background:rgba(255,176,32,.14); border:1.5px solid rgba(255,176,32,.45); color:var(--sodium); font-weight:700 }
+.slot.sel .dot{ border-color:var(--sodium); box-shadow:0 0 0 4px rgba(255,176,32,.16) }
 
 /* ---------- note / empty / card ---------- */
 .note{
   display:flex; gap:9px; align-items:baseline; padding:11px 13px; border-radius:8px;
-   background:rgba(201,162,39,.06); border:1px solid rgba(201,162,39,.16); font-size:12.3px; line-height:1.55;
+  background:rgba(255,176,32,.06); border:1px solid rgba(255,176,32,.16); font-size:12.3px; line-height:1.55;
 }
 .note b{ flex:none; font:500 9px/1.6 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--sodium) }
 .note span{ color:var(--chalk-2) }
@@ -429,7 +358,7 @@ button.tag:hover{ background:var(--ink-4) }
   display:block; width:100%; text-align:left; padding:9px 11px; border-radius:8px;
   background:var(--ink-3); border:1px solid var(--line-soft); cursor:pointer; transition:border-color .13s, background .13s;
 }
-.card-btn:hover{ border-color:rgba(201,162,39,.35); background:var(--ink-4) }
+.card-btn:hover{ border-color:rgba(255,176,32,.35); background:var(--ink-4) }
 
 /* ---------- mobile nav ---------- */
 .mobnav{
@@ -479,8 +408,8 @@ button.tag:hover{ background:var(--ink-4) }
   <aside class="rail-wrap">
     <a class="brand" href="#today" data-go="today">
       <svg class="mark" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-      <path d="M4 18.5a9 9 0 0 1 18 0" stroke="#C9A227" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="13" cy="21.5" r="1.8" fill="#C9A227"/>
+        <path d="M4 18.5a9 9 0 0 1 18 0" stroke="#FFB020" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="13" cy="21.5" r="1.8" fill="#FFB020"/>
       </svg>
       <span><b>Power Board</b><s>Ten leagues, live</s></span>
     </a>
@@ -777,6 +706,9 @@ Kai Havertz|ST|GER|25|29|84
 Gabriel Jesus|ST|BRA|27|9|81
 `,
 'epl:AVL':`
+Alejandro Garnacho|LW|ARG|22|17|80
+João Gomes|DM|BRA|24|8|80
+Johan Manzambi|CM|SUI|20|27|77
 Jadon Sancho|LW|ENG|24|19|79
 Harvey Elliott|AM|ENG|21|19|77
 Emiliano Martínez|GK|ARG|32|1|85
@@ -1058,7 +990,6 @@ Kobbie Mainoo|CM|ENG|19|37|79
 Christian Eriksen|CM|DEN|32|14|77
 Mason Mount|AM|ENG|26|7|78
 Amad Diallo|RW|CIV|22|16|78
-Alejandro Garnacho|LW|ARG|20|17|80
 Rasmus Højlund|ST|DEN|21|11|79
 Joshua Zirkzee|ST|NED|23|11|77
 Patrick Dorgu|LB|DEN|20|13|75
@@ -1184,7 +1115,6 @@ Santiago Bueno|CB|URU|26|21|74
 Toti Gomes|CB|POR|25|24|75
 Rayan Aït-Nouri|LB|ALG|23|3|79
 Hugo Bueno|LB|ESP|22|32|71
-João Gomes|DM|BRA|23|8|80
 Mario Lemina|DM|GAB|31|5|77
 Tommy Doyle|CM|ENG|23|20|72
 Jean-Ricner Bellegarde|CM|FRA|26|27|76
@@ -3892,540 +3822,20 @@ const AGEV = {16:.55,17:.7,18:.86,19:1,20:1.12,21:1.2,22:1.24,23:1.26,24:1.25,25
    source publishes; everyone else is estimated on a curve calibrated to
    Transfermarkt's own distribution. See the Method page. */
 const DEAL_FEE = {"Morgan Rogers":138,"Elliot Anderson":135,"Sandro Tonali":108,"Mateus Fernandes":99,"Anthony Gordon":80,"Gonçalo Ramos":70,"Jérémy Jacquet":63.6,"Maxence Lacroix":60.7,"Jan Paul van Hecke":60,"Andrey Santos":56.3,"Nathaniel Brown":55,"Ismael Saibari":55,"Geovany Quenda":50,"Youri Tielemans":41,"Piero Hincapié":40,"Emanuel Emegha":25.3,"Karim Adeyemi":22,"Denzel Dumfries":20,"Danny Welbeck":5.85};
-const CAREER_PATH = {"Mateus Fernandes":[[0,"epl:TOT"],[1,"epl:SOU"],[3,"pri:SCP"]],"Sandro Tonali":[[0,"epl:TOT"],[1,"epl:NEW"],[4,"ser:MIL"]],"Andrew Robertson":[[0,"epl:TOT"],[1,"epl:LIV"]],"Marcos Senesi":[[0,"epl:TOT"],[1,"epl:BOU"]],"Martin Dúbravka":[[0,"epl:TOT"],[1,"epl:NEW"]],"Jan Paul van Hecke":[[0,"epl:TOT"],[1,"epl:BHA"]],"Morgan Rogers":[[0,"epl:CHE"],[1,"epl:AVL"]],"Maxence Lacroix":[[0,"epl:CHE"],[1,"epl:CRY"],[3,"bun:WOB"]],"Danny Welbeck":[[0,"epl:CHE"],[1,"epl:BHA"],[6,"epl:ARS"]],"Geovany Quenda":[[0,"epl:CHE"],[1,"pri:SCP"]],"Emanuel Emegha":[[0,"epl:CHE"],[1,"lig:RCS"]],"Elliot Anderson":[[0,"epl:MCI"],[1,"epl:NFO"],[3,"epl:NEW"]],"Andrey Santos":[[0,"epl:MUN"],[1,"lig:RCS"]],"Youri Tielemans":[[0,"epl:MUN"],[1,"epl:AVL"],[4,"epl:LEI"]],"Piero Hincapié":[[0,"epl:ARS"],[1,"bun:B04"]],"Jérémy Jacquet":[[0,"epl:LIV"],[1,"lig:SRF"]],"Anthony Gordon":[[0,"lal:BAR"],[1,"epl:NEW"],[5,"epl:EVE"]],"Karim Adeyemi":[[0,"lal:BAR"],[1,"bun:BVB"]],"Ibrahima Konaté":[[0,"lal:RMA"],[1,"epl:LIV"],[6,"bun:RBL"]],"Denzel Dumfries":[[0,"lal:RMA"],[1,"ser:INT"],[6,"ere:PSV"]],"Bernardo Silva":[[0,"lal:RMA"],[1,"epl:MCI"],[10,"lig:ASM"]],"Marc Cucurella":[[0,"lal:RMA"],[1,"epl:CHE"],[5,"epl:BHA"]],"Gonçalo Ramos":[[0,"ser:MIL"],[1,"lig:PSG"],[4,"pri:BEN"]],"Nathaniel Brown":[[0,"bun:FCB"],[1,"bun:SGE"]],"Ismael Saibari":[[0,"bun:FCB"],[1,"ere:PSV"]],"Yan Diomande":[[0,"bun:RBL"],[2,"lal:LEG"]]};
+const CAREER_PATH = {"Mateus Fernandes":[[0,"epl:TOT"],[1,"epl:SOU"],[3,"pri:SCP"]],"Sandro Tonali":[[0,"epl:TOT"],[1,"epl:NEW"],[4,"ser:MIL"]],"Andrew Robertson":[[0,"epl:TOT"],[1,"epl:LIV"]],"Marcos Senesi":[[0,"epl:TOT"],[1,"epl:BOU"]],"Martin Dúbravka":[[0,"epl:TOT"],[1,"epl:NEW"]],"Jan Paul van Hecke":[[0,"epl:TOT"],[1,"epl:BHA"]],"Morgan Rogers":[[0,"epl:CHE"],[1,"epl:AVL"]],"Maxence Lacroix":[[0,"epl:CHE"],[1,"epl:CRY"],[3,"bun:WOB"]],"Danny Welbeck":[[0,"epl:CHE"],[1,"epl:BHA"],[6,"epl:ARS"]],"Geovany Quenda":[[0,"epl:CHE"],[1,"pri:SCP"]],"Emanuel Emegha":[[0,"epl:CHE"],[1,"lig:RCS"]],"Elliot Anderson":[[0,"epl:MCI"],[1,"epl:NFO"],[3,"epl:NEW"]],"Andrey Santos":[[0,"epl:MUN"],[1,"lig:RCS"]],"Youri Tielemans":[[0,"epl:MUN"],[1,"epl:AVL"],[4,"epl:LEI"]],"Piero Hincapié":[[0,"epl:ARS"],[1,"bun:B04"]],"Jérémy Jacquet":[[0,"epl:LIV"],[1,"lig:SRF"]],"Anthony Gordon":[[0,"lal:BAR"],[1,"epl:NEW"],[5,"epl:EVE"]],"Karim Adeyemi":[[0,"lal:BAR"],[1,"bun:BVB"]],"Ibrahima Konaté":[[0,"lal:RMA"],[1,"epl:LIV"],[6,"bun:RBL"]],"Denzel Dumfries":[[0,"lal:RMA"],[1,"ser:INT"],[6,"ere:PSV"]],"Bernardo Silva":[[0,"lal:RMA"],[1,"epl:MCI"],[10,"lig:ASM"]],"Marc Cucurella":[[0,"lal:RMA"],[1,"epl:CHE"],[5,"epl:BHA"]],"Gonçalo Ramos":[[0,"ser:MIL"],[1,"lig:PSG"],[4,"pri:BEN"]],"Nathaniel Brown":[[0,"bun:FCB"],[1,"bun:SGE"]],"Ismael Saibari":[[0,"bun:FCB"],[1,"ere:PSV"]],"Yan Diomande":[[0,"bun:RBL"],[2,"lal:LEG"]],"Alejandro Garnacho":[[0,"epl:AVL"],[1,"epl:CHE"],[2,"epl:MUN"]],"João Gomes":[[0,"epl:AVL"],[1,"epl:WOL"]]};
 const TM_VALUES = {"Kylian Mbappé":200,"Erling Haaland":185,"Lamine Yamal":180,"Jude Bellingham":180,"Pedri":150,"Florian Wirtz":150,"Vinícius Júnior":150,"Bukayo Saka":150,"Phil Foden":130,"Jamal Musiala":130,"Rodri":120,"Gavi":120,"Eduardo Camavinga":100,"Nico Williams":100,"Rúben Dias":90,"Warren Zaïre-Emery":90,"Xavi Simons":90,"Lautaro Martínez":90,"Evan Ferguson":85,"António Silva":80,"Kobbie Mainoo":80,"Savinho":75,"Gonçalo Ramos":75,"Alejandro Garnacho":75,"Kim Min-jae":70,"Fermín López":70,"Alejandro Grimaldo":60,"Dani Carvajal":40,"Yan Diomande":90,"Lionel Messi":17};
-/* ---- TOP 500 BOARD ----
-   Membership + verified Transfermarkt values, € millions.
-   null = not yet verified; marketValue() falls through to the
-   estimate and tmReal stays false, so nothing is ever faked.
-   Sorted by roster rating at extraction. */
-const TOP500 = {
-  "Erling Haaland": 185,  // #1 Manchester City · rat 91
-  "Kylian Mbappé": 200,  // #2 Real Madrid · rat 91
-  "Mohamed Salah": null,  // #3 Liverpool · rat 91
-  "Rodri": 120,  // #4 Manchester City · rat 91
-  "Florian Wirtz": 150,  // #5 Liverpool · rat 90
-  "Harry Kane": null,  // #6 Bayern München · rat 90
-  "Lionel Messi": 17,  // #7 Inter Miami · rat 90
-  "Vinícius Júnior": 150,  // #8 Real Madrid · rat 90
-  "Alisson": null,  // #9 Liverpool · rat 89
-  "Jamal Musiala": 130,  // #10 Bayern München · rat 89
-  "Jude Bellingham": 180,  // #11 Real Madrid · rat 89
-  "Lamine Yamal": 180,  // #12 Barcelona · rat 89
-  "Ousmane Dembélé": null,  // #13 Paris Saint-Germain · rat 89
-  "Raphinha": null,  // #14 Barcelona · rat 89
-  "Thibaut Courtois": null,  // #15 Real Madrid · rat 89
-  "Virgil van Dijk": null,  // #16 Liverpool · rat 89
-  "Bukayo Saka": 150,  // #17 Arsenal · rat 88
-  "Kevin De Bruyne": null,  // #18 Napoli · rat 88
-  "Lautaro Martínez": 90,  // #19 Internacional · rat 88
-  "Pedri": 150,  // #20 Barcelona · rat 88
-  "Phil Foden": 130,  // #21 Manchester City · rat 88
-  "Viktor Gyökeres": null,  // #22 Arsenal · rat 88
-  "Achraf Hakimi": null,  // #23 Paris Saint-Germain · rat 87
-  "Bruno Fernandes": null,  // #24 Manchester United · rat 87
-  "Cole Palmer": null,  // #25 Chelsea · rat 87
-  "Declan Rice": null,  // #26 Arsenal · rat 87
-  "Federico Valverde": null,  // #27 Real Madrid · rat 87
-  "Gianluigi Donnarumma": null,  // #28 Manchester City · rat 87
-  "Martin Ødegaard": null,  // #29 Arsenal · rat 87
-  "Rúben Dias": 90,  // #30 Manchester City · rat 87
-  "Vitinha": null,  // #31 Paris Saint-Germain · rat 87
-  "William Saliba": null,  // #32 Arsenal · rat 87
-  "Alessandro Bastoni": null,  // #33 Internacional · rat 86
-  "Alexander Isak": null,  // #34 Liverpool · rat 86
-  "Bernardo Silva": null,  // #35 Real Madrid · rat 86
-  "Ederson": null,  // #36 Manchester City · rat 86
-  "Gabriel Magalhães": null,  // #37 Arsenal · rat 86
-  "Jan Oblak": null,  // #38 Atlético Madrid · rat 86
-  "Julián Alvarez": null,  // #39 Atlético Madrid · rat 86
-  "Khvicha Kvaratskhelia": null,  // #40 Paris Saint-Germain · rat 86
-  "Michael Olise": null,  // #41 Bayern München · rat 86
-  "Nico Williams": 100,  // #42 Athletic Club · rat 86
-  "Nicolò Barella": null,  // #43 Internacional · rat 86
-  "Robert Lewandowski": null,  // #44 Barcelona · rat 86
-  "Trent Alexander-Arnold": null,  // #45 Real Madrid · rat 86
-  "Ademola Lookman": null,  // #46 Atalanta · rat 85
-  "Alejandro Grimaldo": 60,  // #47 Bayer Leverkusen · rat 85
-  "Alexis Mac Allister": null,  // #48 Liverpool · rat 85
-  "Antonio Rüdiger": null,  // #49 Real Madrid · rat 85
-  "Bruno Guimarães": null,  // #50 Newcastle United · rat 85
-  "Cristian Romero": null,  // #51 Tottenham · rat 85
-  "Emiliano Martínez": null,  // #52 Aston Villa · rat 85
-  "Gregor Kobel": null,  // #53 Borussia Dortmund · rat 85
-  "Hakan Çalhanoğlu": null,  // #54 Internacional · rat 85
-  "Isco": null,  // #55 Betis · rat 85
-  "Joshua Kimmich": null,  // #56 Bayern München · rat 85
-  "Joško Gvardiol": null,  // #57 Manchester City · rat 85
-  "Jules Koundé": null,  // #58 Barcelona · rat 85
-  "Luis Díaz": null,  // #59 Bayern München · rat 85
-  "Marcus Thuram": null,  // #60 Internacional · rat 85
-  "Mike Maignan": null,  // #61 Milan · rat 85
-  "Moisés Caicedo": null,  // #62 Chelsea · rat 85
-  "Nuno Mendes": null,  // #63 Paris Saint-Germain · rat 85
-  "Ollie Watkins": null,  // #64 Aston Villa · rat 85
-  "Rafael Leão": null,  // #65 Milan · rat 85
-  "Raya": null,  // #66 Arsenal · rat 85
-  "Rodrygo": null,  // #67 Real Madrid · rat 85
-  "Serhou Guirassy": null,  // #68 Borussia Dortmund · rat 85
-  "Son Heung-min": null,  // #69 LAFC · rat 85
-  "Alphonso Davies": null,  // #70 Bayern München · rat 84
-  "Ángel Di María": null,  // #71 Benfica · rat 84
-  "Antoine Griezmann": null,  // #72 Atlético Madrid · rat 84
-  "Christian Pulisic": null,  // #73 Milan · rat 84
-  "Éder Militão": null,  // #74 Real Madrid · rat 84
-  "Enzo Fernández": null,  // #75 Chelsea · rat 84
-  "Federico Dimarco": null,  // #76 Internacional · rat 84
-  "Gleison Bremer": null,  // #77 Juventude · rat 84
-  "Granit Xhaka": null,  // #78 Bayer Leverkusen · rat 84
-  "Ibrahima Konaté": null,  // #79 Real Madrid · rat 84
-  "João Neves": null,  // #80 Paris Saint-Germain · rat 84
-  "Jonathan David": null,  // #81 Lille · rat 84
-  "Jonathan Tah": null,  // #82 Bayer Leverkusen · rat 84
-  "Kai Havertz": null,  // #83 Arsenal · rat 84
-  "Manuel Akanji": null,  // #84 Manchester City · rat 84
-  "Manuel Neuer": null,  // #85 Bayern München · rat 84
-  "Marquinhos": null,  // #86 Paris Saint-Germain · rat 84
-  "Martín Zubimendi": null,  // #87 Arsenal · rat 84
-  "Mikel Oyarzabal": null,  // #88 Real Sociedad · rat 84
-  "Pau Cubarsí": null,  // #89 Barcelona · rat 84
-  "Scott McTominay": null,  // #90 Napoli · rat 84
-  "Tijjani Reijnders": null,  // #91 Manchester City · rat 84
-  "Unai Simón": null,  // #92 Athletic Club · rat 84
-  "Yan Diomande": 90,  // #93 RB Leipzig · rat 84
-  "Yann Sommer": null,  // #94 Internacional · rat 84
-  "Álex Baena": null,  // #95 Atlético Madrid · rat 83
-  "Andrew Robertson": null,  // #96 Tottenham · rat 83
-  "Anthony Gordon": null,  // #97 Barcelona · rat 83
-  "Aurélien Tchouaméni": null,  // #98 Real Madrid · rat 83
-  "Ben White": null,  // #99 Arsenal · rat 83
-  "Bradley Barcola": null,  // #100 Paris Saint-Germain · rat 83
-  "Bryan Mbeumo": null,  // #101 Manchester United · rat 83
-  "Cody Gakpo": null,  // #102 Liverpool · rat 83
-  "Dani Olmo": null,  // #103 Barcelona · rat 83
-  "Dejan Kulusevski": null,  // #104 Tottenham · rat 83
-  "Désiré Doué": null,  // #105 Paris Saint-Germain · rat 83
-  "Diogo Costa": null,  // #106 Porto · rat 83
-  "Diogo Jota": null,  // #107 Liverpool · rat 83
-  "Dominik Szoboszlai": null,  // #108 Liverpool · rat 83
-  "Eberechi Eze": null,  // #109 Arsenal · rat 83
-  "Eduardo Camavinga": 100,  // #110 Real Madrid · rat 83
-  "Frenkie de Jong": null,  // #111 Barcelona · rat 83
-  "Gabriel Martinelli": null,  // #112 Arsenal · rat 83
-  "Giorgi Mamardashvili": null,  // #113 Valencia · rat 83
-  "Giorgian de Arrascaeta": null,  // #114 Flamengo · rat 83
-  "Jeremie Frimpong": null,  // #115 Liverpool · rat 83
-  "John Stones": null,  // #116 Manchester City · rat 83
-  "Jordan Pickford": null,  // #117 Everton · rat 83
-  "Lisandro Martínez": null,  // #118 Manchester United · rat 83
-  "Lucas Paquetá": null,  // #119 West Ham · rat 83
-  "Mateo Kovačić": null,  // #120 Manchester City · rat 83
-  "Matheus Cunha": null,  // #121 Manchester United · rat 83
-  "Matthijs de Ligt": null,  // #122 Manchester United · rat 83
-  "Micky van de Ven": null,  // #123 Tottenham · rat 83
-  "Moise Kean": null,  // #124 Fiorentina · rat 83
-  "Ronald Araújo": null,  // #125 Barcelona · rat 83
-  "Sandro Tonali": null,  // #126 Tottenham · rat 83
-  "Theo Hernández": null,  // #127 Milan · rat 83
-  "Thomas Partey": null,  // #128 Arsenal · rat 83
-  "Xavi Simons": 90,  // #129 Tottenham · rat 83
-  "Alejandro Balde": null,  // #130 Barcelona · rat 82
-  "Alessandro Buongiorno": null,  // #131 Napoli · rat 82
-  "Benjamin Šeško": null,  // #132 Manchester United · rat 82
-  "Christopher Nkunku": null,  // #133 Chelsea · rat 82
-  "Dani Carvajal": 40,  // #134 Real Madrid · rat 82
-  "David de Gea": null,  // #135 Fiorentina · rat 82
-  "Dayot Upamecano": null,  // #136 Bayern München · rat 82
-  "Denis Bouanga": null,  // #137 LAFC · rat 82
-  "Denzel Dumfries": null,  // #138 Real Madrid · rat 82
-  "Dušan Vlahović": null,  // #139 Juventude · rat 82
-  "Estêvão": null,  // #140 Palmeiras · rat 82
-  "Fabián Ruiz": null,  // #141 Paris Saint-Germain · rat 82
-  "Guglielmo Vicario": null,  // #142 Tottenham · rat 82
-  "Hugo Ekitiké": null,  // #143 Liverpool · rat 82
-  "Iago Aspas": null,  // #144 Celta Vigo · rat 82
-  "Ilkay Gündoğan": null,  // #145 Manchester City · rat 82
-  "Iñaki Williams": null,  // #146 Athletic Club · rat 82
-  "Iñigo Martínez": null,  // #147 Barcelona · rat 82
-  "Jack Grealish": null,  // #148 Manchester City · rat 82
-  "James Maddison": null,  // #149 Tottenham · rat 82
-  "Jarrad Branthwaite": null,  // #150 Everton · rat 82
-  "Jarrod Bowen": null,  // #151 West Ham · rat 82
-  "Jérémy Doku": null,  // #152 Manchester City · rat 82
-  "Joan García": null,  // #153 Barcelona · rat 82
-  "Joelinton": null,  // #154 Newcastle United · rat 82
-  "Jurriën Timber": null,  // #155 Arsenal · rat 82
-  "Kaoru Mitoma": null,  // #156 Brighton · rat 82
-  "Kenan Yıldız": null,  // #157 Juventude · rat 82
-  "Leandro Trossard": null,  // #158 Arsenal · rat 82
-  "Loïs Openda": null,  // #159 RB Leipzig · rat 82
-  "Lucas Chevalier": null,  // #160 Lille · rat 82
-  "Luis Suárez": null,  // #161 Inter Miami · rat 82
-  "Marc Guéhi": null,  // #162 Manchester City · rat 82
-  "Mason Greenwood": null,  // #163 Marseille · rat 82
-  "Mikel Merino": null,  // #164 Arsenal · rat 82
-  "Mile Svilar": null,  // #165 Roma · rat 82
-  "Mohammed Kudus": null,  // #166 Tottenham · rat 82
-  "Morgan Gibbs-White": null,  // #167 Nottingham Forest · rat 82
-  "Murillo": null,  // #168 Nottingham Forest · rat 82
-  "Nico Schlotterbeck": null,  // #169 Borussia Dortmund · rat 82
-  "Oihan Sancet": null,  // #170 Athletic Club · rat 82
-  "Omar Marmoush": null,  // #171 Manchester City · rat 82
-  "Pau Torres": null,  // #172 Aston Villa · rat 82
-  "Paulo Dybala": null,  // #173 Roma · rat 82
-  "Pedro": null,  // #174 Flamengo · rat 82
-  "Pedro Porro": null,  // #175 Tottenham · rat 82
-  "Rayan Cherki": null,  // #176 Manchester City · rat 82
-  "Reece James": null,  // #177 Chelsea · rat 82
-  "Rodrigo De Paul": null,  // #178 Atlético Madrid · rat 82
-  "Ryan Gravenberch": null,  // #179 Liverpool · rat 82
-  "Stanislav Lobotka": null,  // #180 Napoli · rat 82
-  "Takefusa Kubo": null,  // #181 Real Sociedad · rat 82
-  "Willian Pacho": null,  // #182 Paris Saint-Germain · rat 82
-  "Youri Tielemans": null,  // #183 Manchester United · rat 82
-  "Adrien Rabiot": null,  // #184 Marseille · rat 81
-  "Álex Remiro": null,  // #185 Real Sociedad · rat 81
-  "Antony": null,  // #186 Betis · rat 81
-  "Ayoze Pérez": null,  // #187 Villarreal · rat 81
-  "Benjamin Pavard": null,  // #188 Internacional · rat 81
-  "Boubacar Kamara": null,  // #189 Aston Villa · rat 81
-  "Charles De Ketelaere": null,  // #190 Atalanta · rat 81
-  "Dani Vivian": null,  // #191 Athletic Club · rat 81
-  "Destiny Udogie": null,  // #192 Tottenham · rat 81
-  "Dominic Solanke": null,  // #193 Tottenham · rat 81
-  "Éderson": null,  // #194 Atalanta · rat 81
-  "Edmond Tapsoba": null,  // #195 Bayer Leverkusen · rat 81
-  "Franco Mastantuono": null,  // #196 Real Madrid · rat 81
-  "Gabriel Jesus": null,  // #197 Arsenal · rat 81
-  "Gerónimo Rulli": null,  // #198 Marseille · rat 81
-  "Giovanni Di Lorenzo": null,  // #199 Napoli · rat 81
-  "Illia Zabarnyi": null,  // #200 Paris Saint-Germain · rat 81
-  "José María Giménez": null,  // #201 Atlético Madrid · rat 81
-  "Karim Adeyemi": null,  // #202 Barcelona · rat 81
-  "Kim Min-jae": 70,  // #203 Bayern München · rat 81
-  "Leroy Sané": null,  // #204 Bayern München · rat 81
-  "Levi Colwill": null,  // #205 Chelsea · rat 81
-  "Lewis Dunk": null,  // #206 Brighton · rat 81
-  "Luka Modrić": null,  // #207 Milan · rat 81
-  "Marcus Rashford": null,  // #208 Barcelona · rat 81
-  "Michele Di Gregorio": null,  // #209 Juventude · rat 81
-  "Nathan Aké": null,  // #210 Manchester City · rat 81
-  "Patrik Schick": null,  // #211 Bayer Leverkusen · rat 81
-  "Piero Hincapié": null,  // #212 Arsenal · rat 81
-  "Robin Le Normand": null,  // #213 Atlético Madrid · rat 81
-  "Romelu Lukaku": null,  // #214 Napoli · rat 81
-  "Sergio Busquets": null,  // #215 Inter Miami · rat 81
-  "Sven Botman": null,  // #216 Newcastle United · rat 81
-  "Vangelis Pavlidis": null,  // #217 Benfica · rat 81
-  "Alejandro Garnacho": 75,  // #218 Manchester United · rat 80
-  "Aleksandar Pavlović": null,  // #219 Bayern München · rat 80
-  "Alex Meret": null,  // #220 Napoli · rat 80
-  "Alexander Sørloth": null,  // #221 Atlético Madrid · rat 80
-  "André Onana": null,  // #222 Manchester United · rat 80
-  "Andrea Cambiaso": null,  // #223 Juventude · rat 80
-  "Angelo Stiller": null,  // #224 Stuttgart · rat 80
-  "Ante Budimir": null,  // #225 Osasuna · rat 80
-  "Antonee Robinson": null,  // #226 Fulham · rat 80
-  "Arda Güler": null,  // #227 Real Madrid · rat 80
-  "Bernd Leno": null,  // #228 Fulham · rat 80
-  "Brahim Díaz": null,  // #229 Real Madrid · rat 80
-  "Casemiro": null,  // #230 Manchester United · rat 80
-  "Dani Parejo": null,  // #231 Villarreal · rat 80
-  "Dean Huijsen": null,  // #232 Real Madrid · rat 80
-  "Denis Zakaria": null,  // #233 Monaco · rat 80
-  "Diogo Dalot": null,  // #234 Manchester United · rat 80
-  "Dodi Lukébakio": null,  // #235 Sevilla · rat 80
-  "Exequiel Palacios": null,  // #236 Bayer Leverkusen · rat 80
-  "Ezri Konsa": null,  // #237 Aston Villa · rat 80
-  "Fabian Schär": null,  // #238 Newcastle United · rat 80
-  "Ferran Torres": null,  // #239 Barcelona · rat 80
-  "Fikayo Tomori": null,  // #240 Milan · rat 80
-  "Frank Anguissa": null,  // #241 Napoli · rat 80
-  "Gavi": 120,  // #242 Barcelona · rat 80
-  "Gerson": null,  // #243 Flamengo · rat 80
-  "Giovani Lo Celso": null,  // #244 Betis · rat 80
-  "Igor Paixão": null,  // #245 Feyenoord · rat 80
-  "Jean-Philippe Mateta": null,  // #246 Crystal Palace · rat 80
-  "Jerdy Schouten": null,  // #247 PSV · rat 80
-  "Jhon Arias": null,  // #248 Fluminense · rat 80
-  "Joachim Andersen": null,  // #249 Fulham · rat 80
-  "João Cancelo": null,  // #250 Barcelona · rat 80
-  "João Gomes": null,  // #251 Wolves · rat 80
-  "João Pedro": null,  // #252 Chelsea · rat 80
-  "Johnny Cardoso": null,  // #253 Atlético Madrid · rat 80
-  "Julian Brandt": null,  // #254 Borussia Dortmund · rat 80
-  "Khéphren Thuram": null,  // #255 Juventude · rat 80
-  "Kieran Trippier": null,  // #256 Newcastle United · rat 80
-  "Kingsley Coman": null,  // #257 Bayern München · rat 80
-  "Kyle Walker": null,  // #258 Milan · rat 80
-  "Loïc Badé": null,  // #259 Sevilla · rat 80
-  "Maghnes Akliouche": null,  // #260 Monaco · rat 80
-  "Marc Cucurella": null,  // #261 Real Madrid · rat 80
-  "Marco Asensio": null,  // #262 Aston Villa · rat 80
-  "Marco Carnesecchi": null,  // #263 Atalanta · rat 80
-  "Marcos Llorente": null,  // #264 Atlético Madrid · rat 80
-  "Matheus Pereira": null,  // #265 Cruzeiro · rat 80
-  "Mattia Zaccagni": null,  // #266 Lazio · rat 80
-  "Miguel Gutiérrez": null,  // #267 Girona · rat 80
-  "Miloš Kerkez": null,  // #268 Bournemouth · rat 80
-  "Morgan Rogers": null,  // #269 Chelsea · rat 80
-  "Nick Pope": null,  // #270 Newcastle United · rat 80
-  "Nico Paz": null,  // #271 Como · rat 80
-  "Nicolas Jackson": null,  // #272 Bayern München · rat 80
-  "Nikola Milenković": null,  // #273 Nottingham Forest · rat 80
-  "Noussair Mazraoui": null,  // #274 Manchester United · rat 80
-  "Orkun Kökçü": null,  // #275 Benfica · rat 80
-  "Pedro Gonçalves": null,  // #276 Sporting CP · rat 80
-  "Pedro Neto": null,  // #277 Chelsea · rat 80
-  "Pervis Estupiñán": null,  // #278 Brighton · rat 80
-  "Pierre-Emile Højbjerg": null,  // #279 Marseille · rat 80
-  "Randal Kolo Muani": null,  // #280 Juventude · rat 80
-  "Riccardo Calafiori": null,  // #281 Arsenal · rat 80
-  "Riccardo Orsolini": null,  // #282 Bologna · rat 80
-  "Samu Aghehowa": null,  // #283 Porto · rat 80
-  "Santiago Giménez": null,  // #284 Milan · rat 80
-  "Savinho": 75,  // #285 Manchester City · rat 80
-  "Thiago Almada": null,  // #286 Atlético Madrid · rat 80
-  "Victor Boniface": null,  // #287 Bayer Leverkusen · rat 80
-  "Warren Zaïre-Emery": 90,  // #288 Paris Saint-Germain · rat 80
-  "Wesley Fofana": null,  // #289 Chelsea · rat 80
-  "Wojciech Szczęsny": null,  // #290 Barcelona · rat 80
-  "Yoane Wissa": null,  // #291 Newcastle United · rat 80
-  "Adam Wharton": null,  // #292 Crystal Palace · rat 79
-  "Alan Patrick": null,  // #293 Internacional · rat 79
-  "Alan Varela": null,  // #294 Porto · rat 79
-  "Albert Gudmundsson": null,  // #295 Fiorentina · rat 79
-  "Alberto Moleiro": null,  // #296 Las Palmas · rat 79
-  "Aleksandr Golovin": null,  // #297 Monaco · rat 79
-  "Alex Iwobi": null,  // #298 Fulham · rat 79
-  "Amadou Onana": null,  // #299 Aston Villa · rat 79
-  "Amine Gouiri": null,  // #300 Marseille · rat 79
-  "Amir Rrahmani": null,  // #301 Napoli · rat 79
-  "Anatoliy Trubin": null,  // #302 Benfica · rat 79
-  "Andrey Santos": null,  // #303 Manchester United · rat 79
-  "Andriy Lunin": null,  // #304 Real Madrid · rat 79
-  "Anthony Elanga": null,  // #305 Newcastle United · rat 79
-  "Antoine Semenyo": null,  // #306 Manchester City · rat 79
-  "Artem Dovbyk": null,  // #307 Roma · rat 79
-  "Brais Méndez": null,  // #308 Real Sociedad · rat 79
-  "Brennan Johnson": null,  // #309 Tottenham · rat 79
-  "Carles Gil": null,  // #310 New England · rat 79
-  "Castello Lukeba": null,  // #311 RB Leipzig · rat 79
-  "Chris Wood": null,  // #312 Nottingham Forest · rat 79
-  "Christian Nørgaard": null,  // #313 Brest · rat 79
-  "Conor Gallagher": null,  // #314 Atlético Madrid · rat 79
-  "Cristhian Mosquera": null,  // #315 Valencia · rat 79
-  "Cucho Hernández": null,  // #316 Betis · rat 79
-  "Curtis Jones": null,  // #317 Liverpool · rat 79
-  "Daniel Muñoz": null,  // #318 Crystal Palace · rat 79
-  "David Alaba": null,  // #319 Real Madrid · rat 79
-  "Dávid Hancko": null,  // #320 Atlético Madrid · rat 79
-  "David Neres": null,  // #321 Napoli · rat 79
-  "Deniz Undav": null,  // #322 Stuttgart · rat 79
-  "Diego Carlos": null,  // #323 Aston Villa · rat 79
-  "Dwight McNeil": null,  // #324 Everton · rat 79
-  "Edson Álvarez": null,  // #325 West Ham · rat 79
-  "Evan Ndicka": null,  // #326 Roma · rat 79
-  "Evander": null,  // #327 FC Cincinnati · rat 79
-  "Evanilson": null,  // #328 Bournemouth · rat 79
-  "Ez Abde": null,  // #329 Betis · rat 79
-  "Federico Chiesa": null,  // #330 Liverpool · rat 79
-  "Ferland Mendy": null,  // #331 Real Madrid · rat 79
-  "Fermín López": 70,  // #332 Barcelona · rat 79
-  "Francesco Acerbi": null,  // #333 Internacional · rat 79
-  "Georges Mikautadze": null,  // #334 Villarreal · rat 79
-  "Gonçalo Inácio": null,  // #335 Sporting CP · rat 79
-  "Gonçalo Ramos": 75,  // #336 Milan · rat 79
-  "Hany Mukhtar": null,  // #337 Nashville SC · rat 79
-  "Harvey Barnes": null,  // #338 Newcastle United · rat 79
-  "Hugo Larsson": null,  // #339 Eintracht Frankfurt · rat 79
-  "Hulk": null,  // #340 Atlético Mineiro · rat 79
-  "Igor Zubeldia": null,  // #341 Real Sociedad · rat 79
-  "Ismaïla Sarr": null,  // #342 Crystal Palace · rat 79
-  "Ivan Provedel": null,  // #343 Lazio · rat 79
-  "Jadon Sancho": null,  // #344 Aston Villa · rat 79
-  "James Tarkowski": null,  // #345 Everton · rat 79
-  "Jamie Gittens": null,  // #346 Chelsea · rat 79
-  "Jan Paul van Hecke": null,  // #347 Tottenham · rat 79
-  "Jean-Clair Todibo": null,  // #348 West Ham · rat 79
-  "Jhon Durán": null,  // #349 Aston Villa · rat 79
-  "Joe Gomez": null,  // #350 Liverpool · rat 79
-  "Joey Veerman": null,  // #351 PSV · rat 79
-  "John McGinn": null,  // #352 Aston Villa · rat 79
-  "Jonathan Burkardt": null,  // #353 Mainz 05 · rat 79
-  "Jordi Alba": null,  // #354 Inter Miami · rat 79
-  "Jorrel Hato": null,  // #355 Ajax · rat 79
-  "José Gayà": null,  // #356 Valencia · rat 79
-  "Justin Kluivert": null,  // #357 Bournemouth · rat 79
-  "Kepa Arrizabalaga": null,  // #358 Bournemouth · rat 79
-  "Kobbie Mainoo": 80,  // #359 Manchester United · rat 79
-  "Konrad Laimer": null,  // #360 Bayern München · rat 79
-  "Leon Bailey": null,  // #361 Aston Villa · rat 79
-  "Leon Goretzka": null,  // #362 Bayern München · rat 79
-  "Leonardo Balerdi": null,  // #363 Marseille · rat 79
-  "Lukáš Hrádecký": null,  // #364 Bayer Leverkusen · rat 79
-  "Luke Shaw": null,  // #365 Manchester United · rat 79
-  "Malick Fofana": null,  // #366 Lyon · rat 79
-  "Malo Gusto": null,  // #367 Chelsea · rat 79
-  "Manu Koné": null,  // #368 Roma · rat 79
-  "Manuel Locatelli": null,  // #369 Juventude · rat 79
-  "Manuel Ugarte": null,  // #370 Manchester United · rat 79
-  "Marc Casadó": null,  // #371 Barcelona · rat 79
-  "Marcos Senesi": null,  // #372 Tottenham · rat 79
-  "Matteo Politano": null,  // #373 Napoli · rat 79
-  "Matz Sels": null,  // #374 Nottingham Forest · rat 79
-  "Max Kilman": null,  // #375 West Ham · rat 79
-  "Memphis Depay": null,  // #376 Corinthians · rat 79
-  "Morten Hjulmand": null,  // #377 Sporting CP · rat 79
-  "Nathan Collins": null,  // #378 Brest · rat 79
-  "Niclas Füllkrug": null,  // #379 West Ham · rat 79
-  "Nicolás De la Cruz": null,  // #380 Flamengo · rat 79
-  "Noa Lang": null,  // #381 PSV · rat 79
-  "Noni Madueke": null,  // #382 Arsenal · rat 79
-  "Ola Aina": null,  // #383 Nottingham Forest · rat 79
-  "Oscar": null,  // #384 São Paulo · rat 79
-  "Óscar Mingueza": null,  // #385 Celta Vigo · rat 79
-  "Pablo Barrios": null,  // #386 Atlético Madrid · rat 79
-  "Pepê": null,  // #387 Porto · rat 79
-  "Pierre Kalulu": null,  // #388 Juventude · rat 79
-  "Raphael Veiga": null,  // #389 Palmeiras · rat 79
-  "Rasmus Højlund": null,  // #390 Manchester United · rat 79
-  "Rayan Aït-Nouri": null,  // #391 Wolves · rat 79
-  "Ricardo Horta": null,  // #392 Braga · rat 79
-  "Richard Ríos": null,  // #393 Palmeiras · rat 79
-  "Riqui Puig": null,  // #394 LA Galaxy · rat 79
-  "Rodrigo Bentancur": null,  // #395 Tottenham · rat 79
-  "Rodrigo Garro": null,  // #396 Corinthians · rat 79
-  "Samuele Ricci": null,  // #397 Torino · rat 79
-  "Stefan de Vrij": null,  // #398 Internacional · rat 79
-  "Teun Koopmeiners": null,  // #399 Juventude · rat 79
-  "Thomas Müller": null,  // #400 Bayern München · rat 79
-  "Tino Livramento": null,  // #401 Newcastle United · rat 79
-  "Vanderson": null,  // #402 Monaco · rat 79
-  "Vanja Milinković-Savić": null,  // #403 Torino · rat 79
-  "Viktor Tsygankov": null,  // #404 Girona · rat 79
-  "Yeremy Pino": null,  // #405 Villarreal · rat 79
-  "Youssouf Fofana": null,  // #406 Milan · rat 79
-  "Aaron Ramsdale": null,  // #407 Southampton · rat 78
-  "Aaron Wan-Bissaka": null,  // #408 West Ham · rat 78
-  "Abdoulaye Doucouré": null,  // #409 Everton · rat 78
-  "Adrián Martínez": null,  // #410 Racing · rat 78
-  "Agustín Rossi": null,  // #411 Flamengo · rat 78
-  "Aleix García": null,  // #412 Bayer Leverkusen · rat 78
-  "Alessio Romagnoli": null,  // #413 Lazio · rat 78
-  "Alexander Nübel": null,  // #414 Stuttgart · rat 78
-  "Alexandre Lacazette": null,  // #415 Lyon · rat 78
-  "Alexsandro": null,  // #416 Lille · rat 78
-  "Alphonse Areola": null,  // #417 West Ham · rat 78
-  "Álvaro Carreras": null,  // #418 Real Madrid · rat 78
-  "Amad Diallo": null,  // #419 Manchester United · rat 78
-  "Ander Barrenetxea": null,  // #420 Real Sociedad · rat 78
-  "Andreas Christensen": null,  // #421 Barcelona · rat 78
-  "Andreas Pereira": null,  // #422 Fulham · rat 78
-  "Andrei Ratiu": null,  // #423 Rayo Vallecano · rat 78
-  "Andrej Kramarić": null,  // #424 Hoffenheim · rat 78
-  "Ángel Correa": null,  // #425 Atlético Madrid · rat 78
-  "António Silva": 80,  // #426 Benfica · rat 78
-  "Arnaud Kalimuendo": null,  // #427 Rennes · rat 78
-  "Bafodé Diakité": null,  // #428 Lille · rat 78
-  "Bart Verbruggen": null,  // #429 Brighton · rat 78
-  "Borja Mayoral": null,  // #430 Getafe · rat 78
-  "Brice Samba": null,  // #431 Rennes · rat 78
-  "Callum Hudson-Odoi": null,  // #432 Nottingham Forest · rat 78
-  "Calvin Bassey": null,  // #433 Fulham · rat 78
-  "Carlos Baleba": null,  // #434 Brighton · rat 78
-  "Crysencio Summerville": null,  // #435 West Ham · rat 78
-  "Daichi Kamada": null,  // #436 Crystal Palace · rat 78
-  "Dan Ndoye": null,  // #437 Bologna · rat 78
-  "Dani Ceballos": null,  // #438 Real Madrid · rat 78
-  "David Raum": null,  // #439 RB Leipzig · rat 78
-  "Davide Frattesi": null,  // #440 Internacional · rat 78
-  "Dean Henderson": null,  // #441 Crystal Palace · rat 78
-  "Dodô": null,  // #442 Fiorentina · rat 78
-  "Dominic Calvert-Lewin": null,  // #443 Everton · rat 78
-  "Đorđe Petrović": null,  // #444 Strasbourg · rat 78
-  "Edon Zhegrova": null,  // #445 Lille · rat 78
-  "Emile Smith Rowe": null,  // #446 Fulham · rat 78
-  "Enzo Millot": null,  // #447 Stuttgart · rat 78
-  "Ethan Pinnock": null,  // #448 Brest · rat 78
-  "Evann Guessand": null,  // #449 Nice · rat 78
-  "Federico Gatti": null,  // #450 Juventude · rat 78
-  "Ferdi Kadıoğlu": null,  // #451 Brighton · rat 78
-  "Francisco Conceição": null,  // #452 Juventude · rat 78
-  "Francisco Trincão": null,  // #453 Sporting CP · rat 78
-  "Franco Armani": null,  // #454 River Plate · rat 78
-  "Gerard Moreno": null,  // #455 Villarreal · rat 78
-  "Gianluca Mancini": null,  // #456 Roma · rat 78
-  "Gustavo Gómez": null,  // #457 Palmeiras · rat 78
-  "Harry Maguire": null,  // #458 Manchester United · rat 78
-  "Henrikh Mkhitaryan": null,  // #459 Internacional · rat 78
-  "Hugo Lloris": null,  // #460 LAFC · rat 78
-  "Ibrahim Sangaré": null,  // #461 Nottingham Forest · rat 78
-  "Isak Hien": null,  // #462 Atalanta · rat 78
-  "Isi Palazón": null,  // #463 Rayo Vallecano · rat 78
-  "Jacob Murphy": null,  // #464 Newcastle United · rat 78
-  "Jaka Bijol": null,  // #465 Udinese · rat 78
-  "James Ward-Prowse": null,  // #466 West Ham · rat 78
-  "Javi Guerra": null,  // #467 Valencia · rat 78
-  "Jefferson Lerma": null,  // #468 Crystal Palace · rat 78
-  "João Félix": null,  // #469 Milan · rat 78
-  "João Palhinha": null,  // #470 Bayern München · rat 78
-  "Johan Bakayoko": null,  // #471 RB Leipzig · rat 78
-  "Jonathan Calleri": null,  // #472 São Paulo · rat 78
-  "Jorginho": null,  // #473 Arsenal · rat 78
-  "José Sá": null,  // #474 Wolves · rat 78
-  "Juan Foyth": null,  // #475 Villarreal · rat 78
-  "Kaio Jorge": null,  // #476 Cruzeiro · rat 78
-  "Kevin Trapp": null,  // #477 Eintracht Frankfurt · rat 78
-  "Koke": null,  // #478 Atlético Madrid · rat 78
-  "Lee Kang-in": null,  // #479 Paris Saint-Germain · rat 78
-  "Leny Yoro": null,  // #480 Manchester United · rat 78
-  "Lewis Hall": null,  // #481 Newcastle United · rat 78
-  "Lorenzo Pellegrini": null,  // #482 Roma · rat 78
-  "Lucas Digne": null,  // #483 Aston Villa · rat 78
-  "Lucas Hernández": null,  // #484 Paris Saint-Germain · rat 78
-  "Lucas Moura": null,  // #485 São Paulo · rat 78
-  "Lucas Perri": null,  // #486 Lyon · rat 78
-  "Luciano Acosta": null,  // #487 FC Dallas · rat 78
-  "Luis Henrique": null,  // #488 Marseille · rat 78
-  "Łukasz Skorupski": null,  // #489 Bologna · rat 78
-  "Luuk de Jong": null,  // #490 PSV · rat 78
-  "Malik Tillman": null,  // #491 PSV · rat 78
-  "Marco Reus": null,  // #492 LA Galaxy · rat 78
-  "Marcos Acuña": null,  // #493 River Plate · rat 78
-  "Mario Gila": null,  // #494 Lazio · rat 78
-  "Mario Pašalić": null,  // #495 Atalanta · rat 78
-  "Mark Flekken": null,  // #496 Brest · rat 78
-  "Mason Mount": null,  // #497 Manchester United · rat 78
-  "Matéo Guendouzi": null,  // #498 Lazio · rat 78
-  "Matheus Nunes": null,  // #499 Manchester City · rat 78
-  "Mathías Olivera": null,  // #500 Napoli · rat 78
-};
-   function marketValue(p){
+function marketValue(p){
   const coef = DB.leagues.find(l=>l.id===p.lg).coef;
   const a = AGEV[p.age] ?? .3;
   const potBoost = 1 + (p.pot - p.rat)*0.055;
   const contractF = clamp(0.62 + (p.contract-2026)*0.12, .62, 1.06);
- if (DEAL_FEE[p.name] != null) return DEAL_FEE[p.name];     // fee actually paid this summer
-  if (TOP500[p.name] != null)   return TOP500[p.name];       // verified board value
+  if (DEAL_FEE[p.name] != null) return DEAL_FEE[p.name];     // fee actually paid this summer
   if (TM_VALUES[p.name] != null) return TM_VALUES[p.name];   // real Transfermarkt figure
   const v = Math.pow(Math.max(p.rat-40,1), 3.40) * 0.000082 * a * (0.5+coef*0.75) * potBoost * contractF;
   const posMult = {ST:1.22,W:1.16,AM:1.1,CM:1.0,DM:.94,FB:.9,CB:.92,GK:.72}[p.grp];
   return Math.max(0.2, +(v*posMult).toFixed(1));   // € millions, Transfermarkt-calibrated
 }
-/* 12-month market value history.
-   TM_HISTORY holds real Transfermarkt curves, keyed by player name:
-   [oldest ... newest], twelve monthly values in € millions.
-   Anything not in there falls back to an estimated curve and is
-   flagged mvhReal:false so the UI can label it honestly. */
-const TM_HISTORY = {};
 function mvHistory(p){
-  const real = TM_HISTORY[p.name];
-  if (Array.isArray(real) && real.length === 12){
-    p.mvhReal = true;
-    return real.map(v => +(+v).toFixed(1));
-  }
-  p.mvhReal = false;
   const out=[]; let v = p.mv * rf(.55,.85);
   for(let i=0;i<12;i++){ v = Math.max(.2, v * rf(.94,1.14)); out.push(+v.toFixed(1)); }
   out[11] = p.mv; return out;
@@ -4495,13 +3905,31 @@ DB.players.forEach(p=>{
   p.mv  = marketValue(p);
   p.mvh = mvHistory(p);
   p.mvd = +(p.mvh[11]-p.mvh[8]).toFixed(1);
-p.tmReal = TOP500[p.name] != null || TM_VALUES[p.name] != null || DEAL_FEE[p.name] != null;
-  p.onBoard = Object.prototype.hasOwnProperty.call(TOP500, p.name);
+  p.tmReal = TM_VALUES[p.name] != null || DEAL_FEE[p.name] != null;
   p.feeReal = DEAL_FEE[p.name] != null;
   p.styles = styles(p);
   p.axes = axes(p);
   p.rate = matchRating(p, gauss(0,.28));
 });
+const LOANS = {"Alejandro Garnacho":{"from":"epl:CHE","until":"2027","obligation":true}};
+(function applyLoans(){
+  const byKey = {}; DB.teams.forEach(t => { byKey[t.lg+':'+t.abbr] = t; });
+  DB.players.forEach(p => {
+    const L = LOANS[p.name];
+    if (!L) return;
+    const parent = byKey[L.from];
+    if (!parent || parent.id === p.team) return;   // not actually out on loan
+    p.loan = { parent: parent.id, until: L.until, obligation: !!L.obligation };
+  });
+})();
+
+/* The board is the 500 highest-rated players. Membership is derived,
+   not hand-listed, so it can never drift out of step with the ratings. */
+(function buildBoard(){
+  [...DB.players].sort((a,b)=> b.rat - a.rat || b.ps - a.ps)
+    .slice(0,500).forEach(p => { p.onBoard = true; });
+})();
+
 /* league + global + positional ranks on Power Score */
 function rankAll(){
   const g = [...DB.players].sort((a,b)=>b.ps-a.ps); g.forEach((p,i)=>p.rk=i+1);
@@ -4744,6 +4172,7 @@ function buildMatch(compId, h, a, state, dayOffset){
     const m = buildMatch(fx.lg, h, a, st.state, 0);
     m.ko = ko;
     m.real = true;
+    m.hasResult = hasResult;
     m.pending = st.pending;
     m.min = st.min;
     if (hasResult){ m.hs = fx.hs; m.as = fx.as; }
@@ -4819,6 +4248,14 @@ const REAL_MANAGERS = {"epl:MCI":"Enzo Maresca","epl:CHE":"Xabi Alonso","epl:MUN
     if (!to || !from) return;
     const p = DB.players.find(x => x.name === name && x.team === to.id);
     DB.deals.push({ id:'d'+i, pid: p ? p.id : null, name, from: from.id, to: to.id, fee });
+  });
+  // loans in for this club, shown with the permanent business
+  const byKey2 = {}; DB.teams.forEach(t => { byKey2[t.lg+':'+t.abbr] = t; });
+  Object.entries(LOANS).forEach(([name, L], i) => {
+    const p = DB.players.find(x => x.name === name && x.loan);
+    if (!p) return;
+    DB.deals.push({ id:'l'+i, pid:p.id, name, from:p.loan.parent, to:p.team,
+                    fee:0, loan:true, obligation:p.loan.obligation });
   });
   DB.deals.sort((a, b) => b.fee - a.fee);
 })();
@@ -4952,7 +4389,7 @@ function radar(sets, size=230){
   });
   AXES.forEach((a,i)=>{
     const [x,y]=pt(i,124);
-  g+=`<text x="${x}" y="${y}" fill="var(--chalk-3)" font-size="9" font-family="IBM Plex Mono" letter-spacing=".08em" text-anchor="middle" dominant-baseline="middle">${a[0].toUpperCase()}</text>`;
+    g+=`<text x="${x}" y="${y}" fill="var(--chalk-3)" font-size="9" font-family="JetBrains Mono" letter-spacing=".08em" text-anchor="middle" dominant-baseline="middle">${a[0].toUpperCase()}</text>`;
   });
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="overflow:visible">${g}</svg>`;
 }
@@ -4976,7 +4413,7 @@ function pctRow(label,v,pc,k){
 }
 function pill(p){
   return `<button class="pname" data-p="${p.id}">${crest(T(p.team))}
-    <span class="who"><b>${esc(p.name)}${p.generated?'<span class="dim" style="font-size:9px;font-weight:400" title="Placeholder — Power Board has no roster data for this slot"> gen</span>':''}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}${p.foxRank?` · <span class="amber">WC100 #${p.foxRank}</span>`:''}</s></span></button>`;
+    <span class="who"><b>${esc(p.name)}${p.generated?'<span class="dim" style="font-size:9px;font-weight:400" title="Placeholder — Power Board has no roster data for this slot"> gen</span>':''}</b><s>${p.pos} · ${p.age} · ${LG(p.lg).abbr}${p.loan?` · <span class="vio" title="On loan from ${esc(T(p.loan.parent).name)}">LOAN</span>`:''}${p.foxRank?` · <span class="amber">WC100 #${p.foxRank}</span>`:''}</s></span></button>`;
 }
 function formDots(f){
   return f.map(r=>`<span class="mono" style="font-size:10px;width:15px;height:15px;display:inline-grid;place-items:center;border-radius:2px;background:${r==='W'?'rgba(46,216,167,.16)':r==='D'?'var(--ink-3)':'rgba(255,77,94,.16)'};color:${r==='W'?'var(--jade)':r==='D'?'var(--chalk-3)':'var(--flare)'}">${r}</span>`).join('');
@@ -5036,7 +4473,6 @@ VIEWS.today = () => {
   return vhead('Matchday · '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}),
     'Today',
     `${live.length ? live.length + ' in play right now. ' : 'Nothing in play right now. '}${DB.matches.length} real fixtures loaded from the match feed — real clubs, real kickoff times, and real scores for matches already played.`)
-  + valueDisclosure()
   + `<div class="grid gside">
     <div>
       ${live.length?`<div class="panel mb"><div class="panel-h"><h3>Live now</h3><span class="live">${live.length} in play</span></div>${live.map(matchRow).join('')}</div>`:''}
@@ -5080,49 +4516,6 @@ VIEWS.today = () => {
       </div></div>
     </div></div>`;
 };
-   /* ---------- VALUE DISCLOSURE PANEL ----------
-   The football equivalent of the VC board's "NOT PUBLIC DATA" panel.
-   Counts are computed live from DB.players so the numbers can never
-   drift away from what's actually loaded. */
-function valueDisclosure(){
-  const pool     = DB.players;
-  const board    = pool.filter(p => p.onBoard);
-  const verified = pool.filter(p => p.tmReal);
-  const feeReal  = pool.filter(p => p.feeReal);
-  const pct      = board.length ? Math.round(verified.length / board.length * 100) : 0;
-
-  return `<div class="disclose">
-    <div class="disclose-mark"><span>NOT</span><span>A</span><span>FEE</span></div>
-    <div class="disclose-body">
-      <p><b>A market value is an estimate, not a price anybody paid.</b>
-      Clubs don't publish what a player is worth, and most transfer fees stay confidential or
-      get reported in ranges. What follows is the closest honest picture: Transfermarkt's
-      published valuations where they exist, actual fees where a deal is confirmed, and a
-      clearly-flagged model estimate everywhere else.</p>
-
-      <div class="disclose-bar" role="img"
-           aria-label="${verified.length} of ${board.length} board players carry a sourced value">
-        <div class="disclose-fill" style="width:${pct}%"></div>
-      </div>
-      <div class="disclose-legend">
-        <span><i class="sw-real"></i>Sourced value</span>
-        <span><i class="sw-est"></i>Model estimate</span>
-        <span class="disclose-pct">${pct}% sourced</span>
-      </div>
-
-      <div class="disclose-stats">
-        <div><b>${board.length}</b><s>on the board</s></div>
-        <div><b>${verified.length}</b><s>sourced value</s></div>
-        <div><b>${feeReal.length}</b><s>confirmed fee</s></div>
-        <div><b>${board.length - verified.length}</b><s>estimated</s></div>
-      </div>
-
-      <p class="disclose-foot">Every figure carrying a sourced value is marked
-      <span class="vbadge">✓ sourced</span> wherever it appears. Anything without that badge
-      came out of the model and should be read as an approximation, not a fact.</p>
-    </div>
-  </div>`;
-}
 
 /* ---------------- MATCH CENTRE ---------------- */
 VIEWS.match = (id) => {
@@ -5316,7 +4709,7 @@ VIEWS.player = (id) => {
   const sim = DB.players.filter(x=>x.id!==p.id).map(x=>({x,s:similarity(p,x)})).sort((a,b)=>b.s-a.s).slice(0,5);
 
   return `<div class="vhead">
-    <div class="eyebrow">${esc(L.name)} · ${esc(t.name)} · #${p.num}</div>
+    <div class="eyebrow">${esc(L.name)} · ${esc(t.name)} · #${p.num}${p.loan?` · <span class="vio">ON LOAN FROM ${esc(T(p.loan.parent).name).toUpperCase()}</span>`:''}</div>
     <div class="spread" style="align-items:flex-start;flex-wrap:wrap;gap:20px">
       <div style="display:flex;gap:16px;align-items:center">
         ${crest(t,'xl')}
@@ -5325,6 +4718,7 @@ VIEWS.player = (id) => {
             <span class="chip on">${p.pos}</span><span class="chip">${p.age} yrs</span>
             <span class="chip">${esc(p.nat)}</span><span class="chip">${p.height}cm</span>
             <span class="chip">${p.foot} footed</span><span class="chip">Contract ${p.contract}</span>
+            ${p.loan?`<button class="chip" style="border-color:rgba(139,123,255,.45);color:var(--violet)" data-t="${p.loan.parent}" title="Registration held by ${esc(T(p.loan.parent).name)}">On loan from ${esc(T(p.loan.parent).name)}${p.loan.obligation?' · obligation to buy':''}</button>`:''}
             ${p.foxRank?`<a class="chip on" href="https://www.foxsports.com/stories/soccer/world-cup-2026-ranking-best-100-players" target="_blank" rel="noopener" title="FOX Sports 2026 World Cup Top 100">FOX Top 100 · #${p.foxRank}</a>`:''}
           </div></div>
       </div>
@@ -5426,10 +4820,7 @@ VIEWS.player = (id) => {
     </tbody></table></div></div>`:''}
 
   ${tab==='value'?`<div class="grid gside"><div class="panel"><div class="panel-h"><h3>Market value</h3><span class="eyebrow">12 windows</span></div><div class="panel-b">
-  <div class="spread mb"><span class="num" style="font-size:30px;font-weight:700">${money(p.mv)}</span>${delta(p.mvd,'m')}</div>
-      <div class="mb">${p.tmReal
-        ? `<span class="vbadge">✓ ${p.feeReal ? 'confirmed fee' : 'sourced'}</span>`
-        : `<span class="vbadge" style="color:var(--chalk-3);background:transparent;border-color:var(--line)">model estimate</span>`}</div>
+      <div class="spread mb"><span class="num" style="font-size:30px;font-weight:700">${money(p.mv)}</span>${delta(p.mvd,'m')}</div>
       ${spark(p.mvh,520,110)}
       <div class="wp-lab"><span>3 yrs ago</span><span>Now</span></div>
       <div class="chalk-rule mt mb"></div>
@@ -5513,13 +4904,20 @@ VIEWS.compare = () => {
 };
 
 /* ---------------- TEAMS ---------------- */
+function coverageLine(){
+  const real = DB.players.filter(p=>!p.generated).length;
+  const clubs = DB.teams.filter(t=>t.realCount>0).length;
+  const full  = DB.teams.filter(t=>t.realCount>=22).length;
+  return real.toLocaleString() + ' real players across ' + clubs + ' of ' + DB.teams.length
+       + ' clubs, of which ' + full + ' have a squad deep enough to be considered complete.';
+}
 VIEWS.teams = () => {
   const ts = DB.teams.filter(t=>ST8.lg==='all'||t.lg===ST8.lg).sort((a,b)=>a.wrank-b.wrank);
   return vhead(ST8.lg==='all'?'All ten leagues':LG(ST8.lg).name,'Teams',
-    'Sorted by world ranking. The <b>World</b> column is built from the <a href="https://www.uefa.com/nationalassociations/uefarankings/club/?year=2027" target="_blank" rel="noopener" style="color:var(--sodium)">UEFA club coefficient</a> for 2026/27 where one exists (amber), falling back to the <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--chalk-2)">FootballDatabase</a> world ranking (marked <span class="dim">fdb</span>) for the clubs UEFA does not rank. Squad values come from <a href="https://www.transfermarkt.com" target="_blank" rel="noopener" style="color:var(--sodium)">Transfermarkt</a>.')
+    'Sorted by world ranking. The <b>World</b> column is built from the <a href="https://www.uefa.com/nationalassociations/uefarankings/club/?year=2027" target="_blank" rel="noopener" style="color:var(--sodium)">UEFA club coefficient</a> for 2026/27 where one exists (amber), falling back to the <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--chalk-2)">FootballDatabase</a> world ranking (marked <span class="dim">fdb</span>) for the clubs UEFA does not rank. Squad values come from <a href="https://www.transfermarkt.com" target="_blank" rel="noopener" style="color:var(--sodium)">Transfermarkt</a>. The <b>Real</b> column is how many of each squad are actual footballers rather than placeholders — ' + coverageLine() + '')
   + `<div class="panel"><div class="tbl-wrap"><table><thead><tr>
       <th>#</th><th>Club</th><th title="FootballDatabase world club ranking">World</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
-      <th>xG</th><th>xGA</th><th>Squad PS</th><th>Squad value</th><th>Form</th>
+      <th>xG</th><th>xGA</th><th>Squad PS</th><th title="Real players in the squad vs total squad size. Anything below the total is made up of placeholders.">Real</th><th>Squad value</th><th>Form</th>
       <th>Best GK</th><th>Best DEF</th><th>Best MID</th><th>Best ATT</th></tr></thead><tbody>
     ${ts.map((t,i)=>`<tr data-t="${t.id}">
       <td class="rank ${i<4?'top':''}">${i+1}</td>
@@ -5529,7 +4927,8 @@ VIEWS.teams = () => {
       <td class="num">${t.rec.gf}</td><td class="num">${t.rec.ga}</td><td class="num ${t.rec.gd>0?'jd':t.rec.gd<0?'fl':''}">${t.rec.gd>0?'+':''}${t.rec.gd}</td>
       <td class="num amber" style="font-weight:700">${t.rec.pts}</td>
       <td class="num dim">${t.xg}</td><td class="num dim">${t.xga}</td>
-      <td class="num" style="color:${ratColor(t.ps)}">${t.ps}${t.realSquad?'':'<span class="dim" style="font-size:9px" title="No roster data for this club — squad is generated"> gen</span>'}</td>
+      <td class="num" style="color:${ratColor(t.ps)}">${t.ps}</td>
+      <td class="num" title="${t.realCount} real players, ${t.squad.length-t.realCount} placeholders" style="color:${t.realCount>=22?'var(--jade)':t.realCount>=15?'var(--sodium)':t.realCount>0?'var(--chalk-2)':'var(--flare)'}">${t.realCount}<span class="dim">/${t.squad.length}</span></td>
       <td class="num">${money(t.mv)}</td>
       <td><span style="display:flex;gap:2px;justify-content:flex-end">${formDots(t.form)}</span></td>
       ${['GK','DEF','MID','ATT'].map(l=>{const b=t.best[l];return `<td style="text-align:right"><button class="tag" data-p="${b.id}">${esc(b.name.split(' ').pop())} ${b.ps.toFixed(0)}</button></td>`}).join('')}
@@ -5553,7 +4952,7 @@ VIEWS.team = (id) => {
       <div class="panel"><div class="panel-h"><h3>Squad</h3><span class="eyebrow">sorted by Power Score</span></div>
         <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>Age</th><th>PS</th><th>Rat</th><th>Pot</th><th>Apps</th><th>Mins</th><th>G</th><th>A</th><th>Rtg</th><th>Value</th></tr></thead><tbody>
         ${sq.map((p,i)=>`<tr data-p="${p.id}"><td class="rank">${p.num}</td><td>${pill(p)}</td>
-          <td class="mono dim">${p.pos}</td><td class="num dim">${p.age}</td>
+          <td class="mono dim">${p.pos}${p.loan?`<span class="vio" style="font-size:9px" title="On loan from ${esc(T(p.loan.parent).name)}"> L</span>`:''}</td><td class="num dim">${p.age}</td>
           <td class="num" style="color:${ratColor(p.ps)};font-weight:700">${p.ps.toFixed(1)}</td>
           <td class="num amber">${p.rat}</td><td class="num vio">${p.pot}</td>
           <td class="num">${p.apps}</td><td class="num dim">${p.mins}</td>
@@ -5735,8 +5134,8 @@ VIEWS.transfers = () => {
               <div><b style="font-size:14px">${esc(d.name)}</b>
                 <div class="dim" style="font-size:11.5px">${esc(f.name)} → ${esc(to.name)}</div></div></div>
             <div style="text-align:right">
-              <div class="num ${d.fee?'amber':'jd'}" style="font-size:18px;font-weight:700">${d.fee?'€'+d.fee+'m':'Free'}</div>
-              <div class="eyebrow">${d.fee?'reported fee':'free transfer'}</div></div>
+              <div class="num ${d.fee?'amber':d.loan?'vio':'jd'}" style="font-size:18px;font-weight:700">${d.fee?'€'+d.fee+'m':d.loan?'Loan':'Free'}</div>
+              <div class="eyebrow">${d.fee?'reported fee':d.loan?(d.obligation?'obligation to buy':'season loan'):'free transfer'}</div></div>
           </div></div>`}).join('')}
     </div>`;
 };
@@ -5856,6 +5255,7 @@ VIEWS.method = () => vhead('Under the hood','How the numbers work',
   <div class="note mt"><b>Club ranking sources</b><span>Club strength, the league tables and every win probability are driven by two ranking sources. The primary one is the <a href="https://www.uefa.com/nationalassociations/uefarankings/club/?year=2027" target="_blank" rel="noopener" style="color:var(--sodium)">UEFA club coefficient</a> for 2026/27 — the five-season sporting coefficient covering 2021/22 to 2025/26, as published in this season's Champions League seeding pots. UEFA ranks European clubs only, so it covers 23 clubs here and by definition none from Brazil, Argentina or MLS. Every club UEFA does not rank falls back to the <a href="https://footballdatabase.com/ranking/world/1" target="_blank" rel="noopener" style="color:var(--chalk-2)">FootballDatabase</a> world club ranking (CC BY-SA 4.0, snapshot 2 August 2026), marked <span class="dim">fdb</span> in the table. Where a club appears in both, UEFA wins. Clubs in neither list rank below both, ordered on squad strength. One quirk worth knowing: UEFA rates Stuttgart 80th on a thin five-year European record, well below where a domestic-form ranking would put them.</span></div>
   <div class="note mt"><b>Transfers &amp; squads</b><span>Squads are current to the summer 2026 window, sourced from <a href="https://www.footballtransfers.com/en/transfer-news/uk-premier-league/2026/08/done-deals-every-official-completed-transfer-around-europe-today" target="_blank" rel="noopener" style="color:var(--sodium)">FootballTransfers</a>' done-deals record of 2 August 2026 — Rogers and Lacroix at Chelsea, Anderson at City, Tonali and Fernandes at Spurs, Konaté, Dumfries, Bernardo Silva and Cucurella at Real Madrid, Gonçalo Ramos at Milan. The Transfer desk lists those completed deals only. <b>The invented rumour feed has been removed</b>: it previously generated fake links between real players and random clubs, attributed to made-up reporters. Clubs with real squad data are no longer padded out with generated players either, so every name at those clubs is a real footballer — squads are therefore the size the data supports rather than a uniform 25. The clubs Power Board has no roster for are still filled with generated players and are marked <span class="dim">generated squad</span> in Tables &amp; squads.</span></div>
   <div class="note mt"><b>Market values</b><span>Squad and player values come from <a href="https://www.transfermarkt.com" target="_blank" rel="noopener" style="color:var(--sodium)">Transfermarkt</a>'s June 2026 market-value update. Transfermarkt blocks automated access, so the figures published for their most valuable players are used directly — those show a <span class="amber">✓</span> on the player profile — and every other player is estimated on a curve fitted to Transfermarkt's own distribution, so the scale and shape match even where the exact figure is Power Board's own. Market value is an estimate of open-market cost: not a release clause, not a wage, and not a fee any club has actually bid — except for players who moved this summer, who carry the fee their new club actually paid, marked <span class="amber">fee paid ✓</span>.</span></div>
+  <div class="note mt"><b>Loans</b><span>A player out on loan is listed in the squad he actually plays for, because that is where you would look for him, and tagged <span class="vio">LOAN</span> with the club that still holds his registration. His profile names the parent club and says whether the deal carries an obligation to buy. Alejandro Garnacho is the worked example: Manchester United sold him to Chelsea in summer 2025 for £40m, and Chelsea loaned him to Aston Villa for 2026/27 with a conditional obligation to buy, so he appears at Villa in the No 17 shirt, on loan from Chelsea.</span></div>
   <div class="note mt"><b>Career histories</b><span>The career tab used to walk backwards from a player's current club and, after three seasons, jump to a <i>randomly chosen</i> club 30% of the time. That made summer signings look like long servants of clubs they had just joined. Real club paths are now used for players Power Board has transfer history on, including the season each move happened. For everyone else the table shows their current club throughout and says so, rather than inventing former clubs. Per-season appearances, goals and ratings remain modelled throughout — only the clubs and move dates are sourced.</span></div>
   <div class="note mt"><b>How live are the matches?</b><span>Fixtures are real — real matchups, real kickoff times and real final scores for matches already played, pulled from a match feed on 4 August 2026. No invented games. Each fixture works out whether it is upcoming, in play or finished from your own device clock, so it changes state on its own. What a static page <i>cannot</i> do is discover a goal as it happens: for genuinely live in-play scores, set <span class="mono amber">LIVE_FEED</span> at the top of the file to your own provider's endpoint and key, and Power Board will fetch from it on load and fall back to these fixtures if it fails. Matches that have kicked off without a score in the data show a dash, never a made-up scoreline. Match commentary and player match ratings are still generated by the model. Fixtures involving clubs promoted after 2024/25 (Leeds, Sunderland, Levante, Paderborn and similar) are skipped, because this build has no squad data for them.</span></div>
   <div class="note mt"><b>Squads &amp; ages</b><span>Real rosters were refreshed against reported summer 2025, January 2026 and summer 2026 transfer business, so players sit at the club they actually play for today rather than a frozen 2024/25 snapshot. Ages aren't stored as fixed numbers: each player has a birth date, and age is calculated fresh from your device's clock every time this page loads — so it keeps advancing on its own, no rebuild needed. The ~100 highest-profile players use their real birthday; everyone else is approximated to Jan 1 of their birth year, since sourcing exact birthdates for a sample of 2,600 players isn't something this build can responsibly guarantee. Transfers, by contrast, can't self-update the same way — there's no live data feed wired in, so if a new move gets confirmed, the roster needs a manual refresh.</span></div>`;
@@ -6013,8 +5413,45 @@ if (!ST8.cmp.length){
   const mate = t.find(p=>p.grp===t[0].grp && p.id!==t[0].id) || t[1];
   ST8.cmp = mate ? [t[0].id, mate.id] : [t[0].id];
 }
+/* ---- live clock ----
+   Re-derives every fixture's state from the device clock. Runs every
+   15 seconds, so a match flips to LIVE within 15s of kicking off and
+   to FT within 15s of finishing, with no reload. Clock cells are
+   patched in place so the page doesn't jump under you; a full redraw
+   only happens when a fixture actually changes state, which is when
+   the Live-now panel needs to appear or disappear. */
+function tickMatches(){
+  let stateChanged = false;
+  DB.matches.forEach(m => {
+    if (m.ko == null) return;
+    const before = m.state;
+    const st = matchStateNow(m.ko, m.hasResult);
+    m.state = st.state; m.min = st.min; m.pending = st.pending;
+    if (st.state !== before) stateChanged = true;
+    if (st.state === 'PRE'){ m.hs = 0; m.as = 0; }
+  });
+
+  if (stateChanged){ render(); return; }
+
+  // no state change — just move the clocks on the rows already drawn
+  document.querySelectorAll('.match[data-m]').forEach(el => {
+    const m = DB.matches.find(x => x.id === el.dataset.m);
+    if (!m || !m.ko) return;
+    const cell = el.querySelector('.clock');
+    if (!cell) return;
+    if (m.state === 'LIVE'){
+      cell.innerHTML = m.pending
+        ? '<span class="live">LIVE</span>'
+        : '<span class="live">' + m.min + "'</span>";
+    }
+  });
+}
+setInterval(tickMatches, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tickMatches(); });
+
 window.addEventListener('hashchange',()=>{ const v=location.hash.slice(1); if(VIEWS[v]&&v!==ST8.view) go(v); });
 render();
+tickMatches();
 
 </script>
 </body>
